@@ -4067,9 +4067,8 @@ CreditObject *CreatureObjectImplementation::getCreditObject()
 	return obj.castTo<CreditObject *>();
 }
 
-void CreatureObjectImplementation::updateCOV()
-{
-	debug("running out of range checks");
+void CreatureObjectImplementation::updateCOV() {
+	// debug("running out of range checks");
 
 	CreatureObject *creature = asCreatureObject();
 
@@ -4092,15 +4091,7 @@ void CreatureObjectImplementation::updateCOV()
 	{
 		SceneObject *o = static_cast<SceneObject *>(closeObjects.getUnsafe(i));
 
-		auto rootParent = o->getRootParent();
-
-		if (rootParent != nullptr)
-		{ //the parent should be in cov, so we can ignore the contained object
-			continue;
-		}
-
-		if (o != creature)
-		{
+		if (o != creature) {
 			auto objectWorldPos = o->getWorldPosition();
 
 			float deltaX = x - objectWorldPos.getX();
