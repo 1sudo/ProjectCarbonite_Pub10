@@ -4087,9 +4087,8 @@ void CreatureObjectImplementation::updateCOV() {
 	auto currentZone = getZone();
 	float range2 = getOutOfRangeDistance();
 
-	for (int i = 0; i < closeObjects.size(); ++i)
-	{
-		SceneObject *o = static_cast<SceneObject *>(closeObjects.getUnsafe(i));
+	for (int i = 0; i < closeObjects.size(); ++i) {
+		SceneObject* o = static_cast<SceneObject*>(closeObjects.getUnsafe(i));
 
 		if (o != creature) {
 			auto objectWorldPos = o->getWorldPosition();
