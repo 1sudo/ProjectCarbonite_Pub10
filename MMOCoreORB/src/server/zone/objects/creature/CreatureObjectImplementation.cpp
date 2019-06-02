@@ -2375,8 +2375,65 @@ void CreatureObjectImplementation::notifyLoadFromDatabase()
 		ghost->setLinkDead();
 }
 
-int CreatureObjectImplementation::notifyObjectInserted(SceneObject *object)
-{
+void CreatureObjectImplementation::notifyInsert(QuadTreeEntry* obj) {
+	auto linkedCreature = getLinkedCreature().get();
+
+	if (linkedCreature != nullptr && linkedCreature->getParent() == asCreatureObject()) {
+#if DEBUG_COV
+		linkedCreature->info("proxy notifyInsert(" + String::valueOf(obj->getObjectID()) + ")");
+#endif // DEBUG_COV
+
+		if (linkedCreature->getCloseObjects() != nullptr)
+			linkedCreature->addInRangeObject(obj);
+
+		if (obj->getCloseObjects() != nullptr)
+			obj->addInRangeObject(linkedCreature, false);
+
+		linkedCreature->notifyInsert(obj);
+	}
+
+	TangibleObjectImplementation::notifyInsert(obj);
+}
+
+void CreatureObjectImplementation::notifyDissapear(QuadTreeEntry* obj) {
+	auto linkedCreature = getLinkedCreature().get();
+
+	if (linkedCreature != nullptr && linkedCreature->getParent() == asCreatureObject()) {
+#if DEBUG_COV
+		linkedCreature->info("proxy notifyDissapear(" + String::valueOf(obj->getObjectID()) + ")");
+#endif // DEBUG_COV
+		if (linkedCreature->getCloseObjects() != nullptr)
+			linkedCreature->removeInRangeObject(obj);
+
+		if (obj->getCloseObjects() != nullptr)
+			obj->removeInRangeObject(linkedCreature);
+
+		linkedCreature->notifyDissapear(obj);
+	}
+
+	TangibleObjectImplementation::notifyDissapear(obj);
+}
+
+void CreatureObjectImplementation::notifyPositionUpdate(QuadTreeEntry* entry) {
+	auto linkedCreature = getLinkedCreature().get();
+
+	if (linkedCreature != nullptr && linkedCreature->getParent() == asCreatureObject()) {
+#if DEBUG_COV
+		linkedCreature->info("proxy notifyPositionUpdate(" + String::valueOf(entry->getObjectID()) + ")");
+#endif // DEBUG_COV
+		if (linkedCreature->getCloseObjects() != nullptr)
+			linkedCreature->addInRangeObject(entry, false);
+
+		if (entry->getCloseObjects() != nullptr)
+			entry->addInRangeObject(linkedCreature, false);
+
+		linkedCreature->notifyPositionUpdate(entry);
+	}
+
+	TangibleObjectImplementation::notifyPositionUpdate(entry);
+}
+
+int CreatureObjectImplementation::notifyObjectInserted(SceneObject* object) {
 	if (object->isWeaponObject())
 		setWeapon(cast<WeaponObject *>(object));
 
@@ -4067,13 +4124,21 @@ CreditObject *CreatureObjectImplementation::getCreditObject()
 	return obj.castTo<CreditObject *>();
 }
 
-void CreatureObjectImplementation::updateCOV() {
-	// debug("running out of range checks");
+void CreatureObjectImplementation::removeOutOfRangeObjects() {
+	// debug("removeOutOfRangeObjects");
 
 	CreatureObject *creature = asCreatureObject();
 
-	SortedVector<QuadTreeEntry *> closeObjects;
-	auto closeObjectsVector = getCloseObjects();
+	if (creature == nullptr)
+		return;
+
+	CreatureObject* parent = getParent().get().castTo<CreatureObject*>();
+
+	if (parent != nullptr && (parent->isVehicleObject() || parent->isMount()))
+		creature = parent;
+
+	SortedVector<QuadTreeEntry*> closeObjects;
+	auto closeObjectsVector = creature->getCloseObjects();
 
 	if (closeObjectsVector == nullptr)
 		return;
@@ -4084,8 +4149,7 @@ void CreatureObjectImplementation::updateCOV() {
 	float x = worldPos.getX();
 	float y = worldPos.getY();
 
-	auto currentZone = getZone();
-	float range2 = getOutOfRangeDistance();
+	float range2 = creature->getOutOfRangeDistance();
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
 		SceneObject* o = static_cast<SceneObject*>(closeObjects.getUnsafe(i));
@@ -4109,7 +4173,7 @@ void CreatureObjectImplementation::updateCOV() {
 			if (deltaX * deltaX + deltaY * deltaY > rangesq)
 			{
 				if (getCloseObjects() != nullptr)
-					removeInRangeObject(o);
+					creature->removeInRangeObject(o);
 
 				if (o->getCloseObjects() != nullptr)
 					o->removeInRangeObject(creature);
@@ -4118,8 +4182,86 @@ void CreatureObjectImplementation::updateCOV() {
 	}
 }
 
-void CreatureObjectImplementation::addPersonalEnemyFlag(CreatureObject *enemy, uint64 duration)
-{
+// The player may still have buildings and other far away objects in COV
+// this function finds differences and sync's them between child/parent
+void CreatureObjectImplementation::synchronizeCloseObjects() {
+	auto creature = asCreatureObject();
+
+	if (creature == nullptr)
+		return;
+
+	auto parent = getParent().get().castTo<CreatureObject*>();
+
+	if (parent == nullptr)
+		return;
+
+	auto closeObjectsVector = getCloseObjects();
+
+	if (closeObjectsVector == nullptr)
+		return;
+
+	auto parentCloseObjectsVector = parent->getCloseObjects();
+
+	if (parentCloseObjectsVector == nullptr)
+		return;
+
+	SortedVector<QuadTreeEntry*> closeObjects;
+	closeObjectsVector->safeCopyTo(closeObjects);
+
+	SortedVector<QuadTreeEntry*> parentCloseObjects;
+	parentCloseObjectsVector->safeCopyTo(parentCloseObjects);
+
+	VectorMap<ManagedReference<SceneObject*>, uint8> diff;
+
+	// Diff child/parent
+	for (int i = 0; i < closeObjects.size(); ++i) {
+		auto obj = static_cast<SceneObject*>(closeObjects.getUnsafe(i));
+
+		if (obj != nullptr)
+			diff.put(obj, 1);
+	}
+
+	// Diff parent/child
+	for (int i = 0; i < parentCloseObjects.size(); ++i) {
+		auto obj = static_cast<SceneObject*>(parentCloseObjects.getUnsafe(i));
+
+		uint8 flags = 0;
+		int found = diff.find(obj);
+
+		if (found != -1)
+			flags = diff.elementAt(found).getValue();
+
+		diff.put(obj, flags | 2);
+	}
+
+	// Add anything missing on either side
+	int count_c2p = 0;
+	int count_p2c = 0;
+
+	for (int i = 0; i < diff.size(); ++i) {
+		auto element = diff.elementAt(i);
+		auto obj = element.getKey();
+		auto flags = element.getValue();
+
+		if (flags == 3)
+			continue;
+
+		if (flags == 1) {
+			count_c2p++;
+			parent->addInRangeObject(obj);
+		} else if(flags == 2) {
+			count_p2c++;
+			addInRangeObject(obj);
+		}
+	}
+
+#if DEBUG_COV
+	if (count_c2p != 0 || count_p2c != 0)
+		info("synchronizeCloseObjects - Child => Parent: " + String::valueOf(count_c2p) + " Parent => Child: " + String::valueOf(count_p2c), true);
+#endif // DEBUG_COV
+}
+
+void CreatureObjectImplementation::addPersonalEnemyFlag(CreatureObject* enemy, uint64 duration) {
 	uint64 expireTime = duration;
 
 	if (duration > 0)
