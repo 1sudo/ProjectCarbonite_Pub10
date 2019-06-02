@@ -4127,7 +4127,10 @@ CreditObject *CreatureObjectImplementation::getCreditObject()
 void CreatureObjectImplementation::removeOutOfRangeObjects() {
 	// debug("removeOutOfRangeObjects");
 
-	CreatureObject *creature = asCreatureObject();
+	CreatureObject* parent = getParent().get().castTo<CreatureObject*>();
+
+	if (parent != nullptr && (parent->isVehicleObject() || parent->isMount()))
+		creature = parent;
 
 	if (creature == nullptr)
 		return;
