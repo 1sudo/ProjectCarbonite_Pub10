@@ -403,10 +403,9 @@ void PlayerManagerImplementation::loadNameMap()
 				error("error coliding name:" + firstName.toLowerCase());
 			}
 		}
-	}
-	catch (Exception &e)
-	{
-		error(e.getMessage());
+
+	} catch (Exception& e) {
+		fatal(e.getMessage());
 	}
 
 	StringBuffer msg;
