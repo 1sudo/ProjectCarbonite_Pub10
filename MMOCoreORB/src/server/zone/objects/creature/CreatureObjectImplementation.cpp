@@ -2384,16 +2384,22 @@ void CreatureObjectImplementation::notifyInsert(QuadTreeEntry* obj) {
 		if (linkedCreature->getCloseObjects() != nullptr)
 			linkedCreature->addInRangeObject(obj);
 
-		if (obj->getCloseObjects() != nullptr) {
-			obj->addInRangeObject(linkedCreature, false);
+		if (obj->getCloseObjects() != nullptr)
+			obj->addInRangeObject(linkedCreature);
+	} else if(isPlayerCreature() || isPet()) {
+		auto rootParent = getRootParent();
 
-			auto scno = dynamic_cast<SceneObject*>(obj);
+		if (rootParent != nullptr && rootParent->isBuildingObject()) {
+			auto building = dynamic_cast<BuildingObject*>(rootParent);
 
-			if (scno != nullptr)
-				scno->sendTo(linkedCreature, true, false);
+			// If we're in a building and visible we need to sendTo so client sees us
+			if (building != nullptr && (building->isPublicStructure() || building->isStaticBuilding())) {
+				auto scno = static_cast<SceneObject*>(obj);
+
+				if (scno != nullptr && scno->isPlayerCreature())
+					sendTo(scno, true);
+			}
 		}
-
-		linkedCreature->notifyInsert(obj);
 	}
 
 	TangibleObjectImplementation::notifyInsert(obj);
@@ -2411,8 +2417,6 @@ void CreatureObjectImplementation::notifyDissapear(QuadTreeEntry* obj) {
 
 		if (obj->getCloseObjects() != nullptr)
 			obj->removeInRangeObject(linkedCreature);
-
-		linkedCreature->notifyDissapear(obj);
 	}
 
 	TangibleObjectImplementation::notifyDissapear(obj);
@@ -2426,12 +2430,10 @@ void CreatureObjectImplementation::notifyPositionUpdate(QuadTreeEntry* entry) {
 		linkedCreature->info("proxy notifyPositionUpdate(" + String::valueOf(entry->getObjectID()) + ")");
 #endif // DEBUG_COV
 		if (linkedCreature->getCloseObjects() != nullptr)
-			linkedCreature->addInRangeObject(entry, false);
+			linkedCreature->addInRangeObject(entry);
 
 		if (entry->getCloseObjects() != nullptr)
-			entry->addInRangeObject(linkedCreature, false);
-
-		linkedCreature->notifyPositionUpdate(entry);
+			entry->addInRangeObject(linkedCreature);
 	}
 
 	TangibleObjectImplementation::notifyPositionUpdate(entry);
