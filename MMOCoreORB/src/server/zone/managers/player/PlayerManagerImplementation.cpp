@@ -2832,9 +2832,8 @@ int PlayerManagerImplementation::notifyObserverEvent(uint32 eventType, Observabl
 		}
 
 		// Check POSTURECHANGED disrupting Logout...
-		Reference<LogoutTask *> logoutTask = creature->getPendingTask("logout").castTo<LogoutTask *>();
-		if (logoutTask != nullptr && !creature->isSitting())
-		{
+		Reference<LogoutTask*> logoutTask = creature->getPendingTask("logout").castTo<LogoutTask*>();
+		if (logoutTask != NULL && !creature->isSitting()) {
 			logoutTask->cancelLogout();
 		}
 
