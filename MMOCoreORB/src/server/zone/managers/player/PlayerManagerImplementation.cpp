@@ -4904,15 +4904,16 @@ void PlayerManagerImplementation::decreaseOnlineCharCount(ZoneClientSession *cli
 
 	auto server = ServerCore::getZoneServer();
 	uint32 accountId = client->getAccountID();
+	auto session = client->getSession();
 
-	if (!onlineZoneClientMap.containsKey(accountId))
-	{
-		error("decreaseOnlineCharCount missing account " + String::valueOf(accountId) + " in onlineZoneClientMap");
-		// onlineZoneClientMap.accountLoggedOut(client->getIPAddress(), accountId, server != nullptr ? server->getGalaxyID() : 0);
+	if (!onlineZoneClientMap.containsKey(accountId)) {
+		if (session != nullptr)
+			onlineZoneClientMap.accountLoggedOut(session->getIPAddress(), accountId);
+
 		return;
 	}
 
-	Vector<Reference<ZoneClientSession *>> clients = onlineZoneClientMap.get(accountId);
+	Vector<Reference<ZoneClientSession*> > clients = onlineZoneClientMap.get(accountId);
 
 	for (int i = 0; i < clients.size(); ++i)
 		if (clients.get(i) == client)
@@ -4922,12 +4923,12 @@ void PlayerManagerImplementation::decreaseOnlineCharCount(ZoneClientSession *cli
 			break;
 		}
 
-	if (clients.size() == 0)
-	{
+	if (clients.size() == 0) {
 		onlineZoneClientMap.remove(accountId);
-		// onlineZoneClientMap.accountLoggedOut(client->getIPAddress(), accountId, server != nullptr ? server->getGalaxyID() : 0);
-	}
-	else
+
+		if (session != nullptr)
+			onlineZoneClientMap.accountLoggedOut(session->getIPAddress(), accountId);
+	} else
 		onlineZoneClientMap.put(accountId, clients);
 
 	locker.release();
@@ -5682,13 +5683,8 @@ bool PlayerManagerImplementation::increaseOnlineCharCountIfPossible(ZoneClientSe
 
 		locker.release();
 
-		// onlineZoneClientMap.accountLoggedIn(client->getIPAddress(), accountId, server != nullptr ? server->getGalaxyID() : 0);
-		if (session != NULL)
-		{
-			String ip = session->getIPAddress();
-
-			onlineZoneClientMap.addAccount(ip, accountId);
-		}
+		if (session != nullptr)
+			onlineZoneClientMap.addAccount(session->getIPAddress(), accountId);
 
 		return true;
 	}
