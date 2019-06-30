@@ -5692,6 +5692,9 @@ bool PlayerManagerImplementation::increaseOnlineCharCountIfPossible(ZoneClientSe
 		if (session == nullptr)
 			continue;
 
+		if (session == nullptr)
+			continue;
+
 		ManagedReference<CreatureObject*> player = session->getPlayer();
 
 		if (player != NULL)
