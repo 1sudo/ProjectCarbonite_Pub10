@@ -3857,7 +3857,7 @@ int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject *player
 		if (ghost->isOnLoadScreen())
 			ghost->setOnLoadScreen(false);
 
-		// ghost->incrementSessionMovement(dist);
+		ghost->incrementSessionMovement(dist);
 	}
 
 	return ret;
