@@ -105,6 +105,8 @@
 #include "server/zone/objects/player/badges/Badge.h"
 #include "server/zone/objects/building/TutorialBuildingObject.h"
 #include "server/zone/managers/frs/FrsManager.h"
+#include "server/zone/objects/player/events/OnlinePlayerLogTask.h"
+#include <sys/stat.h>
 
 // Custom includes
 #include "server/zone/objects/creature/buffs/PrivateBuff.h"
@@ -166,6 +168,16 @@ PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer *zoneServer,
 			info("Player: " + name + " level: " + String::valueOf(level), true);
 		}
 	}
+
+	Core::getTaskManager()->executeTask([=] () {
+		int logSecs = ConfigManager::instance()->getInt("Core3.OnlineLogSeconds", 300);
+		int logSize = ConfigManager::instance()->getInt("Core3.OnlineLogSize", 100000000);
+
+		logOnlinePlayers(logSize);
+
+		Reference<Task*> onlinePlayerLogTask = new OnlinePlayerLogTask(_this.getReferenceUnsafeStaticCast(), logSize);
+		onlinePlayerLogTask->schedulePeriodic(logSecs * 1000, logSecs * 1000);
+	}, "startOnlinePlayerLogTask");
 }
 
 bool PlayerManagerImplementation::createPlayer(ClientCreateCharacterCallback *callback)
@@ -6703,249 +6715,191 @@ Vector<uint64> PlayerManagerImplementation::getOnlinePlayerList()
 	return playerList;
 }
 
-// void PlayerManagerImplementation::logOnlinePlayers(bool onlyWho)
-// {
-// 	int countOnline = 0;
-// 	int countAccounts = 0;
-// 	int countPlayers = 0;
-// 	int countnullptrClient = 0;
-// 	int countnullptrCreature = 0;
-// 	int countnullptrGhost = 0;
+void PlayerManagerImplementation::logOnlinePlayers(int logMaxSize) {
+	int countOnline = 0;
+	int countAccounts = 0;
+	int countPlayers = 0;
+	int countNULLClient = 0;
+	int countNULLCreature = 0;
+	int countNULLGhost = 0;
 
-// 	JSONSerializationType logClients;
-
-// 	Locker locker(&onlineMapMutex);
+	JSONSerializationType logClients;
 
-// 	int countDistinctIPs = onlineZoneClientMap.getDistinctIps();
-
-// 	auto iter = onlineZoneClientMap.iterator();
+	Locker locker(&onlineMapMutex);
 
-// 	while (iter.hasNext())
-// 	{
-// 		countAccounts++;
+	auto iter = onlineZoneClientMap.iterator();
 
-// 		auto clients = iter.next();
+	while (iter.hasNext()) {
+		auto clients = iter.next();
 
-// 		for (int i = 0; i < clients.size(); i++)
-// 		{
-// 			auto client = clients.get(i);
+		for (int i = 0;i < clients.size();i++) {
+			auto client = clients.get(i);
 
-// 			if (client == nullptr)
-// 			{
-// 				countnullptrClient++;
-// 				continue;
-// 			}
+			if (client == nullptr) {
+				countNULLClient++;
+				continue;
+			}
 
-// 			JSONSerializationType logClient;
+			JSONSerializationType logClient;
 
-// 			logClient["accountID"] = client->getAccountID();
-// 			logClient["ip"] = client->getIPAddress();
+			countAccounts++;
+			logClient["accountID"] = client->getAccountID();
+			logClient["ip"] = client->getIPAddress();
 
-// 			Reference<CreatureObject *> creature = client->getPlayer();
+			Reference<CreatureObject*> creature = client->getPlayer();
 
-// 			if (creature != nullptr)
-// 			{
-// 				countPlayers++;
+			if (creature != nullptr) {
+				countPlayers++;
 
-// 				logClient["oid"] = creature->getObjectID();
-// 				logClient["firstName"] = creature->getFirstName();
+				logClient["oid"] = creature->getObjectID();
+				logClient["firstName"] = creature->getFirstName();
 
-// 				if (creature->isInvisible())
-// 					logClient["invisible"] = true;
+				if (creature->isInvisible())
+					logClient["invisible"] = true;
 
-// 				Reference<PlayerObject *> ghost = creature->getPlayerObject();
+				Reference<PlayerObject*> ghost = creature->getPlayerObject();
 
-// 				if (ghost != nullptr)
-// 				{
-// 					Locker lock(ghost);
+				if (ghost != nullptr) {
+					Locker lock(ghost);
 
-// 					logClient["playedSeconds"] = (int)(ghost->getPlayedMiliSecs() / 1000);
-// 					logClient["sessionSeconds"] = (int)(ghost->getSessionMiliSecs() / 1000);
-// 					logClient["totalMovement"] = ghost->getSessionTotalMovement();
+					logClient["playedSeconds"] = (int)(ghost->getPlayedMiliSecs() / 1000);
+					logClient["sessionSeconds"] = (int)(ghost->getSessionMiliSecs() / 1000);
+					logClient["totalMovement"] = ghost->getSessionTotalMovement();
 
-// 					auto admin_level = ghost->getAdminLevel();
+					auto admin_level = ghost->getAdminLevel();
 
-// 					if (admin_level > 0 && ghost->hasAbility("admin"))
-// 						logClient["admin_level"] = admin_level;
+					if (admin_level > 0 && ghost->hasAbility("admin"))
+						logClient["admin_level"] = admin_level;
 
-// 					if (ghost->isOnline())
-// 					{
-// 						countOnline++;
+					if (ghost->isOnline()) {
+						countOnline++;
 
-// 						auto zone = creature->getZone();
+						auto zone = creature->getZone();
 
-// 						if (zone != nullptr)
-// 						{
-// 							auto worldPosition = creature->getWorldPosition();
+						if (zone != nullptr) {
+							logClient["worldPositionX"] = (int)creature->getWorldPositionX();
+							logClient["worldPositionZ"] = (int)creature->getWorldPositionZ();
+							logClient["worldPositionY"] = (int)creature->getWorldPositionY();
+							logClient["zone"] = zone->getZoneName();
+						}
+					} else {
+						logClient["isOnline"] = false;
+					}
 
-// 							logClient["worldPositionX"] = (int)worldPosition.getX();
-// 							logClient["worldPositionZ"] = (int)worldPosition.getZ();
-// 							logClient["worldPositionY"] = (int)worldPosition.getY();
-// 							logClient["zone"] = zone->getZoneName();
-// 						}
-// 					}
-// 					else
-// 					{
-// 						logClient["isOnline"] = false;
-// 					}
+					if (ghost->isAFK())
+						logClient["isAFK"] = true;
+				} else {
+					countNULLGhost++;
+				}
+			} else {
+				countNULLCreature++;
+			}
 
-// 					if (ghost->isAFK())
-// 						logClient["isAFK"] = true;
-// 				}
-// 				else
-// 				{
-// 					countnullptrGhost++;
-// 				}
-// 			}
-// 			else
-// 			{
-// 				countnullptrCreature++;
-// 				logClient["isNullCreature"] = true;
-// 				logClient["isNullSession"] = client->getSession() == nullptr;
-// 				// TODO - Periodic cleanup of these?
-// 			}
+			logClients.push_back(logClient);
+		}
+	}
 
-// 			logClients.push_back(logClient);
-// 		}
-// 	}
+	locker.release();
 
-// 	locker.release();
+	JSONSerializationType logEntry;
+	Time now;
 
-// 	JSONSerializationType logEntry;
-// 	Time now;
+	logEntry["@timestamp"] = now.getFormattedTimeFull().toCharArray();
+	logEntry["timeMSecs"] = now.getMiliTime();
+	logEntry["clients"] = logClients.size() > 0 ? logClients : nlohmann::json::array();
 
-// 	logEntry["@timestamp"] = now.getFormattedTimeFull().toCharArray();
-// 	logEntry["timeMSecs"] = now.getMiliTime();
-// 	logEntry["clients"] = logClients.size() > 0 ? logClients : nlohmann::json::array();
-// 	logEntry["uptime_secs"] = Logger::getElapsedTime();
+	auto server = ServerCore::getZoneServer();
 
-// 	auto server = ServerCore::getZoneServer();
+	if (server != nullptr) {
+		logEntry["uptime"] = (int)(server->getStartTimestamp()->miliDifference(now) / 1000);
 
-// 	if (server != nullptr)
-// 	{
-// 		logEntry["uptime"] = (int)(server->getStartTimestamp()->miliDifference(now) / 1000);
+		if (server->isServerLocked())
+			logEntry["isServerLocked"] = true;
 
-// 		if (server->isServerLocked())
-// 			logEntry["isServerLocked"] = true;
+		if (server->isServerLoading())
+			logEntry["isServerLoading"] = true;
 
-// 		if (server->isServerLoading())
-// 			logEntry["isServerLoading"] = true;
+		if (server->isServerShuttingDown())
+			logEntry["isServerShuttingDown"] = true;
+	}
 
-// 		if (server->isServerShuttingDown())
-// 			logEntry["isServerShuttingDown"] = true;
-// 	}
+	logEntry["countAccounts"] = countAccounts;
+	logEntry["countPlayers"] = countPlayers;
 
-// 	logEntry["countAccounts"] = countAccounts;
-// 	logEntry["countPlayers"] = countPlayers;
-// 	logEntry["countDistinctIPs"] = countDistinctIPs;
+	if (countOnline != countPlayers)
+		logEntry["countOnline"] = countOnline;
 
-// 	if (countOnline != countPlayers)
-// 		logEntry["countOnline"] = countOnline;
+	if (countNULLClient > 0)
+		logEntry["countNULLClient"] = countNULLClient;
 
-// 	if (countnullptrClient > 0)
-// 		logEntry["countnullptrClient"] = countnullptrClient;
+	if (countNULLCreature > 0)
+		logEntry["countNULLCreature"] = countNULLCreature;
 
-// 	if (countnullptrCreature > 0)
-// 		logEntry["countnullptrCreature"] = countnullptrCreature;
+	if (countNULLGhost > 0)
+		logEntry["countNULLGhost"] = countNULLGhost;
 
-// 	if (countnullptrGhost > 0)
-// 		logEntry["countnullptrGhost"] = countnullptrGhost;
+	String fileName = "log/online-players.log";
 
-// 	StringBuffer logLine;
+	struct stat st_log;
 
-// 	logLine << logEntry.dump().c_str() << "\n";
+	// Check for rollover
+	if (stat(fileName.toCharArray(), &st_log) == 0) {
+		if (st_log.st_size >= logMaxSize) {
+			StringBuffer archiveFilename;
+			archiveFilename << "log/online-players-" << now.getMiliTime() << ".log";
 
-// 	// Write who file
-// 	try
-// 	{
-// 		// Write a new "current status" file
-// 		File file("log/who.json.next");
-// 		FileWriter logFile(&file, false);
+			// If the rename failed its ok because we open with append below
+			int err = std::rename(fileName.toCharArray(), archiveFilename.toString().toCharArray());
 
-// 		logFile << logLine;
+			if (err != 0)
+				error("Failed to archive online-players to " + archiveFilename.toString() + " err = " + err);
+		}
+	}
 
-// 		logFile.close();
+	try {
+		// Append log file with this entry
+		FileWriter* logFile = new FileWriter(new File(fileName), true);
 
-// 		// Update current status file
-// #ifdef PLATFORM_WIN
-// 		std::remove("log/who.json");
-// #endif
-// 		int err = std::rename("log/who.json.next", "log/who.json");
+		StringBuffer logLine;
 
-// 		if (err != 0)
-// 		{
-// 			error() << "Failed to rename log/who.json.next to log/who.json err = " << err;
-// 		}
-// 	}
-// 	catch (const Exception &e)
-// 	{
-// 		error() << "logOnlinePlayers failed to write log/who.json: " << e.getMessage();
-// 	}
+		logLine << logEntry.dump().c_str() << "\n";
 
-// 	if (onlyWho)
-// 		return;
+		(*logFile) << logLine;
 
-// 	Locker logfileLock(&onlinePlayerLogMutext);
+		logFile->close();
 
-// 	String fileName = "log/online-players.log";
+		// Write a new "current status" file
+		logFile = new FileWriter(new File("log/who.json.next"), false);
 
-// 	struct stat st_log;
+		(*logFile) << logLine;
 
-// 	// Check for rollover
-// 	if (stat(fileName.toCharArray(), &st_log) == 0)
-// 	{
-// 		if (st_log.st_size >= ConfigManager::instance()->getOnlineLogSize())
-// 		{
-// 			StringBuffer archiveFilename;
-// 			archiveFilename << "log/online-players-" << now.getMiliTime() << ".log";
+		logFile->close();
 
-// 			// If the rename failed its ok because we open with append below
-// 			int err = std::rename(fileName.toCharArray(), archiveFilename.toString().toCharArray());
+		// Update current status file
+		int err = std::rename("log/who.json.next", "log/who.json");
 
-// 			if (err != 0)
-// 				error() << "Failed to archive online-players to " << archiveFilename.toString() << " err = " << err;
-// 		}
-// 	}
+		if (err != 0)
+			info("Failed to update log/online-players.json err = " + err);
 
-// 	try
-// 	{
-// 		// Append log file with this entry
-// 		File file(fileName);
-// 		FileWriter logFile(&file, true);
+		if (countOnline > 0 || countNULLClient > 0 || countNULLCreature > 0 || countNULLGhost > 0) {
+			StringBuffer logMsg;
 
-// 		logFile << logLine;
+			logMsg << "Logged " << countOnline << " players (" << countAccounts << " accounts) to " << fileName;
 
-// 		logFile.close();
+			if (countNULLClient > 0)
+				logMsg << "; " << countNULLClient << " null clients";
 
-// 		logfileLock.release();
+			if (countNULLCreature > 0)
+				logMsg << "; " << countNULLCreature << " clients without a creature";
 
-// 		int LogSum = countOnline + countAccounts + countPlayers + countnullptrClient + countnullptrCreature + countnullptrGhost + countDistinctIPs;
+			if (countNULLGhost > 0)
+				logMsg << "; " << countNULLGhost << " creatures without a player object";
 
-// 		// Throttle to no more often than once per 5s and only if something to report
-// 		if (lastOnlinePlayerLogMsg.miliDifference() >= 5000 && LogSum != onlinePlayerLogSum)
-// 		{
-// 			StringBuffer logMsg;
+			logMsg << ".";
 
-// 			logMsg << "Logged " << countOnline << " players (" << countAccounts << " accounts, " << countDistinctIPs << " distinct IPs) to " << fileName;
-
-// 			if (countnullptrClient > 0)
-// 				logMsg << "; " << countnullptrClient << " null clients";
-
-// 			if (countnullptrCreature > 0)
-// 				logMsg << "; " << countnullptrCreature << " clients without a creature";
-
-// 			if (countnullptrGhost > 0)
-// 				logMsg << "; " << countnullptrGhost << " creatures without a player object";
-
-// 			logMsg << ".";
-
-// 			info(logMsg.toString(), true);
-// 			lastOnlinePlayerLogMsg.updateToCurrentTime();
-// 			onlinePlayerLogSum = LogSum;
-// 		}
-// 	}
-// 	catch (const Exception &e)
-// 	{
-// 		error() << "logOnlinePlayers failed to write " << fileName << ": " << e.getMessage();
-// 	}
-// }
+			info(logMsg.toString(), true);
+		}
+	} catch (Exception& e) {
+		error("logOnlinePlayers failed: " + e.getMessage());
+	}
+}

@@ -96,6 +96,7 @@ void PlayerObjectImplementation::initializeTransientMembers() {
 	sessionStatsLastSkillPoints = skillPoints;
 	sessionStatsActivityXP = 0;
 	sessionStatsActivityMovement = 0;
+	sessionStatsTotalMovement = 0;
 	sessionStatsIPAddress = "";
 	miliSecsSession = 0;
 }
@@ -1447,7 +1448,11 @@ void PlayerObjectImplementation::notifyOffline() {
 }
 
 void PlayerObjectImplementation::incrementSessionMovement(float moveDelta) {
+	if (moveDelta < 10.0f)
+		return;
+
 	sessionStatsActivityMovement += (int)moveDelta;
+	sessionStatsTotalMovement += (int)moveDelta;
 }
 
 void PlayerObjectImplementation::resetSessionStats(bool isSessionStart) {
@@ -1469,6 +1474,7 @@ void PlayerObjectImplementation::resetSessionStats(bool isSessionStart) {
 			sessionStatsLastCredits = playerCreature->getCashCredits() + playerCreature->getBankCredits();
 
 		logSessionStats(false);
+		sessionStatsTotalMovement = 0;
 		return;
 	}
 
