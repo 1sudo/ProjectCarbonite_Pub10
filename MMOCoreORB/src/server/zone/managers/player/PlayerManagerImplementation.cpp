@@ -6749,6 +6749,8 @@ void PlayerManagerImplementation::logOnlinePlayers(bool onlyWho) {
 	auto iter = onlineZoneClientMap.iterator();
 
 	while (iter.hasNext()) {
+		countAccounts++;
+
 		auto clients = iter.next();
 
 		for (int i = 0;i < clients.size();i++) {
@@ -6761,7 +6763,6 @@ void PlayerManagerImplementation::logOnlinePlayers(bool onlyWho) {
 
 			JSONSerializationType logClient;
 
-			countAccounts++;
 			logClient["accountID"] = client->getAccountID();
 			logClient["ip"] = client->getIPAddress();
 
