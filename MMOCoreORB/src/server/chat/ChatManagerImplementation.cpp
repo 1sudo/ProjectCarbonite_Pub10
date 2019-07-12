@@ -2071,7 +2071,8 @@ Reference<ChatRoom*> ChatManagerImplementation::createPersistentRoomByFullPath(C
 		return NULL;
 	}
 
-	NameManager* nameManager = NameManager::instance();
+	ZoneProcessServer* zps = player->getZoneProcessServer();
+	NameManager* nameManager = zps->getNameManager();
 	bool nameOK = true;
 
 	//Validate the room name on its own (need to compare to special cases).
