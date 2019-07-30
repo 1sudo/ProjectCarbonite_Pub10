@@ -180,13 +180,21 @@ PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer *zoneServer,
 	}
 }
 
+void PlayerManagerImplementation::stopOnlinePlayerLogTask() {
+	auto onlinePlayerLogTask = this->onlinePlayerLogTask.get();
+
+	if (onlinePlayerLogTask != nullptr) {
+		onlinePlayerLogTask->cancel();
+	}
+}
+
 bool PlayerManagerImplementation::rescheduleOnlinePlayerLogTask(int logSecs) {
 	auto onlinePlayerLogTask = this->onlinePlayerLogTask.get();
 
 	if (logSecs <= -1) {
 		if (onlinePlayerLogTask != nullptr) {
 			onlinePlayerLogTask->cancel();
-			onlinePlayerLogTask = nullptr;
+			this->onlinePlayerLogTask = onlinePlayerLogTask = nullptr;
 		}
 		info("Loging online players disabled.", true);
 		return true;
@@ -415,10 +423,7 @@ void PlayerManagerImplementation::loadPermissionLevels()
 }
 
 void PlayerManagerImplementation::finalize() {
-	auto onlinePlayerLogTask = this->onlinePlayerLogTask.get();
-
-	if (onlinePlayerLogTask != nullptr)
-		onlinePlayerLogTask->cancel();
+	stopOnlinePlayerLogTask();
 
 	nameMap = NULL;
 
@@ -6813,9 +6818,11 @@ void PlayerManagerImplementation::logOnlinePlayers(bool onlyWho) {
 						auto zone = creature->getZone();
 
 						if (zone != nullptr) {
-							logClient["worldPositionX"] = (int)creature->getWorldPositionX();
-							logClient["worldPositionZ"] = (int)creature->getWorldPositionZ();
-							logClient["worldPositionY"] = (int)creature->getWorldPositionY();
+							auto worldPosition = creature->getWorldPosition();
+
+							logClient["worldPositionX"] = (int)worldPosition.getX();
+							logClient["worldPositionZ"] = (int)worldPosition.getZ();
+							logClient["worldPositionY"] = (int)worldPosition.getY();
 							logClient["zone"] = zone->getZoneName();
 						}
 					} else {
