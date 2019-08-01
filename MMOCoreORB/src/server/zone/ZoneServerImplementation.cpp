@@ -341,8 +341,6 @@ void ZoneServerImplementation::stopManagers() {
 	reactionManager = NULL;
 
 	if (frsManager != NULL) {
-		frsManager->cancelTasks();
-
 		frsManager = NULL;
 	}
 
@@ -384,7 +382,6 @@ void ZoneServerImplementation::stopManagers() {
 	}
 
 	if (playerManager != NULL) {
-		playerManager->stopOnlinePlayerLogTask();
 		playerManager->finalize();
 		playerManager = NULL;
 	}
