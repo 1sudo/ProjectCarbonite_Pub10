@@ -3637,7 +3637,7 @@ void CreatureObjectImplementation::createChildObjects()
 		if (obj == nullptr)
 			continue;
 
-		ContainerPermissions *permissions = obj->getContainerPermissions();
+		ContainerPermissions* permissions = obj->getContainerPermissionsForUpdate();
 		permissions->setOwner(getObjectID());
 		permissions->setInheritPermissionsFromParent(false);
 		permissions->setDefaultDenyPermission(ContainerPermissions::MOVECONTAINER);

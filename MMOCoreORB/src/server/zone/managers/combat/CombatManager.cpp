@@ -3166,11 +3166,9 @@ Reference<SortedVector<ManagedReference<TangibleObject *>> *> CombatManager::get
 				Reference<CellObject *> targetCell = object->getParent().get().castTo<CellObject *>();
 				CreatureObject *aggressor = attacker->asCreatureObject();
 
-				if (targetCell != nullptr)
-				{
-					if (!object->isPlayerCreature())
-					{
-						ContainerPermissions *perms = targetCell->getContainerPermissions();
+				if (targetCell != nullptr) {
+					if (!object->isPlayerCreature()) {
+						auto perms = targetCell->getContainerPermissions();
 
 						if (!perms->hasInheritPermissionsFromParent())
 						{
