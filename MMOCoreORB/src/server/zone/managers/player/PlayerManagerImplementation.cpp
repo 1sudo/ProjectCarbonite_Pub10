@@ -108,12 +108,9 @@
 #include "server/zone/objects/player/events/OnlinePlayerLogTask.h"
 #include <sys/stat.h>
 
-// Custom includes
-#include "server/zone/objects/creature/buffs/PrivateBuff.h"
-#include "server/zone/objects/creature/buffs/PrivateSkillMultiplierBuff.h"
-
-PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer *zoneServer, ZoneProcessServer *impl) : Logger("PlayerManager")
-{
+PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer* zoneServer, ZoneProcessServer* impl,
+							bool trackOnlineUsers) :
+										Logger("PlayerManager") {
 
 	playerLoggerFilename = "log/player.log";
 	playerLoggerLines = ConfigManager::instance()->getMaxLogLines();
@@ -171,7 +168,7 @@ PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer *zoneServer,
 
 	int onlineLogSeconds = ConfigManager::instance()->getOnlineLogSeconds();
 
-	if (onlineLogSeconds > 0) {
+	if (onlineLogSeconds > 0 && trackOnlineUsers) {
 		onlinePlayerLogSum = 0;
 
 		Core::getTaskManager()->executeTask([=] () {
