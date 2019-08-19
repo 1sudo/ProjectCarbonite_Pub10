@@ -767,7 +767,7 @@ void PlayerObjectImplementation::removeWaypointBySpecialType(int specialTypeID, 
 
 }
 
-WaypointObject* PlayerObjectImplementation::getWaypointBySpecialType(int specialTypeID) {
+WaypointObject* PlayerObjectImplementation::getWaypointBySpecialType(int specialTypeID) const {
 	uint64 waypointID = waypointList.getWaypointBySpecialType(specialTypeID);
 	if (waypointID != 0) {
 		return waypointList.get(waypointID);
@@ -775,7 +775,7 @@ WaypointObject* PlayerObjectImplementation::getWaypointBySpecialType(int special
 	return nullptr;
 }
 
-WaypointObject* PlayerObjectImplementation::getSurveyWaypoint() {
+WaypointObject* PlayerObjectImplementation::getSurveyWaypoint() const {
 	return getWaypointBySpecialType(WaypointObject::SPECIALTYPE_RESOURCE);
 }
 
@@ -985,7 +985,7 @@ void PlayerObjectImplementation::removeSchematics(Vector<ManagedReference<DraftS
 	if(player == nullptr)
 		return;
 
-	SkillList* playerSkillBoxList = player->getSkillList();
+	const SkillList* playerSkillBoxList = player->getSkillList();
 
 	for(int i = 0; i < playerSkillBoxList->size(); ++i) {
 		Skill* skillBox = playerSkillBoxList->get(i);
@@ -2329,15 +2329,15 @@ void PlayerObjectImplementation::clearScreenPlayData(const String& screenPlay) {
 	}
 }
 
-Time PlayerObjectImplementation::getLastVisibilityUpdateTimestamp() {
+Time PlayerObjectImplementation::getLastVisibilityUpdateTimestamp() const {
 	return lastVisibilityUpdateTimestamp;
 }
 
-Time PlayerObjectImplementation::getLastBhPvpCombatActionTimestamp() {
+Time PlayerObjectImplementation::getLastBhPvpCombatActionTimestamp() const {
 	return lastBhPvpCombatActionTimestamp;
 }
 
-Time PlayerObjectImplementation::getLastGcwPvpCombatActionTimestamp() {
+Time PlayerObjectImplementation::getLastGcwPvpCombatActionTimestamp() const {
 	return lastGcwPvpCombatActionTimestamp;
 }
 
@@ -2644,7 +2644,7 @@ int PlayerObjectImplementation::getSpentJediSkillPoints() {
 
 	int jediSkillPoints = 0;
 
-	SkillList* skillList = player->getSkillList();
+	const SkillList* skillList = player->getSkillList();
 
 	for(int i = 0; i < skillList->size(); ++i) {
 		Skill* jediSkill = skillList->get(i);
@@ -2946,7 +2946,7 @@ void PlayerObjectImplementation::recalculateForcePower() {
 	setForcePowerMax(maxForce, true);
 }
 
-String PlayerObjectImplementation::getMiliSecsTimeString(uint64 miliSecs, bool verbose) {
+String PlayerObjectImplementation::getMiliSecsTimeString(uint64 miliSecs, bool verbose) const {
 	uint64 ss = miliSecs / 1000;
 
 	int dd = ss / 86400;
@@ -2987,7 +2987,7 @@ String PlayerObjectImplementation::getMiliSecsTimeString(uint64 miliSecs, bool v
 	return buf.toString();
 }
 
-String PlayerObjectImplementation::getPlayedTimeString(bool verbose) {
+String PlayerObjectImplementation::getPlayedTimeString(bool verbose) const {
 	StringBuffer buf;
 
 	if (verbose) {
