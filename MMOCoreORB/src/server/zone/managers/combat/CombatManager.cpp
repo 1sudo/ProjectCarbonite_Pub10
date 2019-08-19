@@ -96,9 +96,8 @@ bool CombatManager::startCombat(CreatureObject *attacker, TangibleObject *defend
 	return true;
 }
 
-bool CombatManager::attemptPeace(CreatureObject *attacker)
-{
-	DeltaVector<ManagedReference<SceneObject *>> *defenderList = attacker->getDefenderList();
+bool CombatManager::attemptPeace(CreatureObject* attacker) {
+	const DeltaVector<ManagedReference<SceneObject*> >* defenderList = attacker->getDefenderList();
 
 	for (int i = defenderList->size() - 1; i >= 0; --i)
 	{
@@ -175,7 +174,7 @@ void CombatManager::forcePeace(CreatureObject *attacker)
 {
 	assert(attacker->isLockedByCurrentThread());
 
-	DeltaVector<ManagedReference<SceneObject *>> *defenderList = attacker->getDefenderList();
+	const DeltaVector<ManagedReference<SceneObject*> >* defenderList = attacker->getDefenderList();
 
 	for (int i = 0; i < defenderList->size(); ++i)
 	{
