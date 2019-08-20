@@ -1319,7 +1319,7 @@ void CraftingSessionImplementation::addSkillMods() {
 
 	ManagedReference<DraftSchematic*> draftSchematic = manufactureSchematic->getDraftSchematic();
 
-	VectorMap<String, int>* skillMods = draftSchematic->getDraftSchematicTemplate()->getSkillMods();
+	const VectorMap<String, int>* skillMods = draftSchematic->getDraftSchematicTemplate()->getSkillMods();
 
 	for (int i = 0; i < skillMods->size(); i++) {
 		VectorMapEntry<String, int> mod = skillMods->elementAt(i);
@@ -1355,7 +1355,7 @@ void CraftingSessionImplementation::addWeaponDots() {
 	ManagedReference<ManufactureSchematic*> manufactureSchematic = this->manufactureSchematic.get();
 	ManagedReference<DraftSchematic*> draftSchematic = manufactureSchematic->getDraftSchematic();
 
-	Vector<VectorMap<String, int> >* weaponDots = draftSchematic->getDraftSchematicTemplate()->getWeaponDots();
+	const Vector<VectorMap<String, int> >* weaponDots = draftSchematic->getDraftSchematicTemplate()->getWeaponDots();
 
 	for (int i = 0; i < weaponDots->size(); i++) {
 		VectorMap<String, int> dot = weaponDots->elementAt(i);
