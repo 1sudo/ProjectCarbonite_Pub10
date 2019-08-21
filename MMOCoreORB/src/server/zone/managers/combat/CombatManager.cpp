@@ -851,7 +851,7 @@ int CombatManager::getAttackerAccuracyModifier(TangibleObject *attacker, Creatur
 
 	int attackerAccuracy = 0;
 
-	Vector<String> *creatureAccMods = weapon->getCreatureAccuracyModifiers();
+	const auto creatureAccMods = weapon->getCreatureAccuracyModifiers();
 
 	for (int i = 0; i < creatureAccMods->size(); ++i)
 	{
@@ -918,7 +918,7 @@ int CombatManager::getDefenderDefenseModifier(CreatureObject *defender, WeaponOb
 	int targetDefense = defender->isPlayerCreature() ? 0 : defender->getLevel();
 	int buffDefense = 0;
 
-	Vector<String> *defenseAccMods = weapon->getDefenderDefenseModifiers();
+	const auto defenseAccMods = weapon->getDefenderDefenseModifiers();
 
 	for (int i = 0; i < defenseAccMods->size(); ++i)
 	{
@@ -960,7 +960,7 @@ int CombatManager::getDefenderSecondaryDefenseModifier(CreatureObject *defender)
 	int targetDefense = defender->isPlayerCreature() ? 0 : defender->getLevel();
 	ManagedReference<WeaponObject *> weapon = defender->getWeapon();
 
-	Vector<String> *defenseAccMods = weapon->getDefenderSecondaryDefenseModifiers();
+	const auto defenseAccMods = weapon->getDefenderSecondaryDefenseModifiers();
 
 	for (int i = 0; i < defenseAccMods->size(); ++i)
 	{
@@ -979,7 +979,7 @@ float CombatManager::getDefenderToughnessModifier(CreatureObject *defender, int 
 {
 	ManagedReference<WeaponObject *> weapon = defender->getWeapon();
 
-	Vector<String> *defenseToughMods = weapon->getDefenderToughnessModifiers();
+	const auto defenseToughMods = weapon->getDefenderToughnessModifiers();
 
 	if (attackType == weapon->getAttackType())
 	{
@@ -1083,20 +1083,9 @@ int CombatManager::calculateDamageRange(TangibleObject *attacker, CreatureObject
 	return range < 0 ? 0 : (int)range;
 }
 
-float CombatManager::applyDamageModifiers(CreatureObject *attacker, WeaponObject *weapon, float damage, const CreatureAttackData &data)
-{
-	// Disable/Enable this for system message helpers
-	bool showDebugHelpers = false;
-
-	if (!data.isForceAttack())
-	{
+float CombatManager::applyDamageModifiers(CreatureObject* attacker, WeaponObject* weapon, float damage, const CreatureAttackData& data) {
+	if (!data.isForceAttack()) {
 		const auto weaponDamageMods = weapon->getDamageModifiers();
-
-		// Help with showing damage modifiers
-		if (showDebugHelpers)
-		{
-			attacker->sendSystemMessage("Damage Pre-Mods:" + String::valueOf(damage));
-		}
 
 		for (int i = 0; i < weaponDamageMods->size(); ++i)
 		{
@@ -1162,7 +1151,7 @@ int CombatManager::getSpeedModifier(CreatureObject *attacker, WeaponObject *weap
 {
 	int speedMods = 0;
 
-	Vector<String> *weaponSpeedMods = weapon->getSpeedModifiers();
+	const auto weaponSpeedMods = weapon->getSpeedModifiers();
 
 	for (int i = 0; i < weaponSpeedMods->size(); ++i)
 	{
@@ -1999,11 +1988,10 @@ int CombatManager::getHitChance(TangibleObject *attacker, CreatureObject *target
 	//info("Attack hit successfully", true);
 
 	// now we have a successful hit, so calculate secondary defenses if there is a damage component
-	if (damage > 0)
-	{
-		ManagedReference<WeaponObject *> targetWeapon = targetCreature->getWeapon();
-		Vector<String> *defenseAccMods = targetWeapon->getDefenderSecondaryDefenseModifiers();
-		const String &def = defenseAccMods->get(0); // FIXME: this is hacky, but a lot faster than using contains()
+	if (damage > 0) {
+		ManagedReference<WeaponObject*> targetWeapon = targetCreature->getWeapon();
+		const auto defenseAccMods = targetWeapon->getDefenderSecondaryDefenseModifiers();
+		const String& def = defenseAccMods->get(0); // FIXME: this is hacky, but a lot faster than using contains()
 
 		// saber block is special because it's just a % chance to block based on the skillmod
 		if (def == "saber_block")
