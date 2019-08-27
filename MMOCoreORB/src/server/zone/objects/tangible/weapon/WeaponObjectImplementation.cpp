@@ -820,10 +820,8 @@ bool WeaponObjectImplementation::isEquipped()
 	return false;
 }
 
-void WeaponObjectImplementation::applySkillModsTo(CreatureObject *creature)
-{
-	if (creature == NULL)
-	{
+void WeaponObjectImplementation::applySkillModsTo(CreatureObject* creature) const {
+	if (creature == NULL) {
 		return;
 	}
 
