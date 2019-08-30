@@ -118,9 +118,7 @@ void CreatureObjectImplementation::initializeTransientMembers()
 	setLoggingName("CreatureObject");
 }
 
-void CreatureObjectImplementation::initializeMembers()
-{
-
+void CreatureObjectImplementation::initializeMembers() {
 	linkedCreature = nullptr;
 	controlDevice = nullptr;
 
@@ -272,46 +270,27 @@ void CreatureObjectImplementation::loadTemplateData(
 		runSpeed = 0;
 		walkSpeed = 0;
 	}
-}
 
-void CreatureObjectImplementation::finalize()
-{
-}
+	auto zoneServer = ServerCore::getZoneServer();
 
-void CreatureObjectImplementation::info(const String &msg, bool force)
-{
-	if (isPlayerCreature())
-	{
-		getZoneServer()->getPlayerManager()->writePlayerLog(asCreatureObject(), msg, Logger::LogLevel::INFO);
-		return;
+	if (zoneServer && isPlayerCreature()) {
+		auto creo = asCreatureObject();
+		WeakReference<PlayerManager*> manager = zoneServer->getPlayerManager();
+
+		setLoggerCallback([creo, manager](Logger::LogLevel level, const char* msg) -> int {
+			auto playerManager = manager.get();
+
+			if (playerManager != nullptr) {
+				playerManager->writePlayerLog(creo, msg, level);
+			}
+
+			return 0;
+		});
 	}
-
-	Logger::info(msg, force);
-	return;
 }
 
-void CreatureObjectImplementation::debug(const String &msg)
-{
-	if (isPlayerCreature())
-	{
-		getZoneServer()->getPlayerManager()->writePlayerLog(asCreatureObject(), msg, Logger::LogLevel::DEBUG);
-		return;
-	}
+void CreatureObjectImplementation::finalize() {
 
-	Logger::debug(msg);
-	return;
-}
-
-void CreatureObjectImplementation::error(const String &msg)
-{
-	if (isPlayerCreature())
-	{
-		getZoneServer()->getPlayerManager()->writePlayerLog(asCreatureObject(), msg, Logger::LogLevel::ERROR);
-		return;
-	}
-
-	Logger::error(msg);
-	return;
 }
 
 void CreatureObjectImplementation::sendToOwner(bool doClose)
@@ -4314,7 +4293,7 @@ void CreatureObjectImplementation::removePersonalEnemyFlag(uint64 enemyID)
 	ZoneServer *zoneServer = server->getZoneServer();
 	ManagedReference<CreatureObject *> enemy = zoneServer->getObject(enemyID).castTo<CreatureObject *>();
 
-	if (enemy != NULL)
+	if (enemy != nullptr)
 		sendPvpStatusTo(enemy);
 }
 
