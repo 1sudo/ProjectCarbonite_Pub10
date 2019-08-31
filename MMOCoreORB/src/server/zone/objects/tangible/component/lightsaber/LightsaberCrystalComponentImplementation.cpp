@@ -69,7 +69,7 @@ void LightsaberCrystalComponentImplementation::generateCrystalStats()
 	if (lootManager == NULL)
 		return;
 
-	CrystalData *crystalData = lootManager->getCrystalData(getObjectTemplate()->getTemplateFileName());
+	const CrystalData* crystalData = lootManager->getCrystalData(getObjectTemplate()->getTemplateFileName());
 
 	if (crystalData == NULL)
 	{
@@ -320,7 +320,7 @@ void LightsaberCrystalComponentImplementation::validateCrystalStats()
 	if (lootManager == NULL)
 		return;
 
-	CrystalData *crystalData = lootManager->getCrystalData(getObjectTemplate()->getTemplateFileName());
+	const CrystalData* crystalData = lootManager->getCrystalData(getObjectTemplate()->getTemplateFileName());
 
 	if (crystalData == NULL)
 	{
