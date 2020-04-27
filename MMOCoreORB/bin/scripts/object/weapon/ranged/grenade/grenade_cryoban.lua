@@ -96,7 +96,7 @@ object_weapon_ranged_grenade_grenade_cryoban = object_weapon_ranged_grenade_shar
 	-- Leave blank for now
 	damageModifiers = { },
 
-	useCount = 5,
+	useCount = 15,
 
 	combatSpam = "throw_cryoban",
 
@@ -127,7 +127,7 @@ object_weapon_ranged_grenade_grenade_cryoban = object_weapon_ranged_grenade_shar
 	experimentalGroupTitles = {"null", "null", "expDamage", "expDamage", "expDamage", "expDamage", "null", "expRange", "expRange", "expRange", "expRange", "null", "expEffeciency", "expEffeciency", "expEffeciency"},
 	experimentalSubGroupTitles = {"null", "null", "mindamage", "maxdamage", "attackspeed", "woundchance", "hitpoints", "zerorangemod", "maxrangemod", "midrangemod", "midrange", "maxrange", "attackhealthcost", "attackactioncost", "attackmindcost"},
 	experimentalMin = {0, 0, 190, 320, 6.5, 7, 1000, -14, -45, 0, 10, 64, 52, 130, 20},
-	experimentalMax = {0, 0, 270, 650, 3, 13, 1000, 16, -15, 30, 30, 64, 28, 70, 11},
+	experimentalMax = {0, 0, 280, 750, 1, 1, 1000, 30, 30, 30, 30, 64, 28, 70, 11},
 	experimentalPrecision = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	experimentalCombineType = {0, 0, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1},
 }

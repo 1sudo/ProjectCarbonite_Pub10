@@ -146,7 +146,7 @@ object_weapon_ranged_pistol_pistol_scatter_light = object_weapon_ranged_pistol_s
 	speedModifiers = { "carbine_speed" },
 
 	-- Leave blank for now
-	damageModifiers = { },
+	damageModifiers = { "carbine_damage" },
 
 
 	-- The values below are the default values.  To be used for blue frog objects primarily

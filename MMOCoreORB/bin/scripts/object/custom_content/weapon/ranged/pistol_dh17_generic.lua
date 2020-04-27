@@ -147,7 +147,7 @@ object_weapon_ranged_pistol_pistol_dh17_generic = object_weapon_ranged_pistol_sh
 	speedModifiers = { "pistol_speed" },
 
 	-- Leave blank for now
-	damageModifiers = { },
+	damageModifiers = { "pistol_damage" },
 
 
 	-- The values below are the default values.  To be used for blue frog objects primarily

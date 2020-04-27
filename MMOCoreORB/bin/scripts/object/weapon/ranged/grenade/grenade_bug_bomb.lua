@@ -95,7 +95,7 @@ object_weapon_ranged_grenade_grenade_bug_bomb = object_weapon_ranged_grenade_sha
 	-- Leave blank for now
 	damageModifiers = { },
 
-	useCount = 5,
+	useCount = 15,
 
 	combatSpam = "throw_bug_bomb",
 

@@ -96,7 +96,7 @@ object_weapon_ranged_carbine_carbine_e11_victor_quest = object_weapon_ranged_car
 	speedModifiers = { "carbine_speed" },
 
 	-- Leave blank for now
-	damageModifiers = { },
+	damageModifiers = { "carbine_damage" },
 	
 
 	-- The values below are the default values.  To be used for blue frog objects primarily

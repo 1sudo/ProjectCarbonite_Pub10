@@ -1048,24 +1048,61 @@ int CombatManager::calculateDamageRange(TangibleObject *attacker, CreatureObject
 
 float CombatManager::applyDamageModifiers(CreatureObject *attacker, WeaponObject *weapon, float damage, const CreatureAttackData &data)
 {
+	// Disable/Enable this for system message helpers
+	bool showDebugHelpers = false;
+
 	if (!data.isForceAttack())
 	{
-		Vector<String> *weaponDamageMods = weapon->getDamageModifiers();
+		const auto weaponDamageMods = weapon->getDamageModifiers();
+
+		// Help with showing damage modifiers
+		if (showDebugHelpers)
+		{
+			attacker->sendSystemMessage("Damage Pre-Mods:" + String::valueOf(damage));
+		}
 
 		for (int i = 0; i < weaponDamageMods->size(); ++i)
 		{
 			damage += attacker->getSkillMod(weaponDamageMods->get(i));
+
+			// Help with showing damage modifiers
+			if (showDebugHelpers)
+			{
+				attacker->sendSystemMessage("Displaying Damage Mod index of: " + String::valueOf(i) + " with value: " + String::valueOf(attacker->getSkillMod(weaponDamageMods->get(i))));
+			}
 		}
 
 		if (weapon->getAttackType() == SharedWeaponObjectTemplate::MELEEATTACK)
+		{
 			damage += attacker->getSkillMod("private_melee_damage_bonus");
+
+			// Help with showing damage modifiers
+			if (showDebugHelpers)
+			{
+				attacker->sendSystemMessage("Private Melee Damage Bonus: " + String::valueOf(attacker->getSkillMod("private_melee_damage_bonus")));
+			}
+		}
 		if (weapon->getAttackType() == SharedWeaponObjectTemplate::RANGEDATTACK)
+		{
 			damage += attacker->getSkillMod("private_ranged_damage_bonus");
+
+			// Help with showing damage modifiers
+			if (showDebugHelpers)
+			{
+				attacker->sendSystemMessage("Private Ranged Damage Bonus: " + String::valueOf(attacker->getSkillMod("private_ranged_damage_bonus")));
+			}
+		}
 	}
 
 	damage += attacker->getSkillMod("private_damage_bonus");
 
 	int damageMultiplier = attacker->getSkillMod("private_damage_multiplier");
+
+	// Help with showing damage modifiers
+	if (showDebugHelpers)
+	{
+		attacker->sendSystemMessage("Private Generic Damage Bonus: " + String::valueOf(attacker->getSkillMod("private_damage_multiplier")));
+	}
 
 	if (damageMultiplier != 0)
 		damage *= damageMultiplier;
@@ -1074,6 +1111,12 @@ float CombatManager::applyDamageModifiers(CreatureObject *attacker, WeaponObject
 
 	if (damageDivisor != 0)
 		damage /= damageDivisor;
+
+	// Help with showing damage modifiers
+	if (showDebugHelpers)
+	{
+		attacker->sendSystemMessage("Damage Post-Mods:" + String::valueOf(damage));
+	}
 
 	return damage;
 }
@@ -1244,7 +1287,8 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 	int damageType = 0, armorPiercing = 1;
 
 	// Reduce all force attack damage by half from NPCs when attacking a player.
-	if (attacker->isAiAgent() && defender->isPlayerObject() && data.isForceAttack()){
+	if (attacker->isAiAgent() && defender->isPlayerObject() && data.isForceAttack())
+	{
 		damage = damage * 0.5;
 	}
 
@@ -1338,7 +1382,8 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 		// Force Absorb -- Disabled while under effect of Avoid Incap
 		if (defender->getSkillMod("force_absorb") > 0 && defender->isPlayerCreature())
 		{
-			if (!defender->hasBuff(BuffCRC::JEDI_AVOID_INCAPACITATION)) {
+			if (!defender->hasBuff(BuffCRC::JEDI_AVOID_INCAPACITATION))
+			{
 				defender->notifyObservers(ObserverEventType::FORCEABSORB, attacker, data.getForceCost());
 			}
 		}
@@ -1400,7 +1445,8 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 		float chestOnlyReduction = 1.00;
 
 		// If isChestOnly then overwrite our reduction mod with a 4th of normal incoming damage
-		if (isChestOnly){
+		if (isChestOnly)
+		{
 			chestOnlyReduction = 0.25;
 		}
 
@@ -1573,7 +1619,7 @@ float CombatManager::doDroidDetonation(CreatureObject *droid, CreatureObject *de
 				mindArmor = getArmorObject(defender, HIT_HEAD);
 				actionArmor = getArmorObject(defender, HIT_LLEG); // This hits both the pants and feet regardless
 			}
-			
+
 			if (psgArmor != nullptr && !psgArmor->isVulnerable(SharedWeaponObjectTemplate::BLAST))
 			{
 				float armorReduction = psgArmor->getBlast();

@@ -146,7 +146,7 @@ object_weapon_ranged_carbine_carbine_laser_static = object_weapon_ranged_carbine
 	speedModifiers = { "carbine_speed" },
 
 	-- Leave blank for now
-	damageModifiers = { },
+	damageModifiers = { "carbine_damage" },
 
 
 	-- The values below are the default values.  To be used for blue frog objects primarily

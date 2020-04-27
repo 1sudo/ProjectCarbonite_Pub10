@@ -146,7 +146,7 @@ object_weapon_ranged_carbine_carbine_bothan_bola_generic = object_weapon_ranged_
 	speedModifiers = { "carbine_speed" },
 
 	-- Leave blank for now
-	damageModifiers = { },
+	damageModifiers = { "carbine_damage" },
 
 
 	-- The values below are the default values.  To be used for blue frog objects primarily

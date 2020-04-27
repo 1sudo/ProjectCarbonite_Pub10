@@ -96,7 +96,7 @@ object_weapon_ranged_pistol_pistol_geonosian_sonic_blaster_loot = object_weapon_
 	speedModifiers = { "pistol_speed" },
 
 	-- Leave blank for now
-	damageModifiers = { },
+	damageModifiers = { "pistol_damage" },
 
 
 	-- The values below are the default values.  To be used for blue frog objects primarily

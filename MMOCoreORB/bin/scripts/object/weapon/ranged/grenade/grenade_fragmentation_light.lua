@@ -96,7 +96,7 @@ object_weapon_ranged_grenade_grenade_fragmentation_light = object_weapon_ranged_
 	-- Leave blank for now
 	damageModifiers = { },
 
-	useCount = 5,
+	useCount = 15,
 
 	combatSpam = "throw_fragmentation",
 
@@ -128,7 +128,7 @@ object_weapon_ranged_grenade_grenade_fragmentation_light = object_weapon_ranged_
 	experimentalGroupTitles = {"null", "null", "expDamage", "expDamage", "expDamage", "expDamage", "null", "expRange", "expRange", "expRange", "expRange", "null", "expEffeciency", "expEffeciency", "expEffeciency"},
 	experimentalSubGroupTitles = {"null", "null", "mindamage", "maxdamage", "attackspeed", "woundchance", "hitpoints", "zerorangemod", "maxrangemod", "midrangemod", "midrange", "maxrange", "attackhealthcost", "attackactioncost", "attackmindcost"},
 	experimentalMin = {0, 0, 130, 220, 5.5, 7, 1000, -16, -45, 0, 10, 64, 75, 65, 13},
-	experimentalMax = {0, 0, 170, 760, 2.5, 13, 1000, 14, 15, 30, 30, 64, 35, 25, 7},
+	experimentalMax = {0, 0, 200, 900, 2.5, 100, 1000, 14, 15, 30, 30, 64, 35, 25, 7},
 	experimentalPrecision = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	experimentalCombineType = {0, 0, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1},
 }

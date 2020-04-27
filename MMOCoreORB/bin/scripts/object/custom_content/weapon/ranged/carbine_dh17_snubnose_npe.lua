@@ -146,7 +146,7 @@ object_weapon_ranged_carbine_carbine_dh17_snubnose_npe = object_weapon_ranged_ca
 	speedModifiers = { "carbine_speed" },
 
 	-- Leave blank for now
-	damageModifiers = { },
+	damageModifiers = { "carbine_damage" },
 
 
 	-- The values below are the default values.  To be used for blue frog objects primarily

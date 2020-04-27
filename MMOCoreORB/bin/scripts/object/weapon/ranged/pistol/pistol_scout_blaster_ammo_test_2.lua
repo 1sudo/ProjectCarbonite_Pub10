@@ -96,7 +96,7 @@ object_weapon_ranged_pistol_pistol_scout_blaster_ammo_test_2 = object_weapon_ran
 	speedModifiers = { "pistol_speed" },
 
 	-- Leave blank for now
-	damageModifiers = { },
+	damageModifiers = { "pistol_damage" },
 	
 
 	-- The values below are the default values.  To be used for blue frog objects primarily

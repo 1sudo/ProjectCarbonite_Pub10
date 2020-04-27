@@ -146,7 +146,7 @@ object_weapon_ranged_carbine_ep3_loot_mark = object_weapon_ranged_carbine_shared
 	speedModifiers = { "carbine_speed" },
 
 	-- Leave blank for now
-	damageModifiers = { },
+	damageModifiers = { "carbine_damage" },
 
 
 	-- The values below are the default values.  To be used for blue frog objects primarily
