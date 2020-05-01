@@ -77,8 +77,8 @@ rebelRewardData = {
 
 	hirelingList = {
 		"rebel_trooper", "senior_specforce_heavy_weapons_specialist", "senior_specforce_infiltrator", "senior_specforce_marine", "senior_specforce_pathfinder", "senior_specforce_technician",
-		"senior_specforce_urban_guerrilla", "senior_specforce_wilderness_fighter", "specforce_heavy_weapons_specialist", "specforce_infiltrator", "specforce_interrogator", "specforce_marine",
-		"specforce_procurement_specialist", "specforce_technician",	"specforce_wilderness_operative", "rebel_specforce_guerrilla",
+		"senior_specforce_wilderness_fighter", "specforce_heavy_weapons_specialist", "specforce_infiltrator", "specforce_interrogator", "specforce_marine",
+		"specforce_procurement_specialist", "specforce_technician",	"specforce_wilderness_operative", "rebel_specforce_guerrilla", "senior_specforce_urban_guerrilla", "rebel_droideka",
 	},
 
 	hirelings = {
@@ -88,7 +88,6 @@ rebelRewardData = {
 		senior_specforce_marine = { type=factionRewardType.hireling, display="@mob/creature_names:senior_specforce_marine", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="senior_specforce_marine", cost=450},
 		senior_specforce_pathfinder = { type=factionRewardType.hireling, display="@mob/creature_names:senior_specforce_pathfinder", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="senior_specforce_pathfinder", cost=450},
 		senior_specforce_technician = { type=factionRewardType.hireling, display="@mob/creature_names:senior_specforce_technician", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="senior_specforce_technician", cost=450},
-		senior_specforce_urban_guerrilla = { type=factionRewardType.hireling, display="@mob/creature_names:senior_specforce_guerrilla", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="senior_specforce_urban_guerrilla", cost=450},
 		senior_specforce_wilderness_fighter = { type=factionRewardType.hireling, display="@mob/creature_names:senior_specforce_wilderness_trooper", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="senior_specforce_wilderness_fighter", cost=450},
 		specforce_heavy_weapons_specialist = { type=factionRewardType.hireling, display="@mob/creature_names:specforce_heavy_weapons_specialist", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="specforce_heavy_weapons_specialist", cost=375},
 		specforce_infiltrator = { type=factionRewardType.hireling, display="@mob/creature_names:specforce_infiltrator", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="specforce_infiltrator", cost=375},
@@ -98,6 +97,8 @@ rebelRewardData = {
 		specforce_technician = { type=factionRewardType.hireling, display="@mob/creature_names:specforce_technician", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="specforce_technician", cost=375},
 		specforce_wilderness_operative = { type=factionRewardType.hireling, display="@mob/creature_names:specforce_wilderness_operative", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="specforce_wilderness_operative", cost=375},
 		rebel_specforce_guerrilla = { type=factionRewardType.hireling, display="@mob/creature_names:rebel_specforce_guerrilla", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="rebel_specforce_urban_guerrilla", cost=375},
+		senior_specforce_urban_guerrilla = { type=factionRewardType.hireling, display="@mob/creature_names:senior_specforce_guerrilla", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="senior_specforce_urban_guerrilla", cost=2100},
+		rebel_droideka = { type=factionRewardType.hireling, display="@mob/creature_names:rebel_droideka", item="object/intangible/pet/pet_control.iff", controlledObjectTemplate="rebel_droideka", cost=9450},
 	}
 }
 

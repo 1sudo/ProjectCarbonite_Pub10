@@ -170,6 +170,13 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 		maxPets = 3;
 	}
 
+	// Refactored what is considered a super strong factional pet
+	// This allows us to add more in the future
+	SortedVector<String> restrictedFactionPets = {
+		"at_st",
+		"rebel_droideka"
+	};
+
 	for (int i = 0; i < ghost->getActivePetsSize(); ++i) {
 		ManagedReference<AiAgent*> object = ghost->getActivePet(i);
 
@@ -177,8 +184,10 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 			if (object->isCreature() && petType == PetManager::CREATUREPET) {
 				CreatureTemplate* activePetTemplate = object->getCreatureTemplate();
 
-				if (activePetTemplate == NULL || activePetTemplate->getTemplateName() == "at_st")
+				// if (activePetTemplate == NULL || activePetTemplate->getTemplateName() == "at_st")
+				if (activePetTemplate == NULL || restrictedFactionPets.contains(activePetTemplate->getTemplateName())){
 					continue;
+				}
 
 				if (++currentlySpawned >= maxPets) {
 					player->sendSystemMessage("@pet/pet_menu:at_max"); // You already have the maximum number of pets of this type that you can call.
@@ -200,10 +209,13 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 				CreatureTemplate* activePetTemplate = object->getCreatureTemplate();
 				CreatureTemplate* callingPetTemplate = pet->getCreatureTemplate();
 
-				if (activePetTemplate == NULL || callingPetTemplate == NULL || activePetTemplate->getTemplateName() != "at_st")
+				// if (activePetTemplate == NULL || callingPetTemplate == NULL || activePetTemplate->getTemplateName() != "at_st")
+				if (activePetTemplate == NULL || callingPetTemplate == NULL || !restrictedFactionPets.contains(activePetTemplate->getTemplateName())){
 					continue;
+				}
 
-				if (++currentlySpawned >= maxPets || (activePetTemplate->getTemplateName() == "at_st" && callingPetTemplate->getTemplateName() == "at_st")) {
+				// if (++currentlySpawned >= maxPets || (activePetTemplate->getTemplateName() == "at_st" && callingPetTemplate->getTemplateName() == "at_st")) {
+				if (++currentlySpawned >= maxPets || (restrictedFactionPets.contains(activePetTemplate->getTemplateName()) && restrictedFactionPets.contains(callingPetTemplate->getTemplateName()))) {
 					player->sendSystemMessage("@pet/pet_menu:at_max"); // You already have the maximum number of pets of this type that you can call.
 					return;
 				}

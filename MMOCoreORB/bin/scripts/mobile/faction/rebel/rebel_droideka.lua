@@ -1,7 +1,7 @@
-at_st = Creature:new {
-	objectName = "@mob/creature_names:at_st",
-	socialGroup = "imperial",
-	faction = "imperial",
+rebel_droideka = Creature:new {
+    objectName = "@mob/creature_names:rebel_droideka",
+	socialGroup = "rebel",
+	faction = "rebel",
 	level = 125,
 	chanceHit = 5.0,
 	damageMin = 770,
@@ -25,11 +25,11 @@ at_st = Creature:new {
 	optionsBitmask = AIENABLED,
 	diet = NONE,
 
-	templates = {"object/mobile/atst.iff"},
+	templates = {"object/mobile/droideka.iff"},
 	lootGroups = {},
 	conversationTemplate = "",
-	defaultAttack = "defaultdroidattack",
-	defaultWeapon = "object/weapon/ranged/vehicle/vehicle_atst_ranged.iff",
+	defaultWeapon = "object/weapon/ranged/droid/droid_droideka_ranged.iff",
+	defaultAttack = "attack",
 }
 
-CreatureTemplates:addCreatureTemplate(at_st, "at_st")
+CreatureTemplates:addCreatureTemplate(rebel_droideka, "rebel_droideka")
