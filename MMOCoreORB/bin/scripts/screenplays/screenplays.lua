@@ -650,6 +650,9 @@ includeFile("static_spawns/yavin4_static_spawns.lua")
 --Magic Eight Ball
 includeFile("tools/MagicEightBallMenuComponent.lua")
 
+--Carbonite Custom
+includeFile("dungeon/exar_encounter.lua")
+
 --Treasure Maps
 includeFile("treasure_map/EncodedDiskMenuComponent.lua")
 includeFile("treasure_map/TreasureMapMenuComponent.lua")

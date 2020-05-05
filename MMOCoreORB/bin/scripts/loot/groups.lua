@@ -374,4 +374,5 @@ includeFile("groups/wearables/wearables_scarce.lua")
 includeFile("groups/wearables/wearables_uncommon.lua")
 
 -- custom for carbonite
-includeFile("groups/custom/bh_trophy.lua") 
+includeFile("groups/custom/bh_trophy.lua")
+includeFile("groups/custom/rancor_boss.lua")
