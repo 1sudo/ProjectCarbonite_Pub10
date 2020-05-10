@@ -27,7 +27,8 @@ exarkun = Creature:new {
 	diet = HERBIVORE,
 
 	templates = {
-		"object/mobile/exar_kun.iff"},
+		"object/mobile/exar_kun.iff"
+	},
 	lootGroups = {
 		{
 	        	groups = 

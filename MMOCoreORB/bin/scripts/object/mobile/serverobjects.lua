@@ -2657,3 +2657,7 @@ includeFile("mobile/zabrak_female.lua")
 includeFile("mobile/zabrak_male.lua")
 includeFile("mobile/zucca_boar.lua")
 includeFile("mobile/zucca_boar_hue.lua")
+
+-- Carbonite Custom Mobiles
+includeFile("mobile/exar_kun.lua")
+includeFile("mobile/blackwing_rancor_static.lua")

@@ -653,6 +653,7 @@ includeFile("tools/MagicEightBallMenuComponent.lua")
 
 --Carbonite Custom
 includeFile("dungeon/exar_encounter.lua")
+includeFile("event/bounty_vendor.lua")
 
 --Treasure Maps
 includeFile("treasure_map/EncodedDiskMenuComponent.lua")

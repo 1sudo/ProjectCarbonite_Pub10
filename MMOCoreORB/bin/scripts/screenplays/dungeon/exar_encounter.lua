@@ -23,10 +23,7 @@ function exar_encounter:spawnSceneObjects()
 end
 
 function exar_encounter:spawnMobiles()
-
-
-
-	local pTrigger = spawnMobile("yavin4", "exar_add", 3600, 5079, 73, 5538, 90, 0)
+	local pTrigger = spawnMobile("yavin4", "exar_add", 3600, 5079, 73, 5538, 90, 0) -- the third variable in spawnMobile is the respawn timer
 	if (pTrigger ~= nil ) then
         createObserver(OBJECTDESTRUCTION, "exar_encounter", "notifyTriggerDead", pTrigger)
 	end
