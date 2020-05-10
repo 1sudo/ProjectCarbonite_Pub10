@@ -1818,4 +1818,28 @@ schematics = {
 	{path="object/draft_schematic/furniture/bestine/painting_bestine_ronka.iff"},
 	{path="object/draft_schematic/item/theme_park/alderaan/act2/dead_eye_decoder.iff"},
 	{path="object/draft_schematic/item/quest_item/fs_medic_puzzle_heal_pack.iff"},
+	--Carbonite custom
+	
+	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_chest_plate.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_belt.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_boots.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_helmet.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_gloves.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_leggings.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_bracer_l.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_bracer_r.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_bicep_l.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_bicep_r.iff"},
+
+	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_chest_plate.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_belt.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_boots.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_helmet.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_gloves.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_leggings.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_bracer_l.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_bracer_r.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_bicep_l.iff"},
+	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_bicep_r.iff"},
+	
 };
