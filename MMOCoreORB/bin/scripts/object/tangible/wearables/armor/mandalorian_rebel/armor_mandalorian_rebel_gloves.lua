@@ -46,6 +46,8 @@ object_tangible_wearables_armor_mandalorian_rebel_armor_mandalorian_rebel_gloves
 	templateType = ARMOROBJECT,
 
 	objectMenuComponent = "ArmorObjectMenuComponent",
+	certificationsRequired = { "combat_bountyhunter_novice",
+								"combat_commando_novice" },
 
 --	faction = "Rebel",	
 

@@ -46,6 +46,8 @@ object_tangible_wearables_armor_mandalorian_imperial_armor_mandalorian_imperial_
 	templateType = ARMOROBJECT,
 
 	objectMenuComponent = "ArmorObjectMenuComponent",
+	certificationsRequired = { "combat_bountyhunter_novice",
+								"combat_commando_novice" },
 
 --	faction = "Imperial",	
 

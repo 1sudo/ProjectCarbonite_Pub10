@@ -126,7 +126,7 @@ bounty_vendor_template:addScreen(bounty_vendor_insufficient_space);
 bounty_vendor_insufficient_item = ConvoScreen:new {
    id = "insufficient_item",
    leftDialog = "",
-   customDialogText = "Sorry, but you don't have enough trophies in your inventory to accept the item.",
+   customDialogText = "Sorry, but you don't have a sufficient amount of Bounty Skulls to purchase this item.",
    stopConversation = "true",
    options = {   
    }

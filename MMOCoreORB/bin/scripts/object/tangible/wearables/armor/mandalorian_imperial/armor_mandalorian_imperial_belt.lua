@@ -45,7 +45,9 @@
 object_tangible_wearables_armor_mandalorian_imperial_armor_mandalorian_imperial_belt = object_tangible_wearables_armor_mandalorian_imperial_shared_armor_mandalorian_imperial_belt:new {
 	templateType = ARMOROBJECT,
 
-	objectMenuComponent = "ArmorObjectMenuComponent",	
+	objectMenuComponent = "ArmorObjectMenuComponent",
+	certificationsRequired = { "combat_bountyhunter_novice",
+								"combat_commando_novice" },	
 
 	playerRaces = {
 		"object/creature/player/bothan_male.iff",
@@ -147,15 +149,14 @@ object_tangible_wearables_armor_mandalorian_imperial_armor_mandalorian_imperial_
 	-- LIGHT, MEDIUM, HEAVY
 	rating = LIGHT,
 
-	kinetic = 50,
-	energy = 50,
-	electricity = 50,
-	stun = 15,
-	blast = 50,
-	heat = 50,
-	cold = 50,
-	acid = 50,
-	lightSaber = 10,
+	kinetic = 65,
+	energy = 65,
+	electricity = 65,
+	blast = 65,
+	heat = 65,
+	cold = 65,
+	acid = 65,
+	lightSaber = 15,
 
 	numberExperimentalProperties = {1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2, 1},
 	experimentalProperties = {"XX", "XX", "XX", "XX", "OQ", "SR", "OQ", "UT", "MA", "OQ", "MA", "OQ", "MA", "OQ", "XX", "XX", "OQ", "SR", "XX"},
