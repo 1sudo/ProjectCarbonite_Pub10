@@ -1,5 +1,5 @@
 
-object_tangible_loot_loot_schematic_armor_mandalorian_imperial_chest_plate_schematic = object_tangible_loot_loot_schematic_shared_death_watch_mandalorian_helmet_schematic:new {
+object_tangible_loot_loot_schematic_armor_mandalorian_imperial_chest_plate_schematic = object_tangible_loot_loot_schematic_shared_armor_mandalorian_imperial_chest_plate_schematic:new {
 	templateType = LOOTSCHEMATIC,
 	objectMenuComponent = "LootSchematicMenuComponent",
 	attributeListComponent = "LootSchematicAttributeListComponent",

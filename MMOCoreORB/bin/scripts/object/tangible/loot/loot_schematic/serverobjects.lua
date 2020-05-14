@@ -151,3 +151,4 @@ includeFile("tangible/loot/loot_schematic/armor_mandalorian_rebel_chest_plate_sc
 includeFile("tangible/loot/loot_schematic/armor_mandalorian_rebel_helmet_schematic.lua")
 includeFile("tangible/loot/loot_schematic/armor_mandalorian_rebel_gloves_schematic.lua")
 includeFile("tangible/loot/loot_schematic/armor_mandalorian_rebel_leggings_schematic.lua")
+includeFile("tangible/loot/loot_schematic/universal_loot_schematic.lua")
