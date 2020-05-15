@@ -503,9 +503,7 @@ void CreatureObjectImplementation::sendNewbieTutorialEnableHudElement(
 	sendMessage(message);
 }
 
-void CreatureObjectImplementation::sendSystemMessage(
-	StringIdChatParameter &message)
-{
+void CreatureObjectImplementation::sendSystemMessage(StringIdChatParameter& message) {
 	if (!isPlayerCreature())
 		return;
 
@@ -3049,24 +3047,24 @@ void CreatureObjectImplementation::activateHAMRegeneration(int latency)
 		modifier *= 1.75f;
 
 	// this formula gives the amount of regen per second
-	uint32 healthTick = (uint32)ceil((float)Math::max(0, getHAM(
-															 CreatureAttribute::CONSTITUTION)) *
-									 13.0f / 2100.0f * modifier);
-	uint32 actionTick = (uint32)ceil((float)Math::max(0, getHAM(
-															 CreatureAttribute::STAMINA)) *
-									 13.0f / 2100.0f * modifier);
-	uint32 mindTick = (uint32)ceil((float)Math::max(0, getHAM(
-														   CreatureAttribute::WILLPOWER)) *
-								   13.0f / 2100.0f * modifier);
+	uint32 healthTick = (uint32) ceil((float) Math::max(0, getHAM(CreatureAttribute::CONSTITUTION)) * (13.0f / 2100.0f) * modifier);
+	uint32 actionTick = (uint32) ceil((float) Math::max(0, getHAM(CreatureAttribute::STAMINA)) * (13.0f / 2100.0f) * modifier);
+	uint32 mindTick = (uint32) ceil((float) Math::max(0, getHAM(CreatureAttribute::WILLPOWER)) * (13.0f / 2100.0f) * modifier);
 
-	if (healthTick < 1)
+	if (healthTick < 1){
 		healthTick = 1;
+	}
 
-	if (actionTick < 1)
+	if (actionTick < 1){
 		actionTick = 1;
+	}
 
-	if (mindTick < 1)
+	if (mindTick < 1){
 		mindTick = 1;
+	}
+
+	// Regen debug
+	// warning("Hp/s: " + String::valueOf(healthTick)  + " Act/s: " + String::valueOf(actionTick) +" Mind/s: " + String::valueOf(mindTick));
 
 	healDamage(asCreatureObject(), CreatureAttribute::HEALTH, healthTick, true, false);
 	healDamage(asCreatureObject(), CreatureAttribute::ACTION, actionTick, true, false);

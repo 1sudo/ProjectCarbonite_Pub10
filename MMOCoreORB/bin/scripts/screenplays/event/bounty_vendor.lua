@@ -268,7 +268,7 @@ function bounty_vendor_handler:getNextConversationScreen(conversationTemplate, c
 	            nextConversationScreen = conversation:getScreen("insufficient_item")
 	            creature:sendSystemMessage("You have insufficient items")
 	     elseif (optionLink == "19" and itemCounter >= 10) then
-	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_bicep_l_schematic.iff", -1)
+	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_chest_plate.iff", -1)
 	            DeleteItems = 10
 		    nextConversationScreen = conversation:getScreen("end")
 		    creature:sendSystemMessage("You have received a Rebel Crusader Armor Chest Plate Schematic.")

@@ -53,9 +53,9 @@ CreatureAreaDiseaseCommand = {
 		ATTACK_POOL,
 		true,
 		0,
-		50,
-		50, 
-		300
+		50, -- Min
+		50, -- Max
+		300 -- Duration
 	  )
 	},
 

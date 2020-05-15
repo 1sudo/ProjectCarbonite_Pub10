@@ -2167,8 +2167,9 @@ int PlayerManagerImplementation::awardExperience(CreatureObject *player, const S
 
 	float buffMultiplier = 1.f;
 
-	if (player->hasBuff(BuffCRC::FOOD_XP_INCREASE) && !player->containsActiveSession(SessionFacadeType::CRAFTING))
+	if (player->hasBuff(BuffCRC::FOOD_XP_INCREASE) && !player->containsActiveSession(SessionFacadeType::CRAFTING)){
 		buffMultiplier += player->getSkillModFromBuffs("xp_increase") / 100.f;
+	}
 
 	int xp = 0;
 

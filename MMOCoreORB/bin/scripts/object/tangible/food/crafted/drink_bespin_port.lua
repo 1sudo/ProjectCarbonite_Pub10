@@ -44,7 +44,7 @@
 object_tangible_food_crafted_drink_bespin_port = object_tangible_food_crafted_shared_drink_bespin_port:new {
 	templateType = CONSUMABLE,
 
-	duration = 1,
+	duration = 3600,
 	filling = 1,
 	nutrition = 12,
 

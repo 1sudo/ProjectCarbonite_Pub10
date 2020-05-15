@@ -53,9 +53,9 @@ CreatureAreaPoisonCommand = {
 		ATTACK_POOL,
 		true,
 		0,
-		50,
-		50, 
-		120
+		50, -- Min
+		50, -- Max
+		120 -- Duration
 	  )
 	},
 

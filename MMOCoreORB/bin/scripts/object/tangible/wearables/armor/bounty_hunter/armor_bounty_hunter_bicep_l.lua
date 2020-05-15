@@ -85,7 +85,12 @@ object_tangible_wearables_armor_bounty_hunter_armor_bounty_hunter_bicep_l = obje
 				"object/mobile/vendor/twilek_male.iff",
 				"object/mobile/vendor/weequay_male.iff",
 				"object/mobile/vendor/zabrak_female.iff",
-				"object/mobile/vendor/zabrak_male.iff" },
+				"object/mobile/vendor/zabrak_male.iff",
+				"object/creature/player/wookiee_male.iff",
+				"object/creature/player/wookiee_female.iff",
+				"object/mobile/vendor/wookiee_female.iff",
+				"object/mobile/vendor/wookiee_male.iff" ,
+			},
 	
 	-- The damage types in WeaponObject
 	vulnerability = STUN + LIGHTSABER,

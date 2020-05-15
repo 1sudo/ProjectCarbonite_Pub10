@@ -452,9 +452,9 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 		if (crystal != nullptr) {
 			if (yellow) {
 				crystal->setRareMod(1);
-			} else if (legendary) {
-				crystal->setRareMod(2);
 			} else if (exceptional) {
+				crystal->setRareMod(2);
+			} else if (legendary) {
 				crystal->setRareMod(3);
 			}
 		}

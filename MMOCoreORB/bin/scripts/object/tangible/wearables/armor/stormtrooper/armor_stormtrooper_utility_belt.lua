@@ -93,7 +93,8 @@ object_tangible_wearables_armor_stormtrooper_armor_stormtrooper_utility_belt = o
 				"object/mobile/vendor/wookiee_female.iff",
 				"object/mobile/vendor/wookiee_male.iff",
 				"object/mobile/vendor/zabrak_female.iff",
-				"object/mobile/vendor/zabrak_male.iff" },
+				"object/mobile/vendor/zabrak_male.iff",
+			},
 	
 
 }
