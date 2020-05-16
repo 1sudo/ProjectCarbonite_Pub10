@@ -90,25 +90,27 @@ object_tangible_wearables_armor_zam_armor_zam_wesell_chest_plate_quest = object_
 	-- Damage types in WeaponObject
 	vulnerability = ACID + ENERGY + STUN + LIGHTSABER,
 
-	-- These are default Blue Frog stats
-	healthEncumbrance = 84,
-	actionEncumbrance = 21,
-	mindEncumbrance = 23,
-
-	-- LIGHT, MEDIUM, HEAVY
-	rating = LIGHT,
-
-	maxCondition = 15000,
-
-	kinetic = 10,
-	energy = 0,
-	electricity = 10,
-	stun = 0,
-	blast = 5,
-	heat = 20,
-	cold = 10,
-	acid = 0,
-	lightSaber = 0
+		-- specialResists = ELECTRICITY + HEAT + KINETIC,
+	
+		-- These are default Blue Frog stats
+		healthEncumbrance = 20,
+		actionEncumbrance = 20,
+		mindEncumbrance = 20,
+	
+		maxCondition = 30000,
+	
+		-- LIGHT, MEDIUM, HEAVY
+		rating = LIGHT,
+	
+		kinetic = 45,
+		energy = 45,
+		electricity = 45,
+		stun = 10,
+		blast = 45,
+		heat = 45,
+		cold = 45,
+		acid = 45,
+		lightSaber = 0
 }
 
 ObjectTemplates:addTemplate(object_tangible_wearables_armor_zam_armor_zam_wesell_chest_plate_quest, "object/tangible/wearables/armor/zam/armor_zam_wesell_chest_plate_quest.iff")

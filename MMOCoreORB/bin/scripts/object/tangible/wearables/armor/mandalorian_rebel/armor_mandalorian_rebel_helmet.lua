@@ -132,9 +132,8 @@ object_tangible_wearables_armor_mandalorian_rebel_armor_mandalorian_rebel_helmet
 		"object/mobile/vendor/twilek_male.iff",
 		"object/mobile/vendor/weequay_male.iff",
 		"object/mobile/vendor/zabrak_female.iff",
-		"object/mobile/vendor/zabrak_male.iff"
-	}
-,
+		"object/mobile/vendor/zabrak_male.iff",
+	},
 	
 	-- Damage types in WeaponObject
 	vulnerability = STUN,

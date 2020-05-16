@@ -11,18 +11,18 @@ factionRewardType = {
 
 rebelRewardData = {
 	weaponsArmorList = {
-		"armor_marine_backpack", "armor_marine_helmet", "armor_marine_chest_plate", "armor_marine_leggings", "armor_marine_boots", "armor_marine_bicep_l",
-		"armor_marine_bicep_r", "carbine_laser", "pistol_scout_blaster", "lance_staff_metal", "rocket_launcher", "mine_drx", "mine_xg",
+		"armor_marine_backpack", "armor_marine_helmet_gcw", "armor_marine_chest_plate_gcw", "armor_marine_leggings_gcw", "armor_marine_boots_gcw", "armor_marine_bicep_l_gcw",
+		"armor_marine_bicep_r_gcw", "carbine_laser", "pistol_scout_blaster", "lance_staff_metal", "rocket_launcher", "mine_drx", "mine_xg",
 	},
 
 	weaponsArmor = {
-		armor_marine_backpack = { index=0, type=factionRewardType.armor, display="@wearables_name:armor_marine_backpack", item="object/tangible/wearables/armor/marine/armor_marine_backpack.iff",cost=1500},
-		armor_marine_bicep_l = { index=1, type=factionRewardType.armor, display="@wearables_name:armor_marine_bicep_l", item="object/tangible/wearables/armor/marine/armor_marine_bicep_l.iff",cost=2000},
-		armor_marine_bicep_r = { index=2, type=factionRewardType.armor, display="@wearables_name:armor_marine_bicep_r", item="object/tangible/wearables/armor/marine/armor_marine_bicep_r.iff",cost=2000},
-		armor_marine_boots = { index=3, type=factionRewardType.armor, display="@wearables_name:armor_marine_boots", item="object/tangible/wearables/armor/marine/armor_marine_boots.iff",cost=3000},
-		armor_marine_chest_plate = { index=4, type=factionRewardType.armor, display="@wearables_name:armor_marine_chest_plate", item="object/tangible/wearables/armor/marine/armor_marine_chest_plate.iff",cost=4000},
-		armor_marine_helmet = { index=5, type=factionRewardType.armor, display="@wearables_name:armor_marine_helmet", item="object/tangible/wearables/armor/marine/armor_marine_helmet.iff",cost=3000},
-		armor_marine_leggings = { index=6, type=factionRewardType.armor, display="@wearables_name:armor_marine_leggings", item="object/tangible/wearables/armor/marine/armor_marine_leggings.iff",cost=3000},
+		armor_marine_backpack = { index=0, type=factionRewardType.armor, display="@wearables_name:armor_marine_backpack", item="object/tangible/wearables/armor/marine/armor_marine_backpack_gcw.iff",cost=1500},
+		armor_marine_bicep_l_gcw = { index=1, type=factionRewardType.armor, display="@wearables_name:armor_marine_bicep_l", item="object/tangible/wearables/armor/marine/armor_marine_bicep_l_gcw.iff",cost=2000},
+		armor_marine_bicep_r_gcw = { index=2, type=factionRewardType.armor, display="@wearables_name:armor_marine_bicep_r", item="object/tangible/wearables/armor/marine/armor_marine_bicep_r_gcw.iff",cost=2000},
+		armor_marine_boots_gcw = { index=3, type=factionRewardType.armor, display="@wearables_name:armor_marine_boots", item="object/tangible/wearables/armor/marine/armor_marine_boots_gcw.iff",cost=3000},
+		armor_marine_chest_plate_gcw = { index=4, type=factionRewardType.armor, display="@wearables_name:armor_marine_chest_plate", item="object/tangible/wearables/armor/galactic_marine/armor_galactic_marine_chest_plate_gcw.iff",cost=4000},
+		armor_marine_helmet_gcw = { index=5, type=factionRewardType.armor, display="@wearables_name:armor_marine_helmet", item="object/tangible/wearables/armor/marine/armor_marine_helmet_gcw.iff",cost=3000},
+		armor_marine_leggings_gcw = { index=6, type=factionRewardType.armor, display="@wearables_name:armor_marine_leggings", item="object/tangible/wearables/armor/marine/armor_marine_leggings_gcw.iff",cost=3000},
 		carbine_laser = { index=7, type=factionRewardType.weapon, display="@weapon_name:carbine_laser", item="object/weapon/ranged/carbine/carbine_laser.iff", cost=1500},
 		pistol_scout_blaster = { index=8, type=factionRewardType.weapon, display="@weapon_name:pistol_scout_blaster", item="object/weapon/ranged/pistol/pistol_scout_blaster.iff", cost=1000},
 		metal_staff = { index=9, type=factionRewardType.weapon, display="@weapon_name:sword_02", item="object/weapon/ranged/melee/sword/sword_02.iff", cost=1000},
@@ -104,23 +104,23 @@ rebelRewardData = {
 
 imperialRewardData = {
 	weaponsArmorList = {
-		"armor_stormtrooper_helmet", "armor_stormtrooper_chest_plate", "armor_stormtrooper_leggings", "armor_stormtrooper_boots", "armor_stormtrooper_bicep_l", "armor_stormtrooper_bicep_r",
-		"armor_stormtrooper_bracer_l", "armor_stormtrooper_bracer_r", "armor_stormtrooper_gloves", "armor_stormtrooper_utility_belt", "carbine_e11", "pistol_power5", "sword_02",
+		"armor_stormtrooper_helmet_gcw", "armor_stormtrooper_chest_plate_gcw", "armor_stormtrooper_leggings_gcw", "armor_stormtrooper_boots_gcw", "armor_stormtrooper_bicep_l_gcw", "armor_stormtrooper_bicep_r_gcw",
+		"armor_stormtrooper_bracer_l_gcw", "armor_stormtrooper_bracer_r_gcw", "armor_stormtrooper_gloves_gcw", "armor_stormtrooper_utility_belt_gcw", "carbine_e11", "pistol_power5", "sword_02",
 		"rocket_launcher", "mine_drx", "mine_xg",
 	},
 
 	weaponsArmor = {
 		--armor_stormtrooper_backpack = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_backpack", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_backpack.iff",cost=1500},
-		armor_stormtrooper_bicep_l = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_bicep_l", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_bicep_l.iff",cost=1400},
-		armor_stormtrooper_bicep_r = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_bicep_r", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_bicep_r.iff",cost=1400},
-		armor_stormtrooper_boots = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_boots", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_boots.iff",cost=1400},
-		armor_stormtrooper_chest_plate = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_chest_plate", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_chest_plate.iff", cost=4000},
-		armor_stormtrooper_helmet = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_helmet", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_helmet.iff", cost=2100},
-		armor_stormtrooper_leggings = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_leggings", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_leggings.iff",cost=2100},
-		armor_stormtrooper_bracer_l = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_bracer_l", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_bracer_l.iff",cost=1400},
-		armor_stormtrooper_bracer_r = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_bracer_r", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_bracer_r.iff",cost=1400},
-		armor_stormtrooper_gloves = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_gloves", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_gloves.iff",cost=1400},
-		armor_stormtrooper_utility_belt = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_utility_belt", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_utility_belt.iff",cost=1400},
+		armor_stormtrooper_bicep_l_gcw = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_bicep_l", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_bicep_l_gcw.iff",cost=1400},
+		armor_stormtrooper_bicep_r_gcw = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_bicep_r", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_bicep_r_gcw.iff",cost=1400},
+		armor_stormtrooper_boots_gcw = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_boots", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_boots_gcw.iff",cost=1400},
+		armor_stormtrooper_chest_plate_gcw = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_chest_plate", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_chest_plate_gcw.iff", cost=4000},
+		armor_stormtrooper_helmet_gcw = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_helmet", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_helmet_gcw.iff", cost=2100},
+		armor_stormtrooper_leggings_gcw = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_leggings", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_leggings_gcw.iff",cost=2100},
+		armor_stormtrooper_bracer_l_gcw = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_bracer_l", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_bracer_l_gcw.iff",cost=1400},
+		armor_stormtrooper_bracer_r_gcw = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_bracer_r", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_bracer_r_gcw.iff",cost=1400},
+		armor_stormtrooper_gloves_gcw = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_gloves", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_gloves_gcw.iff",cost=1400},
+		armor_stormtrooper_utility_belt_gcw = { type=factionRewardType.armor, display="@wearables_name:armor_stormtrooper_utility_belt", item="object/tangible/wearables/armor/stormtrooper/armor_stormtrooper_utility_belt_gcw.iff",cost=1400},
 		pistol_power5 = { type=factionRewardType.weapon, display="@weapon_name:pistol_power5", item="object/weapon/ranged/pistol/pistol_power5.iff", cost=700},
 		carbine_e11 = { type=factionRewardType.weapon, display="@weapon_name:carbine_e11", item="object/weapon/ranged/carbine/carbine_e11.iff", cost=1050},
 		sword_02 = { type=factionRewardType.weapon, display="@weapon_name:sword_02", item="object/weapon/melee/sword/sword_02.iff", cost=600},

@@ -98,14 +98,14 @@ object_tangible_wearables_armor_tantel_armor_tantel_skreej_chest_plate_quest = o
 	-- LIGHT, MEDIUM, HEAVY
 	rating = LIGHT,
 
-	kinetic = 15,
-	energy = 15,
-	electricity = 15,
-	stun = 15,
-	blast = 15,
-	heat = 15,
-	cold = 15,
-	acid = 15,
+	kinetic = 45,
+	energy = 45,
+	electricity = 45,
+	stun = 10,
+	blast = 45,
+	heat = 45,
+	cold = 45,
+	acid = 45,
 	lightSaber = 0
 }
 

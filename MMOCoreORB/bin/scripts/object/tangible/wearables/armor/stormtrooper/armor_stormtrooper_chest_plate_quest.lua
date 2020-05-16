@@ -107,15 +107,17 @@ object_tangible_wearables_armor_stormtrooper_armor_stormtrooper_chest_plate_ques
 
 	-- LIGHT, MEDIUM, HEAVY
 	rating = LIGHT,
-	maxCondition = 45000,
-	kinetic = 55,
-	energy = 40,
-	electricity = 40,
+
+	maxCondition = 50000,
+
+	kinetic = 45,
+	energy = 45,
+	electricity = 45,
 	stun = 10,
-	blast = 40,
-	heat = 40,
-	cold = 40,
-	acid = 40,
+	blast = 45,
+	heat = 45,
+	cold = 45,
+	acid = 45,
 	lightSaber = 0
 }
 
