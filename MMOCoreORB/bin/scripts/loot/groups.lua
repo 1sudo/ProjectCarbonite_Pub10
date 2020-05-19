@@ -376,3 +376,6 @@ includeFile("groups/wearables/wearables_uncommon.lua")
 -- custom for carbonite
 includeFile("groups/custom/bh_trophy.lua")
 includeFile("groups/custom/rancor_boss.lua")
+
+includeFile("groups/weapon/epic_weapons_all.lua")
+includeFile("groups/armor/epic_armor_all.lua")

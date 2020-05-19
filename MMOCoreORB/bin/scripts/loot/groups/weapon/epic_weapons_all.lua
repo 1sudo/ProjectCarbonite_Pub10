@@ -1,6 +1,6 @@
-weapons_all = {
+epic_weapons_all = {
 	description = "",
-	minimumLevel = 100,
+	minimumLevel = 400,
 	maximumLevel = -1,
 	lootItems = {
 		-- Common (1/2)
@@ -83,4 +83,4 @@ weapons_all = {
 	}
 }
 
-addLootGroupTemplate("weapons_all", weapons_all)
+addLootGroupTemplate("epic_weapons_all", epic_weapons_all)

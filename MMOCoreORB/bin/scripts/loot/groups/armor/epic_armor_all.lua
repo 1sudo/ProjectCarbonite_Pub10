@@ -1,6 +1,6 @@
-armor_all = {
+epic_armor_all = {
 	description = "",
-	minimumLevel = 100,
+	minimumLevel = 400,
 	maximumLevel = -1,
 	lootItems = {
 		-- Refactored so only ChestPlates drop, if you want cosmetics get them crafted!
@@ -123,4 +123,4 @@ armor_all = {
 	}
 }
 
-addLootGroupTemplate("armor_all", armor_all)
+addLootGroupTemplate("epic_armor_all", epic_armor_all)

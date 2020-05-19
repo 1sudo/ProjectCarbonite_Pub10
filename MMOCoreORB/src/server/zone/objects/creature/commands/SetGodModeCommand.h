@@ -31,6 +31,8 @@ public:
 		}
 
 		int ghostPermissionLevel = ghost->getAdminLevel();
+		
+		creature->sendSystemMessage("Your admin level is: " + String::valueOf(ghostPermissionLevel));
 
 		if (!creature->hasSkill("admin_base")) {
 			return INSUFFICIENTPERMISSION;
