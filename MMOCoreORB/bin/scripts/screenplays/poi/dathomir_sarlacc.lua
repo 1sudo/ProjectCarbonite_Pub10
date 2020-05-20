@@ -62,4 +62,28 @@ function DathomirSarlaccScreenPlay:spawnMobiles()
 	spawnMobile("dathomir", "nocuous_kamurith", 300, -2002.9, 43.2, 3142.0, 1, 0)
 	spawnMobile("dathomir", "nocuous_kamurith", 300, -2171.9, 27.6, 2992.5, -18, 0)
 
+	-- New Additions
+	-- Gar'Vak
+	spawnMobile("dathomir", "gar_vak", 1, -2081.93, 22.3004, 3162.58, 174, 0)
+
+	-- Feral Mutant Rancors below here 
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2095.56, 21.8569, 3161.79, 313, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2092.23, 21.2248, 3122.52, 207, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2068.06, 22.8949, 3122, 140, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2044.84, 24.5639, 3122.71, 116, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2041.81, 28.1419, 3137.95, 65, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2053.08, 27.518, 3180.09, 345, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2070.95, 30.9999, 3198.07, 196, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2059.68, 29.9404, 3193.67, 208, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2102.3, 32.8489, 3202.44, 160, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2128.6, 22.6885, 3172.13, 109, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2130.65, 25.997, 3132.08, 63, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2113.82, 34.8498, 3101.06, 41, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2078.08, 29.083, 3089.16, 5, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2046.72, 25.2469, 3088.09, 356, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2012.17, 33.5721, 3119, 83, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2008.5, 40.9948, 3181.88, 33, 0)
+	spawnMobile("dathomir", "feral_mutant_bull_rancor", 1, -2021.03, 35.8283, 3199.33, 317, 0)
+	-- New Additions
+
 end
