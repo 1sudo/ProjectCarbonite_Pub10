@@ -96,6 +96,8 @@ public:
 							spout(creature, &args, formatSpoutText(creature, target, 3));
 						} else if(adminCommand == "spoutonme") {
 							spout(creature, &args, formatSpoutText(creature, target, 4));
+						} else if(adminCommand == "spoutonmevis") {
+							spout(creature, &args, formatSpoutText(creature, target, 5));
 						} else if(adminCommand == "spoutroom") {
 							spout(creature, &args, formatSpoutTextMulti(creature, 1));
 						} else if(adminCommand == "spoutbuilding") {
@@ -273,6 +275,54 @@ public:
 
 				text << worldPosition.getX() << ", " << worldPosition.getZ() << ", " << worldPosition.getY() << ", " << angle << ", " << "0" << ")";
 			}
+			// Returning: spawnMobile("planet", "commoner", 1, x, z, y, heading, cellid)
+		} else if (textType == 5){
+			int angle = creature->getDirectionAngle();
+
+			text << "spawnMobile(\"" << planetName << "\", " <<  "\"commoner" << "\", 1, ";
+
+			if (creature->getParent() != NULL && creature->getParent().get()->isCellObject()) {
+				// Inside
+				ManagedReference<CellObject*> cell = cast<CellObject*>( creature->getParent().get().get());
+				Vector3 cellPosition = creature->getPosition();
+
+				text << cellPosition.getX() << ", " << cellPosition.getZ() << ", " << cellPosition.getY() << ", " << angle << ", " << cell->getObjectID() << ")";
+			}else {
+				// Outside
+				Vector3 worldPosition = creature->getWorldPosition();
+
+				text << worldPosition.getX() << ", " << worldPosition.getZ() << ", " << worldPosition.getY() << ", " << angle << ", " << "0" << ")";
+
+				// ========================================================
+				// Spawn helper NPC to help visualize placement
+				// Get worldCell
+				uint64 parID = creature->getParentID();
+
+				// Create Creature
+				Zone* zone = creature->getZone();
+				CreatureManager* creatureManager = zone->getCreatureManager();
+				AiAgent* npc = nullptr;
+				String templateName = "commoner";
+				uint32 objTempl = 0;
+				uint32 templ = templateName.hashCode();
+
+				// Setup npc definition
+				npc = cast<AiAgent*>(creatureManager->spawnCreature(templ, objTempl, worldPosition.getX(), worldPosition.getZ(), worldPosition.getY(), parID));
+
+				if (npc != nullptr){
+					npc->activateLoad("");
+				}
+				Locker clocker(npc, creature);
+
+				float scale = -1.0;
+				npc->updateDirection(Math::deg2rad(creature->getDirectionAngle()));
+				
+				if (scale > 0 && scale != 1.0)
+					npc->setHeight(scale);
+				}
+				// Done spawning visual example
+				// ========================================================
+
 			// Returning: spawnMobile("planet", "commoner", 1, x, z, y, heading, cellid)
 		}
 
