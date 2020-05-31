@@ -41,28 +41,40 @@
 --this exception also makes it possible to release a modified version 
 
 
+object_draft_schematic_clothing_clothing_hat_invis = object_draft_schematic_clothing_shared_clothing_hat_invis:new {
 
---Children folder includes
 
--- Server Objects
-includeFile("tangible/wearables/hat/hat_chef_s01.lua")
-includeFile("tangible/wearables/hat/hat_chef_s02.lua")
-includeFile("tangible/wearables/hat/hat_imp_s01.lua")
-includeFile("tangible/wearables/hat/hat_s02.lua")
-includeFile("tangible/wearables/hat/hat_s04.lua")
-includeFile("tangible/wearables/hat/hat_s10.lua")
-includeFile("tangible/wearables/hat/hat_s12.lua")
-includeFile("tangible/wearables/hat/hat_s13.lua")
-includeFile("tangible/wearables/hat/hat_s14.lua")
-includeFile("tangible/wearables/hat/hat_invis.lua")
-includeFile("tangible/wearables/hat/hat_twilek_s01.lua")
-includeFile("tangible/wearables/hat/hat_twilek_s02.lua")
-includeFile("tangible/wearables/hat/hat_twilek_s03.lua")
-includeFile("tangible/wearables/hat/hat_twilek_s04.lua")
-includeFile("tangible/wearables/hat/hat_twilek_s05.lua")
-includeFile("tangible/wearables/hat/nightsister_hat_s01.lua")
-includeFile("tangible/wearables/hat/nightsister_hat_s02.lua")
-includeFile("tangible/wearables/hat/nightsister_hat_s03.lua")
-includeFile("tangible/wearables/hat/singing_mountain_clan_hat_s01.lua")
-includeFile("tangible/wearables/hat/singing_mountain_clan_hat_s02.lua")
-includeFile("tangible/wearables/hat/singing_mountain_clan_mask_s01.lua")
+   templateType = DRAFTSCHEMATIC,
+
+   customObjectName = "Kitchen Master\'s Hat",
+
+   craftingToolTab = 8, -- (See DraftSchematicObjectTemplate.h)
+   complexity = 19, 
+   size = 3, 
+
+   xpType = "crafting_clothing_general", 
+   xp = 90, 
+
+   assemblySkill = "clothing_assembly", 
+   experimentingSkill = "clothing_experimentation", 
+   customizationSkill = "clothing_customization", 
+
+   customizationOptions = {2},
+   customizationStringNames = {"/private/index_color_1"},
+   customizationDefaults = {0},
+
+   ingredientTemplateNames = {"craft_clothing_ingredients_n", "craft_clothing_ingredients_n", "craft_clothing_ingredients_n", "craft_clothing_ingredients_n"},
+   ingredientTitleNames = {"shell", "binding_and_weatherproofing", "trim", "liner"},
+   ingredientSlotType = {1, 0, 1, 1},
+   resourceTypes = {"object/tangible/component/clothing/shared_synthetic_cloth.iff", "petrochem_inert", "object/tangible/component/clothing/shared_trim.iff", "object/tangible/component/clothing/shared_synthetic_cloth.iff"},
+   resourceQuantities = {1, 40, 1, 1},
+   contribution = {100, 100, 100, 100},
+
+
+   targetTemplate = "object/tangible/wearables/hat/hat_invis.iff",
+
+   additionalTemplates = {
+             }
+
+}
+ObjectTemplates:addTemplate(object_draft_schematic_clothing_clothing_hat_invis, "object/draft_schematic/clothing/clothing_hat_invis.iff")

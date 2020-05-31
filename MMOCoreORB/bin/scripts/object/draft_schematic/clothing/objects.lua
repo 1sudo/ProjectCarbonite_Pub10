@@ -24880,6 +24880,22 @@ object_draft_schematic_clothing_shared_armor_mandalorian_rebel_leggings = Shared
 ObjectTemplates:addClientTemplate(object_draft_schematic_clothing_shared_armor_mandalorian_rebel_leggings, "object/draft_schematic/clothing/shared_armor_mandalorian_rebel_leggings.iff")
 
 
+object_draft_schematic_clothing_shared_clothing_gloves_invis = SharedTangibleObjectTemplate:new {
+	clientTemplateFileName = "object/draft_schematic/clothing/shared_clothing_gloves_invis.iff"
+}
+ObjectTemplates:addClientTemplate(object_draft_schematic_clothing_shared_clothing_gloves_invis, "object/draft_schematic/clothing/shared_clothing_gloves_invis.iff")
 
 
---
+
+object_draft_schematic_clothing_shared_clothing_hat_invis = SharedTangibleObjectTemplate:new {
+	clientTemplateFileName = "object/draft_schematic/clothing/shared_clothing_hat_invis.iff"
+}
+ObjectTemplates:addClientTemplate(object_draft_schematic_clothing_shared_clothing_hat_invis, "object/draft_schematic/clothing/shared_clothing_hat_invis.iff")
+
+
+
+object_draft_schematic_clothing_shared_clothing_shirt_invis = SharedTangibleObjectTemplate:new {
+	clientTemplateFileName = "object/draft_schematic/clothing/shared_clothing_shirt_invis.iff"
+}
+ObjectTemplates:addClientTemplate(object_draft_schematic_clothing_shared_clothing_shirt_invis, "object/draft_schematic/clothing/shared_clothing_shirt_invis.iff")
+

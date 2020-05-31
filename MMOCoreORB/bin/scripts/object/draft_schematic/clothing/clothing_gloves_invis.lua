@@ -41,28 +41,40 @@
 --this exception also makes it possible to release a modified version 
 
 
+object_draft_schematic_clothing_clothing_gloves_invis = object_draft_schematic_clothing_shared_clothing_gloves_invis:new {
 
---Children folder includes
 
--- Server Objects
-includeFile("tangible/wearables/hat/hat_chef_s01.lua")
-includeFile("tangible/wearables/hat/hat_chef_s02.lua")
-includeFile("tangible/wearables/hat/hat_imp_s01.lua")
-includeFile("tangible/wearables/hat/hat_s02.lua")
-includeFile("tangible/wearables/hat/hat_s04.lua")
-includeFile("tangible/wearables/hat/hat_s10.lua")
-includeFile("tangible/wearables/hat/hat_s12.lua")
-includeFile("tangible/wearables/hat/hat_s13.lua")
-includeFile("tangible/wearables/hat/hat_s14.lua")
-includeFile("tangible/wearables/hat/hat_invis.lua")
-includeFile("tangible/wearables/hat/hat_twilek_s01.lua")
-includeFile("tangible/wearables/hat/hat_twilek_s02.lua")
-includeFile("tangible/wearables/hat/hat_twilek_s03.lua")
-includeFile("tangible/wearables/hat/hat_twilek_s04.lua")
-includeFile("tangible/wearables/hat/hat_twilek_s05.lua")
-includeFile("tangible/wearables/hat/nightsister_hat_s01.lua")
-includeFile("tangible/wearables/hat/nightsister_hat_s02.lua")
-includeFile("tangible/wearables/hat/nightsister_hat_s03.lua")
-includeFile("tangible/wearables/hat/singing_mountain_clan_hat_s01.lua")
-includeFile("tangible/wearables/hat/singing_mountain_clan_hat_s02.lua")
-includeFile("tangible/wearables/hat/singing_mountain_clan_mask_s01.lua")
+   templateType = DRAFTSCHEMATIC,
+
+   customObjectName = "Cold Weather Gloves",
+
+   craftingToolTab = 8, -- (See DraftSchematicObjectTemplate.h)
+   complexity = 17, 
+   size = 2, 
+
+   xpType = "crafting_clothing_general", 
+   xp = 165, 
+
+   assemblySkill = "clothing_assembly", 
+   experimentingSkill = "clothing_experimentation", 
+   customizationSkill = "clothing_customization", 
+
+   customizationOptions = {2},
+   customizationStringNames = {"/private/index_color_1"},
+   customizationDefaults = {45},
+
+   ingredientTemplateNames = {"craft_clothing_ingredients_n", "craft_clothing_ingredients_n", "craft_clothing_ingredients_n"},
+   ingredientTitleNames = {"shell", "liner", "grip_pads"},
+   ingredientSlotType = {0, 0, 0},
+   resourceTypes = {"fiberplast", "hide", "petrochem_inert"},
+   resourceQuantities = {30, 20, 20},
+   contribution = {100, 100, 100},
+
+
+   targetTemplate = "object/tangible/wearables/gloves/gloves_invis.iff",
+
+   additionalTemplates = {
+             }
+
+}
+ObjectTemplates:addTemplate(object_draft_schematic_clothing_clothing_gloves_invis, "object/draft_schematic/clothing/clothing_gloves_invis.iff")
