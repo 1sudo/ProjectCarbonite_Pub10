@@ -79,9 +79,10 @@ void ArmorObjectImplementation::fillAttributeList(AttributeListMessage *alm, Cre
 	WearableObjectImplementation::fillAttributeList(alm, object);
 	CombatManager *combatManager = CombatManager::instance();
 
+	object->sendSystemMessage("Hitlocation for this armor is: " + String::valueOf(getHitLocation()));
+	
 	// Implement our checks for isChestOnly so we can flag ArmorFillAttributes appropriately.
-	if ((combatManager->isChestOnly && (hitLocation == 1 || hitLocation == 11)) || !combatManager->isChestOnly)
-	{
+	if ((combatManager->isChestOnly && (hitLocation == 1 || hitLocation == 11 || hitLocation == 0)) || !combatManager->isChestOnly){
 		//Armor Rating
 		if (rating == LIGHT)
 			alm->insertAttribute("armorrating", "@obj_attr_n:armor_pierce_light"); //Light

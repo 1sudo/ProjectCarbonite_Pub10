@@ -46,8 +46,6 @@ object_draft_schematic_clothing_clothing_hat_invis = object_draft_schematic_clot
 
    templateType = DRAFTSCHEMATIC,
 
-   customObjectName = "Kitchen Master\'s Hat",
-
    craftingToolTab = 8, -- (See DraftSchematicObjectTemplate.h)
    complexity = 19, 
    size = 3, 

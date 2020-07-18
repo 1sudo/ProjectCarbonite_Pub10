@@ -105,7 +105,7 @@ object_tangible_component_armor_shield_generator_personal_b = object_tangible_co
 
 	-- LIGHT, MEDIUM, HEAVY
 	rating = LIGHT,
-
+	maxCondition = 30000,
 	kinetic = 0,
 	energy = 15,
 	electricity = 10,

@@ -321,9 +321,6 @@ schematics = {
 	{path="object/draft_schematic/item/component/item_electronic_power_conditioner.iff"},
 	{path="object/draft_schematic/item/component/item_electronic_energy_distributor.iff"},
 	{path="object/draft_schematic/item/component/item_electronic_control_unit.iff"},
-	-- Custom SEA Removal
-	{path="object/draft_schematic/item/clothing_sea_removal_tool.iff"},
-	-- Custom SEA Removal
 	{path="object/draft_schematic/space/repair/generic_repair_kit.iff"},
 	{path="object/draft_schematic/clothing/clothing_backpack_field_03.iff"},
 	{path="object/draft_schematic/clothing/clothing_backpack_field_03_quest.iff"},
@@ -1818,8 +1815,8 @@ schematics = {
 	{path="object/draft_schematic/furniture/bestine/painting_bestine_ronka.iff"},
 	{path="object/draft_schematic/item/theme_park/alderaan/act2/dead_eye_decoder.iff"},
 	{path="object/draft_schematic/item/quest_item/fs_medic_puzzle_heal_pack.iff"},
-	--Carbonite custom
-	
+
+	-- Custom Content Below Here for Carbonite
 	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_chest_plate.iff"},
 	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_belt.iff"},
 	{path="object/draft_schematic/clothing/armor_mandalorian_imperial_boots.iff"},
@@ -1841,5 +1838,11 @@ schematics = {
 	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_bracer_r.iff"},
 	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_bicep_l.iff"},
 	{path="object/draft_schematic/clothing/armor_mandalorian_rebel_bicep_r.iff"},
+
+	-- Custom SEA Removal
+	{path="object/draft_schematic/item/clothing_sea_removal_tool.iff"},
+
+	-- Invis Clothing
+	{path="object/draft_schematic/clothing/clothing_hat_invis.iff"},
 	
 };

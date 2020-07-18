@@ -1292,10 +1292,11 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 {
 	int damageType = 0, armorPiercing = 1;
 
-	// Reduce all force attack damage by half from NPCs when attacking a player.
-	if (attacker->isAiAgent() && defender->isPlayerObject() && data.isForceAttack())
-	{
-		damage = damage * 0.5;
+	// defender->sendSystemMessage("Beginning Incoming Damage: " + String::valueOf(damage));
+
+	// Reduce all force attack damage from NPCs when attacking a player.
+	if (attacker->isAiAgent() && defender->isPlayerObject() && data.isForceAttack()){
+		damage = damage * 0.75; // From 100% -> 75% effectiveness
 	}
 
 	if (!data.isForceAttack())
@@ -1398,19 +1399,21 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 	// PSG
 	ManagedReference<ArmorObject *> psg = getPSGArmor(defender);
 
-	if (psg != nullptr && !psg->isVulnerable(damageType))
-	{
-		float armorReduction = getArmorObjectReduction(psg, damageType);
+	if (psg != nullptr && !psg->isVulnerable(damageType)) {
+		float armorReduction =  getArmorObjectReduction(psg, damageType);
+
+		// Moved the armorPiercing code before setting dmbAbsorbed so it stops breaking on AP weapons
+		damage *= getArmorPiercing(psg, armorPiercing); 
 		float dmgAbsorbed = damage;
 
-		damage *= getArmorPiercing(psg, armorPiercing);
-
-		if (armorReduction > 0)
+        if (armorReduction > 0) {
 			damage *= 1.f - (armorReduction / 100.f);
+		}
 
 		dmgAbsorbed -= damage;
-		if (dmgAbsorbed > 0)
+		if (dmgAbsorbed > 0){
 			sendMitigationCombatSpam(defender, psg, (int)dmgAbsorbed, PSG);
+		}
 
 		Locker plocker(psg);
 
@@ -1429,13 +1432,13 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 
 	armor = getArmorObject(defender, hitLocation);
 
-	if (armor != nullptr && !armor->isVulnerable(damageType))
-	{
+	if (armor != nullptr && !armor->isVulnerable(damageType)) {
 		float armorReduction = getArmorObjectReduction(armor, damageType);
-		float dmgAbsorbed = damage;
 
-		// use only the damage applied to the armor for piercing (after the PSG takes some off)
+		// Moved the armorPiercing modifier to before we set dmgAbsorbed so negative values don't occur with AP/non-AP
+		// Use only the damage applied to the armor for piercing (after the PSG takes some off)
 		damage *= getArmorPiercing(armor, armorPiercing);
+		float dmgAbsorbed = damage;
 
 		if (armorReduction > 0)
 		{
@@ -2433,7 +2436,8 @@ int CombatManager::applyDamage(TangibleObject *attacker, WeaponObject *weapon, C
 			defender->inflictDamage(attacker, CreatureAttribute::MIND, (numSpillOverPools-- > 1 ? spillDamagePerPool : spillOverRemainder), true, xpType, true, true);
 	}
 
-	int totalDamage = (int)(healthDamage + actionDamage + mindDamage);
+	int totalDamage =  (int) (healthDamage + actionDamage + mindDamage);
+
 	defender->notifyObservers(ObserverEventType::DAMAGERECEIVED, attacker, totalDamage);
 
 	if (poolsToWound.size() > 0 && System::random(100) < ratio)
@@ -2505,6 +2509,7 @@ int CombatManager::applyDamage(CreatureObject *attacker, WeaponObject *weapon, T
 	}
 
 	defender->inflictDamage(attacker, 0, damage, true, xpType, true, true);
+
 
 	defender->notifyObservers(ObserverEventType::DAMAGERECEIVED, attacker, damage);
 
