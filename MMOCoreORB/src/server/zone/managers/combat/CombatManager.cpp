@@ -1875,8 +1875,22 @@ float CombatManager::calculateDamage(CreatureObject *attacker, WeaponObject *wea
 	}
 
 	// PvP Damage Reduction.
-	if (attacker->isPlayerCreature() && defender->isPlayerCreature() && !data.isForceAttack())
+	if (attacker->isPlayerCreature() && defender->isPlayerCreature() && !data.isForceAttack()) {
 		damage *= 0.25;
+	}
+
+	// Global Pet Mitigation Buff
+	if (defender->isPet()){
+		ManagedReference<CreatureObject*> petOwner = defender->getLinkedCreature();
+		if (petOwner != nullptr && petOwner->isPlayerCreature()) {
+			// If in PVP we want pets to gain their parent's dmg reduction
+			if (attacker->isPlayerCreature()){
+				damage *= 0.25;
+			} else {
+				damage *= 0.75; // If a player's pet is taking damage in PVE then just reduce incoming dmg by 25%
+			}
+		}
+	}
 
 	if (damage < 1)
 		damage = 1;
@@ -1951,17 +1965,32 @@ int CombatManager::getHitChance(TangibleObject *attacker, CreatureObject *target
 	//info("Base attacker accuracy is " + String::valueOf(attackerAccuracy), true);
 
 	// need to also add in general attack accuracy (mostly gotten from posture and states)
-
+	//targetCreature->sendSystemMessage("///////////////////////////////////////");
 	int bonusAccuracy = 0;
 
-	if (creoAttacker != nullptr)
+	if (creoAttacker != nullptr){
 		bonusAccuracy = getAttackerAccuracyBonus(creoAttacker, weapon);
+	}
 
-	// this is the scout/ranger creature hit bonus that only works against creatures (not NPCS)
-	if (targetCreature->isCreature() && creoAttacker != nullptr)
-		bonusAccuracy += creoAttacker->getSkillMod("creature_hit_bonus");
+	// this is the scout/ranger creature hit bonus
+	if (creoAttacker != nullptr){
+		int petOwnerToHitBonus = 0;
 
-	//info("Attacker total bonus is " + String::valueOf(bonusAccuracy), true);
+		if (creoAttacker->isPet()){
+			ManagedReference<CreatureObject*> petOwner = creoAttacker->getLinkedCreature();
+			if (petOwner != nullptr) {
+				if (petOwner->getSkillMod("creature_hit_bonus") > 0){
+					petOwnerToHitBonus += petOwner->getSkillMod("creature_hit_bonus");
+					// petOwner->sendSystemMessage("Player had a CreatureToHit bonus of: " + String::valueOf(petOwnerToHitBonus));
+				}
+			}
+		}
+
+		// bonusAccuracy += creoAttacker->getSkillMod("creature_hit_bonus"); // OLD, DID NOT WORK
+		bonusAccuracy += petOwnerToHitBonus;
+	}
+
+	info("Attacker total bonus is " + String::valueOf(bonusAccuracy), true);
 
 	int postureAccuracy = 0;
 
@@ -1979,13 +2008,22 @@ int CombatManager::getHitChance(TangibleObject *attacker, CreatureObject *target
 	float attackerRoll = (float)System::random(249) + 1.f;
 	float defenderRoll = (float)System::random(150) + 25.f;
 
+	float totalAccuracy = (attackerAccuracy + weaponAccuracy + accuracyBonus + postureAccuracy + bonusAccuracy);
+	float totalAccuracyWithoutBonus = (attackerAccuracy + weaponAccuracy + accuracyBonus + postureAccuracy);
+
+	// targetCreature->sendSystemMessage("Attacker's Accuracy is: " + String::valueOf(totalAccuracy));
+	// targetCreature->sendSystemMessage("Attacker's Accuracy without Bonus is: " + String::valueOf(totalAccuracyWithoutBonus));
+	// targetCreature->sendSystemMessage("Attacker's BonusAccuracy is: " + String::valueOf(bonusAccuracy));
+	
+
 	// TODO (dannuic): add the trapmods in here somewhere (defense down trapmods)
 	float accTotal = hitChanceEquation(attackerAccuracy + weaponAccuracy + accuracyBonus + postureAccuracy + bonusAccuracy, attackerRoll, targetDefense + postureDefense, defenderRoll);
 
 	//info("Final hit chance is " + String::valueOf(accTotal), true);
 
-	if (System::random(100) > accTotal) // miss, just return MISS
+	if (System::random(100) > accTotal){ // miss, just return MISS
 		return MISS;
+	}
 
 	//info("Attack hit successfully", true);
 
