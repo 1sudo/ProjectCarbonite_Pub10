@@ -257,6 +257,19 @@ int LootManagerImplementation::calculateLootCredits(int level) {
 	return credits;
 }
 
+// This method will allow us to add more types of items to be excluded from rolling lego/exc/yellow
+// Each time a yellow roll occurs it reduces chances of future rolls for economic purposes.
+// Avoiding unwanted rolls for rare items means items people actually want will be used for yellow rolls.
+bool LootManagerImplementation::isExcludedPrototype(TangibleObject* proto) {
+	
+	// If it's not armor, clothing, weapons, or components then we never want it to roll Yellow++!
+	if (!proto->isWearableObject() && !proto->isWeaponObject() && !proto->isComponent()){
+		//warning("Is Attachment, it cannot be a Yellow/Lego/Exceptional!");
+		return true;
+	}
+	return false;
+}
+
 TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* templateObject, int level, bool maxCondition) {
 	int uncappedLevel = level;
 
@@ -307,7 +320,18 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 
 	float adjustment = floor((float)(((level > 50) ? level : 50) - 50) / 10.f + 0.5);
 
-	if (System::random(legendaryChance) >= legendaryChance - adjustment) {
+	// warning("=======================================");
+	// warning("+++++++++++++++++");
+	// warning(String::valueOf("TemplateName: " + prototype->getObjectTemplate()->getTemplateFileName()));
+	// warning("+++++++++++++++++");
+	// if (!prototype->isWearableObject() && !prototype->isWeaponObject() && !prototype->isComponent()){
+	// 	warning("+++++++++++++++++");
+	// 	warning(String::valueOf(prototype->getObjectName()->getFullPath()) + " is NOT an item that should be Yellow!");
+	// 	warning("+++++++++++++++++");
+	// }
+	// warning("=======================================");
+
+	if ((System::random(legendaryChance) >= (legendaryChance - adjustment)) && !isExcludedPrototype(prototype)) {
 		UnicodeString newName = prototype->getDisplayedName() + " (Legendary)";
 		prototype->setCustomObjectName(newName, false);
 
@@ -317,7 +341,7 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 
 		legendaryLooted.increment();
 		legendary = true;
-	} else if (System::random(exceptionalChance) >= exceptionalChance - adjustment) {
+	} else if ((System::random(exceptionalChance) >= (exceptionalChance - adjustment)) && !isExcludedPrototype(prototype)) {
 		UnicodeString newName = prototype->getDisplayedName() + " (Exceptional)";
 		prototype->setCustomObjectName(newName, false);
 
@@ -405,7 +429,7 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 			max *= yellowModifier;
 		}
 
-		if (excMod == 1.0 && (yellowChance == 0 || System::random(yellowChance) == 0)) {
+		if ((excMod == 1.0 && (yellowChance == 0 || System::random(yellowChance) == 0)) && !isExcludedPrototype(prototype)) {
 			if (max > min && min >= 0) {
 				min *= yellowModifier;
 				max *= yellowModifier;
@@ -425,9 +449,11 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 				min /= yellowModifier;
 				max *= yellowModifier;
 			}
-
+			// New 'Rare' tag to be explicit for normal Yellows
+			UnicodeString newName = prototype->getDisplayedName() + " (Rare)";
+			prototype->setCustomObjectName(newName, false);
 			yellow = true;
-
+			excMod = yellowModifier;
 			yellowLooted.increment();
 		}
 
@@ -435,14 +461,16 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 		craftingValues->setMaxValue(subtitle, max);
 	}
 
-	if (yellow) {
+	// Making normal yellows more worthwhile by including them in excMod rolls
+	// Come back and refactor this bandaid~
+	if (yellow || excMod == yellowModifier) { 
 		prototype->addMagicBit(false);
-		prototype->setJunkValue((int)(fJunkValue * 1.25));
+		prototype->setJunkValue((int)(fJunkValue * yellowModifier));
 	} else {
 		if (excMod == 1.0) {
 			prototype->setJunkValue((int)(fJunkValue));
 		} else {
-			prototype->setJunkValue((int)(fJunkValue * (excMod/2)));
+			prototype->setJunkValue((int)(fJunkValue * excMod));
 		}
 	}
 
@@ -525,7 +553,7 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 				last = value;
 				attachmentName.setStringId("stat_n", key);
 				prototype->setObjectName(attachmentName,false);
-				attachmentCustomName = attachmentType + prototype->getDisplayedName() + " " + String::valueOf(value);
+				attachmentCustomName = prototype->getDisplayedName() + " [+" + String::valueOf(value) + "] " + attachmentType;
 			}
 		}
 		prototype->setCustomObjectName(attachmentCustomName,false);
@@ -625,8 +653,13 @@ void LootManagerImplementation::addConditionDamage(TangibleObject* loot, Craftin
 }
 
 void LootManagerImplementation::setSkillMods(TangibleObject* object, LootItemTemplate* templateObject, int level, float excMod) {
-	if (!object->isWeaponObject() && !object->isWearableObject())
+	
+	if (!object->isWeaponObject() && !object->isWearableObject()){
 		return;
+	}
+
+	// warning("///////////////////////////////////////////////////////////");
+	// warning("Trying to roll mods for this item: " + String::valueOf(templateObject->getTemplateName()));
 
 	VectorMap<String, int>* skillMods = templateObject->getSkillMods();
 	VectorMap<String, int> additionalMods;
@@ -634,17 +667,53 @@ void LootManagerImplementation::setSkillMods(TangibleObject* object, LootItemTem
 	bool yellow = false;
 	float modSqr = excMod * excMod;
 
-	if (System::random(skillModChance / modSqr) == 0) {
+	// if (System::random(skillModChance / modSqr) == 0) { // OLD
+	if ((skillModChance > 0) && (modSqr > 0)) {	// NEW, drastically increases mods on dropped gear
 		// if it has a skillmod the name will be yellow
 		yellow = true;
 		int modCount = 1;
 		int roll = System::random(100);
+		float levelModifier = 0.f;
+		int modifierBase = 100; // if none of our modifiers work, then no mods for you!
 
-		if(roll > (100 - modSqr))
-			modCount += 2;
+		if (level > 10) {
+			levelModifier = level / 10.f;
+		}
 
-		if(roll < (5 + modSqr))
-			modCount += 1;
+		roll += levelModifier;
+		if (roll > 100) {
+			roll = 100;
+		}
+
+		// Massively refactored chances of double, triple, and quard mods on clothing/gear
+		// We take into account the rarity of the item for mod rolls
+		if (excMod == yellowModifier) {
+			if(roll > (modifierBase - modSqr * 9)) { // From 100 -> 90 to increase mod chances
+				modCount += 1; // 2 total mods for Yellow
+			}
+		} 
+		else { // Else, we want exceptionals and legendaries to have a max of +3 tacked on based on rarity
+			if (excMod == legendaryModifier) {
+				modCount = 3; // Minimum for Legendaries is 3, max is 6!
+			}
+
+			// Rolls for additional mods based on rarity
+			if(roll > (modifierBase - modSqr * 3)){ // From 100 -> 90 to increase mod chances
+				modCount += 3; // 4 total mods
+			} else if(roll > (modifierBase - (modSqr * 6))){ // equals (80 - 9.1875) if Exceptional that you then roll against
+				modCount += 2; // 3 total mods
+			} else if(roll > (modifierBase - (modSqr * 9))){
+				modCount += 1; // 2 total mods
+			}
+		}
+
+		// warning("--------------------");
+		// warning("ItemName: " + String::valueOf(templateObject->getTemplateName()));
+		// warning("Rarity: " + String::valueOf(excMod));
+		// warning("StatMod Roll: " + String::valueOf(roll));
+		// warning("ModSqr: " + String::valueOf(modSqr));
+		// warning("ModCount: " + String::valueOf(modCount));
+		// warning("--------------------");
 
 		for(int i = 0; i < modCount; ++i) {
 			//Mods can't be lower than -1 or greater than 25
@@ -653,12 +722,14 @@ void LootManagerImplementation::setSkillMods(TangibleObject* object, LootItemTem
 
 			int mod = System::random(max - min) + min;
 
-			if(mod == 0)
+			if(mod == 0){
 				mod = 1;
+			}
 
 			String modName = getRandomLootableMod( object->getGameObjectType() );
-			if( !modName.isEmpty() )
+			if( !modName.isEmpty() ){
 				additionalMods.put(modName, mod);
+			}
 		}
 	}
 

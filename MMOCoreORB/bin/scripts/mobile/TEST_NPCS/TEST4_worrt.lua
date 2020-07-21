@@ -1,4 +1,4 @@
-TEST4_worrt = Creature:new {
+worrt = Creature:new {
 	objectName = "@mob/creature_names:worrt",
 	customName = "COMPONENTS PINATA (CL500)",
 	socialGroup = "",
@@ -45,13 +45,13 @@ TEST4_worrt = Creature:new {
 		},
 		{
 			groups = {
-				{group = "gorax_bone_shards_rare", chance = 10000000}
+				{group = "gorax_common", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
 		{
 			groups = {
-				{group = "gorax_bone_shards_rare", chance = 10000000}
+				{group = "gorax_common", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
@@ -122,4 +122,4 @@ TEST4_worrt = Creature:new {
 	}
 }
 
-CreatureTemplates:addCreatureTemplate(TEST4_worrt, "TEST4_worrt") 
+CreatureTemplates:addCreatureTemplate(worrt, "TEST4_worrt")
