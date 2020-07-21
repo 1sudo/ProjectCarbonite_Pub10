@@ -120,8 +120,8 @@ object_tangible_wearables_hat_hat_invis = object_tangible_wearables_hat_shared_h
 		"object/mobile/vendor/zabrak_male.iff",
 		"object/creature/player/ithorian_male.iff",
 		"object/creature/player/ithorian_female.iff",
-		"object/creature/player/wookie_male.iff",
-		"object/creature/player/wookie_female.iff",
+		"object/creature/player/wookiee_male.iff",
+		"object/creature/player/wookiee_female.iff",
 	},
 
 	numberExperimentalProperties = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},

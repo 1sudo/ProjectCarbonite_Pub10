@@ -119,8 +119,8 @@ object_tangible_wearables_shirt_shirt_invis = object_tangible_wearables_shirt_sh
 		"object/mobile/vendor/zabrak_male.iff",
 		"object/creature/player/ithorian_male.iff",
 		"object/creature/player/ithorian_female.iff",
-		"object/creature/player/wookie_male.iff",
-		"object/creature/player/wookie_female.iff",
+		"object/creature/player/wookiee_male.iff",
+		"object/creature/player/wookiee_female.iff",
 	}
 }
 

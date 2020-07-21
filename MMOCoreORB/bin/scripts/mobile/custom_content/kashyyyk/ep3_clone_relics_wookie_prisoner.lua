@@ -1,4 +1,4 @@
-ep3_clone_relics_wookie_prisoner = Creature:new {
+ep3_clone_relics_wookiee_prisoner = Creature:new {
 	customName = "Wookiee Prisoner",
 	randomNameType = NAME_GENERIC_TAG,
 	socialGroup = "wookiee",
@@ -38,4 +38,4 @@ ep3_clone_relics_wookie_prisoner = Creature:new {
 	--attacks = merge(brawlermaster,marksmanmaster)
 }
 
-CreatureTemplates:addCreatureTemplate(ep3_clone_relics_wookie_prisoner, "ep3_clone_relics_wookie_prisoner")
+CreatureTemplates:addCreatureTemplate(ep3_clone_relics_wookiee_prisoner, "ep3_clone_relics_wookiee_prisoner")
