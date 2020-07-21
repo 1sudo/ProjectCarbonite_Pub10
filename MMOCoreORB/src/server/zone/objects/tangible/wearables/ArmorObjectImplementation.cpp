@@ -288,8 +288,8 @@ bool ArmorObjectImplementation::isVulnerable(int type)
 	return isBroken() || (!isSpecial(type) && (vulnerabilites & type));
 }
 
-float ArmorObjectImplementation::getTypeValue(int type, float value)
-{
+// Changed from max sliced of 90 -> 80, and changed max crafted from 80 -> 70
+float ArmorObjectImplementation::getTypeValue(int type, float value) {
 	int newValue = 0;
 
 	if (vulnerabilites & type)
@@ -299,11 +299,9 @@ float ArmorObjectImplementation::getTypeValue(int type, float value)
 	{
 		newValue = specialProtection + value;
 
-		if (newValue > 80)
-			newValue = 80;
-	}
-	else
-	{
+		if (newValue > 70)
+			newValue = 70;
+	} else {
 		newValue = baseProtection + value;
 
 		// Protect LightSaber resist from Slices
@@ -311,15 +309,12 @@ float ArmorObjectImplementation::getTypeValue(int type, float value)
 		{
 			newValue *= effectivenessSlice;
 
-			if (sliced && effectivenessSlice > 1)
-			{
-				if (newValue > 90)
-					newValue = 90;
-			}
-			else
-			{
-				if (newValue > 80)
+			if(sliced && effectivenessSlice > 1) {
+				if(newValue > 80)
 					newValue = 80;
+			} else {
+				if(newValue > 70)
+					newValue = 70;
 			}
 		}
 	}
