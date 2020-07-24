@@ -1,4 +1,4 @@
-worrt = Creature:new {
+TEST4_worrt = Creature:new {
 	objectName = "@mob/creature_names:worrt",
 	customName = "COMPONENTS PINATA (CL500)",
 	socialGroup = "",
@@ -122,4 +122,4 @@ worrt = Creature:new {
 	}
 }
 
-CreatureTemplates:addCreatureTemplate(worrt, "TEST4_worrt")
+CreatureTemplates:addCreatureTemplate(TEST4_worrt, "TEST4_worrt")
