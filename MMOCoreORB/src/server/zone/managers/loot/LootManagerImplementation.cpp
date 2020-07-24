@@ -529,7 +529,8 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 
 	delete craftingValues;
 
-	// --CREDIT--: TCW Source
+	// Boink
+	// --CREDIT--: TCW Source (Heavily modified by Boogles)
 	// Update object name with mod stat if is attachment
 	if(prototype->isAttachment()){
 		Attachment* attachment = cast<Attachment*>( prototype.get());
@@ -600,7 +601,7 @@ TangibleObject* LootManagerImplementation::createLootAttachment(LootItemTemplate
 		float max = craftingValues->getMaxValue(subtitle);
 	}
 
-
+	// Heavily modified attachments name schema by: Boogles
 	if(prototype->isAttachment()){
 		Attachment* attachment = cast<Attachment*>( prototype.get());
 		attachment->updateAttachmentValues(modName, value);
@@ -626,7 +627,8 @@ TangibleObject* LootManagerImplementation::createLootAttachment(LootItemTemplate
 				last = value;
 				attachmentName.setStringId("stat_n", key);
 				prototype->setObjectName(attachmentName,false);
-				attachmentCustomName = attachmentType + prototype->getDisplayedName() + " " + String::valueOf(value);
+				// attachmentCustomName = attachmentType + prototype->getDisplayedName() + " " + String::valueOf(value);
+				attachmentCustomName = prototype->getDisplayedName() + " [+" + String::valueOf(value) + "] " + attachmentType;
 			}
 		}
 		prototype->setCustomObjectName(attachmentCustomName,false);
