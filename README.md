@@ -1,4 +1,7 @@
-## Publish10 Branch
+## ProjectCarbonite based on Publish10 Branch
+This is the Public repo for Project Carbonite based on SWGemu/Pub10 that also had MTG items manually merged in.
+The base for this repo was provided by Sudo, saving us a ton of work (see commit history) thanks! :)
+
 This branch contains a fresh Core3 clone with MTG mobiles and objects included. All custom planets shipped with MTG should be disabled and the MTG planets tre should not be included in the server config. The reason behind this is due to invalid object ID's being used for those planets that will cause issues later down the road. 
 
 ## What is SWGEmu? ##

@@ -105,9 +105,11 @@ ZonesEnabled = {
 }
 
 -- directory of tres with live.cfg
-TrePath = "/home/swgemu/workspace/tre"
+TrePath = "/home/boogles/workspace/tre"
 
 TreFiles = {
+	"carbonite_1.tre",
+	"carbonite_0.tre",
 	"mtg_patch_022.tre",
 	"mtg_patch_021.tre",
 	"mtg_patch_019.tre",
