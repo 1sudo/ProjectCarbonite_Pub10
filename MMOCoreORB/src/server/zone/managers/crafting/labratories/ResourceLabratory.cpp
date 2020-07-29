@@ -78,6 +78,9 @@ void ResourceLabratory::setInitialCraftingValues(TangibleObject* prototype, Manu
 
 		// Enhanced Resource Quality from Player SkillStat
 		weightedSum *= qualityBuffVal;
+		if (weightedSum > 1000) {
+			weightedSum = 1000;
+		}
 
 		// > 0 ensures that we don't add things when there is NaN value
 		if (weightedSum > 0) {
