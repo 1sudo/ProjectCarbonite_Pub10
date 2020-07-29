@@ -25,8 +25,8 @@ void PowerBoostBuffImplementation::activate(bool applyModifiers) {
 			mindBuffAmount=0;
 			haBuffAmount=0;
 			BuffImplementation::activate(false);
-			creature.get()->addMaxHAM(CreatureAttribute::MIND, -(pbTick*20), true);
-			mindBuffAmount=-(pbTick*20);
+			creature.get()->addMaxHAM(CreatureAttribute::MIND, -(pbTick*10), true);
+			mindBuffAmount=-(pbTick*10);
 			creature.get()->sendSystemMessage("@teraskasi:powerboost_begin"); // [meditation] You focus your mental energies into your physical form.
 			// DurationEvent to handle calling the deactivate() when the timer expires.
 			counter++;
@@ -38,7 +38,7 @@ void PowerBoostBuffImplementation::activate(bool applyModifiers) {
 				return; // Shouldn't be here
 			}
 
-		} else if(counter <= 20) {
+		} else if(counter <= 10) {
 			doHealthAndActionTick(true); // 1-20
 			doMindTick(true);
 			counter++;
@@ -46,18 +46,18 @@ void PowerBoostBuffImplementation::activate(bool applyModifiers) {
 			if (boostCheck != NULL) {
 				boostCheck->reschedule(3000);
 			}
-		} else if(counter > 20 && counter <= 40) {
+		} else if(counter > 10 && counter <= 20) {
 			doMindTick(true); // 20-40
 			counter++;
 			Reference<PowerBoostBuffDurationEvent*> boostCheck = creature.get()->getPendingTask("powerBoostTick").castTo<PowerBoostBuffDurationEvent*>();
 			if (boostCheck != NULL)
 				boostCheck->reschedule(3000);
-		} else if(counter == 41) {
-			counter = 45; // increase counter to 45 (to tick Down)..
+		} else if(counter == 51) { // Pretty sure anything past counter 51 is scuffed, but it's not important enough to fix!
+			counter = 55; // increase counter to 45 (to tick Down)..
 			Reference<PowerBoostBuffDurationEvent*> BoostCheck = creature.get()->getPendingTask("powerBoostTick").castTo<PowerBoostBuffDurationEvent*>();
 			if (BoostCheck != NULL)
 				BoostCheck->reschedule(time - (183 * 1000)); // schedule for duration of the buff. (minus the tick time);
-		} else if(counter >= 45 && counter < 65) {
+		} else if(counter >= 55 && counter < 65) {
 			doHealthAndActionTick(false);
 			doMindTick(false);
 			counter++;
