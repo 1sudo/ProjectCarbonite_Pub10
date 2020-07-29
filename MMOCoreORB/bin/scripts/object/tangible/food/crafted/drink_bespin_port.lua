@@ -45,14 +45,14 @@ object_tangible_food_crafted_drink_bespin_port = object_tangible_food_crafted_sh
 	templateType = CONSUMABLE,
 
 	duration = 1,
-	filling = 10,
-	nutrition = 10,
+	filling = 1,
+	nutrition = 12,
 
 	effectType = 3, -- Event Based Buff
 	eventTypes = {CRAFTINGEXPERIMENTATION},
 
-	fillingMin = 25,
-	fillingMax = 15,
+	fillingMin = 1,
+	fillingMax = 1,
 	flavorMin = 1,
 	flavorMax = 1,
 	nutritionMin = 3,
