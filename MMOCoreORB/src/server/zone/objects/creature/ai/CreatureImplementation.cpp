@@ -334,10 +334,12 @@ float CreatureImplementation::getChanceToTame(CreatureObject* player) {
 	int ferocity = getFerocity();
 	float tamingChance = getTame() * 100.0f;
 
-	if (isVicious())
-		skill += player->getSkillMod("tame_aggro");
-	else
-		skill += player->getSkillMod("tame_non_aggro");
+	if (isVicious()) {
+		skill += (player->getSkillMod("tame_aggro") + 15); // +15 Aggro tame bonus
+	}
+	else {
+		skill += (player->getSkillMod("tame_non_aggro") + 5); // +5 Non-Aggro tame bonus
+	}
 
 	float chanceToTame = tamingChance + skill - (cl + ferocity);
 
