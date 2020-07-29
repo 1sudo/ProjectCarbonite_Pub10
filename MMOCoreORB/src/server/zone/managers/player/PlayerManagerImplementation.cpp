@@ -1939,7 +1939,13 @@ int PlayerManagerImplementation::awardExperience(CreatureObject* player, const S
 	if (playerObject == NULL)
 		return 0;
 
-	float speciesModifier = 1.f;
+	float speciesModifier = 1.0f;
+	float musicBuff = 1.0f;
+	musicBuff += ((float)player->getSkillMod("music_exp_buff")*2) / 100; // ie: ((12.5 * 2) / 100) == (0.25 + 1.0) == (1.25), or +25% bonus
+
+	if (musicBuff > 1.25f){
+		musicBuff = 1.25f;
+	}
 
 	if (amount > 0)
 		speciesModifier = getSpeciesXpModifier(player->getSpeciesName(), xpType);
@@ -1951,10 +1957,18 @@ int PlayerManagerImplementation::awardExperience(CreatureObject* player, const S
 
 	int xp = 0;
 
-	if (applyModifiers)
-		xp = playerObject->addExperience(xpType, (int) (amount * speciesModifier * buffMultiplier * localMultiplier * globalExpMultiplier));
-	else
+	if (applyModifiers){
+		float modifiedExpToGrant = (amount * speciesModifier * buffMultiplier * localMultiplier * globalExpMultiplier);
+		player->sendSystemMessage("Music Buff Amount:" + String::valueOf(musicBuff));
+		player->sendSystemMessage("Effective Experience Pre-EntBuff :" + String::valueOf(modifiedExpToGrant));
+		modifiedExpToGrant *= musicBuff;
+		player->sendSystemMessage("Effective Experience Post-EntBuff :" + String::valueOf(modifiedExpToGrant));
+
+		xp = playerObject->addExperience(xpType, (int) (modifiedExpToGrant)); // Round float value down to a flat int for experience granting.
+	}
+	else {
 		xp = playerObject->addExperience(xpType, (int)amount);
+	}
 
 	player->notifyObservers(ObserverEventType::XPAWARDED, player, xp);
 

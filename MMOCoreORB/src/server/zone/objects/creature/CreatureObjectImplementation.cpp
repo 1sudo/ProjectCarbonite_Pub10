@@ -177,6 +177,9 @@ void CreatureObjectImplementation::initializeMembers() {
 	setContainerInheritPermissionsFromParent(false);
 	setContainerDefaultDenyPermission(ContainerPermissions::MOVECONTAINER);
 	setContainerDenyPermission("owner", ContainerPermissions::MOVECONTAINER);
+
+	//Custom members below here
+	isNotified = false;
 }
 
 void CreatureObjectImplementation::loadTemplateData(

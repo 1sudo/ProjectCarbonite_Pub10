@@ -48,6 +48,7 @@ class EntertainingSession extends Facade {
 	protected boolean acceptingBandFlourishes;
 	protected boolean targetInstrument;
 	protected Instrument externalInstrument;
+	protected boolean hasNotified;
 	
 	public EntertainingSession(CreatureObject ent) {
 		entertainer = ent;
@@ -64,6 +65,8 @@ class EntertainingSession extends Facade {
 		playingMusic = false;
 		acceptingBandFlourishes = true;
 		targetInstrument = false;
+
+		hasNotified = false; //Notifier flag for notifying a player of buff completed.
 		
 		watchers.setNoDuplicateInsertPlan();
 		listeners.setNoDuplicateInsertPlan();

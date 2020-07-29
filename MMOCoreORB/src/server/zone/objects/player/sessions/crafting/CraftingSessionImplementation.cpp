@@ -649,8 +649,13 @@ void CraftingSessionImplementation::initialAssembly(int clientCounter) {
 	}
 
 	Locker locker(prototype);
+
+	// Get PlayerBuff values
+	float qualityBuffVal = 1.0f;
+	qualityBuffVal += (((float)crafter->getSkillMod("music_will_buff")) / 4) / 100;
+
 	//Set initial crafting percentages
-	craftingManager->setInitialCraftingValues(prototype, manufactureSchematic, assemblyResult);
+	craftingManager->setInitialCraftingValues(prototype, manufactureSchematic, assemblyResult, qualityBuffVal);
 	//prototype->setInitialCraftingValues(manufactureSchematic, assemblyResult);
 
 	Reference<CraftingValues*> craftingValues = manufactureSchematic->getCraftingValues();

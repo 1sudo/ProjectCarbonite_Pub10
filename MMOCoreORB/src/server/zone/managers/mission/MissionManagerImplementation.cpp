@@ -541,7 +541,25 @@ void MissionManagerImplementation::randomizeGeneralTerminalMissions(CreatureObje
 	SceneObject* missionBag = player->getSlottedObject("mission_bag");
 	int bagSize = missionBag->getContainerObjectsSize();
 
-	for (int i = 0; i < bagSize; ++i) {
+	//player->sendSystemMessage("Firing GenericTerminalMissions Code.");
+
+	// Refactored mission code to be more efficient
+	float entExpBonus = player->getSkillMod("dance_ent_buff");
+	//player->sendSystemMessage("Dancer Credit Bonus: " + String::valueOf(entExpBonus) + ".");
+	float cityBonus = 1.f + (player->getSkillMod("private_spec_missions") / 100.f);
+	//player->sendSystemMessage("CityBonus Pre-Dancer Credit Bonus Application: " + String::valueOf(cityBonus) + ".");
+	cityBonus += ((float)entExpBonus / 100);
+	//player->sendSystemMessage("CityBonus Post-Dancer Credit Bonus Application: " + String::valueOf(cityBonus) + ".");
+
+	//player->sendSystemMessage("Mission Bag Current Size: " + String::valueOf(bagSize));
+	//player->sendSystemMessage("MissionGenerationLimit: " + String::valueOf(missionGenerationLimit));
+
+	// Just in case this was done intentionally, we'll still have a lower limit dependent on bagsize
+	if (bagSize < missionGenerationLimit) {
+		missionGenerationLimit = bagSize;
+	}
+
+	for (int i = 0; i < missionGenerationLimit; i++) {
 		Reference<MissionObject*> mission = missionBag->getContainerObject(i).castTo<MissionObject*>( );
 
 		Locker locker(mission);
@@ -549,19 +567,19 @@ void MissionManagerImplementation::randomizeGeneralTerminalMissions(CreatureObje
 		//Clear mission type before calling mission generators.
 		mission->setTypeCRC(0);
 
-		if (i < 6) {
+		// if (i < 6) {
+		// 	randomizeGenericDestroyMission(player, mission, Factions::FACTIONNEUTRAL);
+		// } else if (i < 12) {
+		// 	randomizeGenericDeliverMission(player, mission, Factions::FACTIONNEUTRAL);
+		// }
+
 			randomizeGenericDestroyMission(player, mission, Factions::FACTIONNEUTRAL);
-		} else if (i < 12) {
-			randomizeGenericDeliverMission(player, mission, Factions::FACTIONNEUTRAL);
-		}
 
 		if (slicer) {
 			mission->setRewardCredits(mission->getRewardCredits() * 1.5);
 		}
 
-		float cityBonus = 1.f + player->getSkillMod("private_spec_missions") / 100.f;
 		mission->setRewardCredits(mission->getRewardCredits() * cityBonus);
-
 		mission->setRefreshCounter(counter, true);
 	}
 }
@@ -570,27 +588,35 @@ void MissionManagerImplementation::randomizeArtisanTerminalMissions(CreatureObje
 	SceneObject* missionBag = player->getSlottedObject("mission_bag");
 	int bagSize = missionBag->getContainerObjectsSize();
 
-	for (int i = 0; i < bagSize; ++i) {
+	// Refactored mission code to be more efficient
+	float entExpBonus = player->getSkillMod("dance_ent_buff");
+	float cityBonus = 1.f + (player->getSkillMod("private_spec_missions") / 100.f);
+	cityBonus += ((float)entExpBonus / 100);
+
+	// Just in case this was done intentionally, we'll still have a lower limit dependent on bagsize
+	if (bagSize < missionGenerationLimit) {
+		missionGenerationLimit = bagSize;
+	}
+
+	for (int i = 0; i < missionGenerationLimit; i++) {
 		Reference<MissionObject*> mission = missionBag->getContainerObject(i).castTo<MissionObject*>( );
 
 		Locker locker(mission);
 
 		//Clear mission type before calling mission generators.
 		mission->setTypeCRC(0);
-
-		if (i < 6) {
-			randomizeGenericSurveyMission(player, mission, Factions::FACTIONNEUTRAL);
-		} else if (i < 12) {
-			randomizeGenericCraftingMission(player, mission, Factions::FACTIONNEUTRAL);
-		}
+		randomizeGenericSurveyMission(player, mission, Factions::FACTIONNEUTRAL);
+		// if (i < 6) {
+		// 	randomizeGenericSurveyMission(player, mission, Factions::FACTIONNEUTRAL);
+		// } else if (i < 12) {
+		// 	randomizeGenericCraftingMission(player, mission, Factions::FACTIONNEUTRAL);
+		// }
 
 		if (slicer) {
 			mission->setRewardCredits(mission->getRewardCredits() * 1.5);
 		}
 
-		float cityBonus = 1.f + player->getSkillMod("private_spec_missions") / 100.f;
 		mission->setRewardCredits(mission->getRewardCredits() * cityBonus);
-
 		mission->setRefreshCounter(counter, true);
 	}
 }
@@ -599,27 +625,35 @@ void MissionManagerImplementation::randomizeEntertainerTerminalMissions(Creature
 	SceneObject* missionBag = player->getSlottedObject("mission_bag");
 	int bagSize = missionBag->getContainerObjectsSize();
 
-	for (int i = 0; i < bagSize; ++i) {
+	// Refactored mission code to be more efficient
+	float entExpBonus = player->getSkillMod("dance_ent_buff");
+	float cityBonus = 1.f + (player->getSkillMod("private_spec_missions") / 100.f);
+	cityBonus += ((float)entExpBonus / 100);
+
+	// Just in case this was done intentionally, we'll still have a lower limit dependent on bagsize
+	if (bagSize < missionGenerationLimit) {
+		missionGenerationLimit = bagSize;
+	}
+
+	for (int i = 0; i < missionGenerationLimit; i++) {
 		Reference<MissionObject*> mission = missionBag->getContainerObject(i).castTo<MissionObject*>( );
 
 		Locker locker(mission);
 
 		//Clear mission type before calling mission generators.
 		mission->setTypeCRC(0);
-
-		if (i < 6) {
 			randomizeGenericEntertainerMission(player, mission, Factions::FACTIONNEUTRAL, MissionTypes::DANCER);
-		} else if (i < 12) {
-			randomizeGenericEntertainerMission(player, mission, Factions::FACTIONNEUTRAL, MissionTypes::MUSICIAN);
-		}
+		// if (i < 6) {
+		// 	randomizeGenericEntertainerMission(player, mission, Factions::FACTIONNEUTRAL, MissionTypes::DANCER);
+		// } else if (i < 12) {
+		// 	randomizeGenericEntertainerMission(player, mission, Factions::FACTIONNEUTRAL, MissionTypes::MUSICIAN);
+		// }
 
 		if (slicer) {
 			mission->setRewardCredits(mission->getRewardCredits() * 1.5);
 		}
 
-		float cityBonus = 1.f + player->getSkillMod("private_spec_missions") / 100.f;
 		mission->setRewardCredits(mission->getRewardCredits() * cityBonus);
-
 		mission->setRefreshCounter(counter, true);
 	}
 }
@@ -628,27 +662,36 @@ void MissionManagerImplementation::randomizeScoutTerminalMissions(CreatureObject
 	SceneObject* missionBag = player->getSlottedObject("mission_bag");
 	int bagSize = missionBag->getContainerObjectsSize();
 
-	for (int i = 0; i < bagSize; ++i) {
+	// Refactored mission code to be more efficient
+	float entExpBonus = player->getSkillMod("dance_ent_buff");
+	float cityBonus = 1.f + (player->getSkillMod("private_spec_missions") / 100.f);
+	cityBonus += ((float)entExpBonus / 100);
+
+	// Just in case this was done intentionally, we'll still have a lower limit dependent on bagsize
+	if (bagSize < missionGenerationLimit) {
+		missionGenerationLimit = bagSize;
+	}
+
+	for (int i = 0; i < missionGenerationLimit; i++) {
 		Reference<MissionObject*> mission = missionBag->getContainerObject(i).castTo<MissionObject*>( );
 
 		Locker locker(mission);
 
 		//Clear mission type before calling mission generators.
 		mission->setTypeCRC(0);
+		randomizeGenericReconMission(player, mission, Factions::FACTIONNEUTRAL);
 
-		if (i < 6) {
-			randomizeGenericReconMission(player, mission, Factions::FACTIONNEUTRAL);
-		} else if (i < 12) {
-			randomizeGenericHuntingMission(player, mission, Factions::FACTIONNEUTRAL);
-		}
+		// if (i < 6) {
+		// 	randomizeGenericReconMission(player, mission, Factions::FACTIONNEUTRAL);
+		// } else if (i < 12) {
+		// 	randomizeGenericHuntingMission(player, mission, Factions::FACTIONNEUTRAL);
+		// }
 
 		if (slicer) {
 			mission->setRewardCredits(mission->getRewardCredits() * 1.5);
 		}
 
-		float cityBonus = 1.f + player->getSkillMod("private_spec_missions") / 100.f;
 		mission->setRewardCredits(mission->getRewardCredits() * cityBonus);
-
 		mission->setRefreshCounter(counter, true);
 	}
 }
@@ -659,21 +702,30 @@ void MissionManagerImplementation::randomizeBountyTerminalMissions(CreatureObjec
 
 	Vector<ManagedReference<PlayerBounty*>> potentialTargets = getPotentialPlayerBountyTargets(player);
 
-	for (int i = 0; i < bagSize; ++i) {
+	// Refactored mission code to be more efficient
+	float entExpBonus = player->getSkillMod("dance_ent_buff");
+	float cityBonus = 1.f + (player->getSkillMod("private_spec_missions") / 100.f);
+	cityBonus += ((float)entExpBonus / 100);
+
+	// Just in case this was done intentionally, we'll still have a lower limit dependent on bagsize
+	if (bagSize < missionGenerationLimit) {
+		missionGenerationLimit = bagSize;
+	}
+
+	for (int i = 0; i < missionGenerationLimit; i++) {
 		Reference<MissionObject*> mission = missionBag->getContainerObject(i).castTo<MissionObject*>( );
 
 		Locker locker(mission);
 
 		//Clear mission type before calling mission generators.
 		mission->setTypeCRC(0);
+		randomizeGenericBountyMission(player, mission, Factions::FACTIONNEUTRAL, &potentialTargets);
 
-		if (i < 10) {
-			randomizeGenericBountyMission(player, mission, Factions::FACTIONNEUTRAL, &potentialTargets);
-		}
-
-		float cityBonus = 1.f + player->getSkillMod("private_spec_missions") / 100.f;
+		// if (i < 10) {
+		// 	randomizeGenericBountyMission(player, mission, Factions::FACTIONNEUTRAL, &potentialTargets);
+		// }
+		
 		mission->setRewardCredits(mission->getRewardCredits() * cityBonus);
-
 		mission->setRefreshCounter(counter, true);
 	}
 }
@@ -687,41 +739,49 @@ void MissionManagerImplementation::randomizeFactionTerminalMissions(CreatureObje
 	int numberOfDancerMissions = 0;
 	int numberOfMusicianMissions = 0;
 
-	for (int i = 0; i < bagSize; ++i) {
+	// Refactored mission code to be more efficient
+	float entExpBonus = player->getSkillMod("dance_ent_buff");
+	float cityBonus = 1.f + (player->getSkillMod("private_spec_missions") / 100.f);
+	cityBonus += ((float)entExpBonus / 100);
+
+	// Just in case this was done intentionally, we'll still have a lower limit dependent on bagsize
+	if (bagSize < missionGenerationLimit) {
+		missionGenerationLimit = bagSize;
+	}
+
+	for (int i = 0; i < missionGenerationLimit; i++) {
 		Reference<MissionObject*> mission = missionBag->getContainerObject(i).castTo<MissionObject*>( );
 
 		Locker locker(mission);
 
 		//Clear mission type before calling mission generators.
 		mission->setTypeCRC(0);
-
-		if (i < 6) {
-			randomizeGenericDestroyMission(player, mission, faction);
-		} else if (i < 12) {
-			randomizeGenericDeliverMission(player, mission, faction);
-		} else {
-			if (enableFactionalCraftingMissions && numberOfCraftingMissions < 6) {
-				randomizeGenericCraftingMission(player, mission, faction);
-				numberOfCraftingMissions++;
-			} else if (enableFactionalReconMissions && numberOfReconMissions < 6) {
-				randomizeGenericReconMission(player, mission, faction);
-				numberOfReconMissions++;
-			} else if (enableFactionalEntertainerMissions && numberOfDancerMissions < 6) {
-				randomizeGenericEntertainerMission(player, mission, faction, MissionTypes::DANCER);
-				numberOfDancerMissions++;
-			} else if (enableFactionalEntertainerMissions && numberOfMusicianMissions < 6) {
-				randomizeGenericEntertainerMission(player, mission, faction, MissionTypes::MUSICIAN);
-				numberOfMusicianMissions++;
-			}
-		}
+		randomizeGenericDestroyMission(player, mission, faction);
+		// if (i < 6) {
+		// 	randomizeGenericDestroyMission(player, mission, faction);
+		// } else if (i < 12) {
+		// 	randomizeGenericDeliverMission(player, mission, faction);
+		// } else {
+		// 	if (enableFactionalCraftingMissions && numberOfCraftingMissions < 6) {
+		// 		randomizeGenericCraftingMission(player, mission, faction);
+		// 		numberOfCraftingMissions++;
+		// 	} else if (enableFactionalReconMissions && numberOfReconMissions < 6) {
+		// 		randomizeGenericReconMission(player, mission, faction);
+		// 		numberOfReconMissions++;
+		// 	} else if (enableFactionalEntertainerMissions && numberOfDancerMissions < 6) {
+		// 		randomizeGenericEntertainerMission(player, mission, faction, MissionTypes::DANCER);
+		// 		numberOfDancerMissions++;
+		// 	} else if (enableFactionalEntertainerMissions && numberOfMusicianMissions < 6) {
+		// 		randomizeGenericEntertainerMission(player, mission, faction, MissionTypes::MUSICIAN);
+		// 		numberOfMusicianMissions++;
+		// 	}
+		// }
 
 		if (slicer) {
 			mission->setRewardCredits(mission->getRewardCredits() * 1.5);
 		}
 
-		float cityBonus = 1.f + player->getSkillMod("private_spec_missions") / 100.f;
 		mission->setRewardCredits(mission->getRewardCredits() * cityBonus);
-
 		mission->setRefreshCounter(counter, true);
 	}
 }

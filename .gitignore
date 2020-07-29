@@ -36,3 +36,4 @@ MMOCoreORB/bin/databases/strings.db
 MMOCoreORB/bin/databases/surveys.db
 MMOCoreORB/bin/conf/config.lua
 MMOCoreORB/bin/scripts/managers/resource_manager_spawns.lua
+MMOCoreORB/utils/engine3

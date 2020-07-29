@@ -1457,6 +1457,14 @@ void PlayerObjectImplementation::increaseFactionStanding(const String& factionNa
 	if (player == nullptr)
 		return;
 
+	// --------- Ent Bonus Section ---------
+	float EntBuffBonus = 1.0f;
+	EntBuffBonus += (((float)player->getSkillMod("music_will_buff"))/100);
+
+	// Buff increased faction standing for missions, or special rewards!
+	amount *= EntBuffBonus;
+	// --------- Ent Bonus Section ---------
+
 	//Get the current amount of faction standing
 	float currentAmount = factionStandingList.getFactionStanding(factionName);
 
