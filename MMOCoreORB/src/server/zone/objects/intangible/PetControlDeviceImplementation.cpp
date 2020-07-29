@@ -223,39 +223,40 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 		server->getZoneServer()->getPlayerManager()->handleAbortTradeMessage(player);
 	}
 
-	if (player->getCurrentCamp() == NULL && player->getCityRegion() == NULL) {
+	// if (player->getCurrentCamp() == NULL && player->getCityRegion() == NULL) {
 
-		Reference<CallPetTask*> callPet = new CallPetTask(_this.getReferenceUnsafeStaticCast(), player, "call_pet");
+	// 	Reference<CallPetTask*> callPet = new CallPetTask(_this.getReferenceUnsafeStaticCast(), player, "call_pet");
 
-		StringIdChatParameter message("pet/pet_menu", "call_pet_delay"); // Calling pet in %DI seconds. Combat will terminate pet call.
-		message.setDI(15);
-		player->sendSystemMessage(message);
+	// 	StringIdChatParameter message("pet/pet_menu", "call_pet_delay"); // Calling pet in %DI seconds. Combat will terminate pet call.
+	// 	message.setDI(15);
+	// 	player->sendSystemMessage(message);
 
-		player->addPendingTask("call_pet", callPet, 15 * 1000);
+	// 	player->addPendingTask("call_pet", callPet, 15 * 1000);
 
-		if (petControlObserver == NULL) {
-			petControlObserver = new PetControlObserver(_this.getReferenceUnsafeStaticCast());
-			petControlObserver->deploy();
-		}
+	// 	if (petControlObserver == NULL) {
+	// 		petControlObserver = new PetControlObserver(_this.getReferenceUnsafeStaticCast());
+	// 		petControlObserver->deploy();
+	// 	}
 
-		player->registerObserver(ObserverEventType::STARTCOMBAT, petControlObserver);
+	// 	player->registerObserver(ObserverEventType::STARTCOMBAT, petControlObserver);
 
-	} else { // Player is in a city or camp, spawn pet immediately
+	// } else { // Player is in a city or camp, spawn pet immediately
 
-		if( player->getCooldownTimerMap() == NULL )
-			return;
+	// Removed call timer checks for pets. This is a CH buff.
+	if( player->getCooldownTimerMap() == NULL )
+		return;
 
-		// Check cooldown
-		if( !player->getCooldownTimerMap()->isPast("petCallOrStoreCooldown") ){
-			player->sendSystemMessage("@pet/pet_menu:cant_call_1sec"); //"You cannot CALL for 1 second."
-			return;
-		}
-
-		spawnObject(player);
-
-		// Set cooldown
-		player->getCooldownTimerMap()->updateToCurrentAndAddMili("petCallOrStoreCooldown", 1000); // 1 sec
+	// Check cooldown
+	if( !player->getCooldownTimerMap()->isPast("petCallOrStoreCooldown") ){
+		player->sendSystemMessage("@pet/pet_menu:cant_call_1sec"); //"You cannot CALL for 1 second."
+		return;
 	}
+
+	spawnObject(player);
+
+	// Set cooldown
+	player->getCooldownTimerMap()->updateToCurrentAndAddMili("petCallOrStoreCooldown", 1000); // 1 sec
+	//}
 
 	EnqueuePetCommand* enqueueCommand = new EnqueuePetCommand(pet, String("petFollow").toLowerCase().hashCode(), String::valueOf(player->getObjectID()), player->getObjectID(), 1);
 	enqueueCommand->execute();
@@ -543,7 +544,7 @@ bool PetControlDeviceImplementation::growPet(CreatureObject* player, bool force,
 
 	Time currentTime;
 	uint32 timeDelta = currentTime.getTime() - lastGrowth.getTime();
-	int stagesToGrow = timeDelta / 43200; // 12 hour
+	int stagesToGrow = timeDelta / 360; // From 12 hours to 6 minutes per stage. Should mean 1 hour to Adult!
 
 	if (adult)
 		stagesToGrow = 10;

@@ -79,28 +79,38 @@ void VehicleControlDeviceImplementation::generateObject(CreatureObject* player) 
 		}
 	}
 
-	if(player->getCurrentCamp() == NULL && player->getCityRegion() == NULL) {
+	// if(player->getCurrentCamp() == NULL && player->getCityRegion() == NULL) {
 
-		Reference<CallMountTask*> callMount = new CallMountTask(_this.getReferenceUnsafeStaticCast(), player, "call_mount");
+	// 	Reference<CallMountTask*> callMount = new CallMountTask(_this.getReferenceUnsafeStaticCast(), player, "call_mount");
 
-		StringIdChatParameter message("pet/pet_menu", "call_vehicle_delay");
-		message.setDI(15);
-		player->sendSystemMessage(message);
+	// 	StringIdChatParameter message("pet/pet_menu", "call_vehicle_delay");
+	// 	message.setDI(15);
+	// 	player->sendSystemMessage(message);
 
-		player->addPendingTask("call_mount", callMount, 15 * 1000);
+	// 	player->addPendingTask("call_mount", callMount, 15 * 1000);
 
-		if (vehicleControlObserver == NULL) {
-			vehicleControlObserver = new VehicleControlObserver(_this.getReferenceUnsafeStaticCast());
-			vehicleControlObserver->deploy();
-		}
+	// 	if (vehicleControlObserver == NULL) {
+	// 		vehicleControlObserver = new VehicleControlObserver(_this.getReferenceUnsafeStaticCast());
+	// 		vehicleControlObserver->deploy();
+	// 	}
 
-		player->registerObserver(ObserverEventType::STARTCOMBAT, vehicleControlObserver);
+	// 	player->registerObserver(ObserverEventType::STARTCOMBAT, vehicleControlObserver);
 
-	} else {
+	// } else {
+	
+	// Removed call time for vehicles, and added a Call/Store cooldown
+	if( !player->getCooldownTimerMap()->isPast("vehicleCallOrStoreCooldown") ){
+		player->sendSystemMessage("You cannot call or store your vehicle for 5 seconds."); //"You cannot CALL for 5 second."
+		return;
+	}
 
 		Locker clocker(controlledObject, player);
 		spawnObject(player);
-	}
+
+	// Set cooldown
+	player->getCooldownTimerMap()->updateToCurrentAndAddMili("vehicleCallOrStoreCooldown", 5000); // 5 sec
+	//}
+	//}
 
 }
 
@@ -175,11 +185,14 @@ void VehicleControlDeviceImplementation::storeObject(CreatureObject* player, boo
 	if (controlledObject == NULL)
 		return;
 
-	/*if (!controlledObject->isInQuadTree())
-		return;*/
-
 	if (!force && (player->isInCombat() || player->isDead()))
 		return;
+
+	// Added a Call/Store cooldown
+	if( !player->getCooldownTimerMap()->isPast("vehicleCallOrStoreCooldown") ){
+		player->sendSystemMessage("You cannot call or store your vehicle for 5 seconds."); //"You cannot CALL for 1 second."
+		return;
+	}
 
 	if (player->isRidingMount() && player->getParent() == controlledObject) {
 
@@ -207,6 +220,9 @@ void VehicleControlDeviceImplementation::storeObject(CreatureObject* player, boo
 		(cast<CreatureObject*>(controlledObject.get()))->setCreatureLink(NULL);
 
 	updateStatus(0);
+
+	// Set cooldown to prevent vehicle spam.
+	player->getCooldownTimerMap()->updateToCurrentAndAddMili("vehicleCallOrStoreCooldown", 5000); // 5 sec
 }
 
 void VehicleControlDeviceImplementation::destroyObjectFromDatabase(bool destroyContainedObjects) {
