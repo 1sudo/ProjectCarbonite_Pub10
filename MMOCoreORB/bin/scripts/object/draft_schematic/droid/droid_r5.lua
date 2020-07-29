@@ -50,7 +50,7 @@ object_draft_schematic_droid_droid_r5 = object_draft_schematic_droid_shared_droi
 	craftingToolTab = 32, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 16,
 	size = 1,
-	factoryCrateSize = 5,
+	factoryCrateSize = 1000,
 
 	xpType = "crafting_droid_general",
 	xp = 300,

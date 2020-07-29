@@ -417,7 +417,8 @@ bool FactoryObjectImplementation::startFactory() {
 			return false;
 	}
 
-	timer = ((int)schematic->getComplexity()) * 8;
+	// Factory times to 1 second per craft
+	timer = (int) 1;//((int)schematic->getComplexity()) * 8;
 
 	if(!populateSchematicBlueprint(schematic))
 		return false;
