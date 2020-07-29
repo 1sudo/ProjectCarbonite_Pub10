@@ -106,6 +106,10 @@
 #include "server/zone/objects/building/TutorialBuildingObject.h"
 #include "server/zone/managers/frs/FrsManager.h"
 
+// Custom includes
+#include "server/zone/objects/creature/buffs/PrivateBuff.h"
+#include "server/zone/objects/creature/buffs/PrivateSkillMultiplierBuff.h"
+
 PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer* zoneServer, ZoneProcessServer* impl) :
 										Logger("PlayerManager") {
 
@@ -1456,6 +1460,27 @@ void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uin
 
 	}
 
+	// PvP-Death Debuff -- 5minutes
+	if (typeofdeath == 1) {
+		// Variables for deathDebuff
+		int deathDebuffVal = -2000;
+		int deathDebuffTime = 300;
+
+		// Handle Debuff -- NEED TO FIGURE OUT HOW TO CREATE CUSTOM BUFFS/DEBUFFS
+		ManagedReference<PrivateBuff *> deathDebuff = new PrivateBuff(player, 0xF531B147, deathDebuffTime, BuffType::JEDI);
+		Locker locker(deathDebuff);
+
+		// Loops through all stats and applies our death debuff
+		for(int i = 0; i < CreatureAttribute::ARRAYSIZE; i++){
+			deathDebuff->setAttributeModifier(i, deathDebuffVal);
+		}
+
+		// Add buffs to player
+		player->addBuff(deathDebuff);
+
+		// Release locker when we no longer need it
+		locker.release();
+	}
 
 
 	Reference<Task*> task = new PlayerIncapacitationRecoverTask(player, true);
