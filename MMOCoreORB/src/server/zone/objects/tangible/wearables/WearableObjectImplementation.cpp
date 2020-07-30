@@ -97,6 +97,9 @@ void WearableObjectImplementation::updateCraftingValues(CraftingValues* values, 
 }
 
 void WearableObjectImplementation::generateSockets(CraftingValues* craftingValues) {
+	// Moved inits of player and manuSchematic so I can use Player outside of the logic block below
+	ManagedReference<CreatureObject*> player = nullptr;
+	ManagedReference<ManufactureSchematic*> manuSchematic = nullptr;
 
 	if (socketsGenerated) {
 		return;
@@ -106,10 +109,10 @@ void WearableObjectImplementation::generateSockets(CraftingValues* craftingValue
 	int luck = 0;
 
 	if (craftingValues != NULL) {
-		ManagedReference<ManufactureSchematic*> manuSchematic = craftingValues->getManufactureSchematic();
+		manuSchematic = craftingValues->getManufactureSchematic();
 		if(manuSchematic != NULL) {
 			ManagedReference<DraftSchematic*> draftSchematic = manuSchematic->getDraftSchematic();
-			ManagedReference<CreatureObject*> player = manuSchematic->getCrafter().get();
+			player = manuSchematic->getCrafter().get();
 
 			if (player != NULL && draftSchematic != NULL) {
 				String assemblySkill = draftSchematic->getAssemblySkill();
@@ -120,7 +123,10 @@ void WearableObjectImplementation::generateSockets(CraftingValues* craftingValue
 		}
 	}
 
-	int random = (System::random(750)) - 250; // -250 to 500
+	// Shifted roll chance from (-250 to 500) -> (100 to 850).
+	// This will drastically increase max sockets chance, but not gaurantee it.
+	// You will always roll at LEAST 1 socket.
+	int random = (System::random(750)) + 100; // -250 to 500
 
 	float roll = System::random(skill + luck + random);
 
