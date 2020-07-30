@@ -6,7 +6,7 @@ jediManagerName = "VillageJediManager"
 
 NOTINABUILDING = 0
 
-NUMBEROFTREESTOMASTER = 6
+NUMBEROFTREESTOMASTER = 4
 
 VillageJediManager = JediManager:new {
 	screenplayName = jediManagerName,
@@ -123,13 +123,15 @@ end
 
 --Check to ensure force skill prerequisites are maintained
 function VillageJediManager:canSurrenderSkill(pPlayer, skillName)
-	if skillName == "force_title_jedi_novice" and CreatureObject(pPlayer):getForceSensitiveSkillCount(true) > 0 then
-		return false
-	end
+	-- // Remove inability to drop Jedi Novice completely if any FSSkills are kept
+	-- if skillName == "force_title_jedi_novice" and CreatureObject(pPlayer):getForceSensitiveSkillCount(true) > 0 then
+	-- 	return false
+	-- end
 
-	if string.find(skillName, "force_sensitive_") and CreatureObject(pPlayer):hasSkill("force_title_jedi_rank_02") and CreatureObject(pPlayer):getForceSensitiveSkillCount(false) <= 24 then
-		return false
-	end
+	-- // Removes requirements of FS skill boxes to retain Jedi boxes
+	-- if string.find(skillName, "force_sensitive_") and CreatureObject(pPlayer):hasSkill("force_title_jedi_rank_02") and CreatureObject(pPlayer):getForceSensitiveSkillCount(false) <= 24 then
+	-- 	return false
+	-- end
 
 	if string.find(skillName, "force_discipline_") and CreatureObject(pPlayer):hasSkill("force_title_jedi_rank_03") and not CreatureObject(pPlayer):villageKnightPrereqsMet(skillName) then
 		return false
