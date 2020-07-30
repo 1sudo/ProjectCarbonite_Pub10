@@ -977,12 +977,12 @@ void ResourceSpawner::sendSampleResults(CreatureObject* player, const float dens
 		return;
 	}
 
-	Coordinate* richSampleLocation = session->getRichSampleLocation();
+	// Coordinate* richSampleLocation = session->getRichSampleLocation();
 
 	float sampleRate = (surveySkill * density) + System::random(100) + player->getSkillMod("private_spec_samplerate");
 
 	// Was the sample successful or not
-	if (!session->tryGamble() && richSampleLocation == NULL && sampleRate < 40) {
+	if (!session->tryGamble() && sampleRate < 40) { //richSampleLocation == nullptr && sampleRate < 40) {
 		StringIdChatParameter message("survey", "sample_failed");
 		message.setTO(resname);
 		player->sendSystemMessage(message);
@@ -997,32 +997,35 @@ void ResourceSpawner::sendSampleResults(CreatureObject* player, const float dens
 	int unitsExtracted = maxUnitsExtracted * (float(surveySkill) / 100.0f) * samplingMultiplier * cityMultiplier;
 	int xpcap = 40;
 
-	if (session->tryGamble()) {
-		if (System::random(2) == 1) {
-			player->sendSystemMessage("@survey:gamble_success");
-			unitsExtracted *= 5;
-		} else {
-			player->sendSystemMessage("@survey:gamble_fail");
-		}
-		session->clearGamble();
-		xpcap = 50;
-	}
+	// if (session->tryGamble()) {
+	// 	if (System::random(2) == 1) {
+	// 		player->sendSystemMessage("@survey:gamble_success");
+	// 		unitsExtracted *= 5;
+	// 	} else {
+	// 		player->sendSystemMessage("@survey:gamble_fail");
+	// 	}
+	// 	session->clearGamble();
+	// 	xpcap = 50;
+	// }
 
-	if (richSampleLocation != NULL && richSampleLocation->getPosition() != Vector3(0, 0, 0)) {
+	// Double Sampling Rates
+	unitsExtracted *= 2;
 
-		if (player->getDistanceTo(richSampleLocation) < 10) {
+	// if (richSampleLocation != NULL && richSampleLocation->getPosition() != Vector3(0, 0, 0)) {
 
-			player->sendSystemMessage("@survey:node_recovery");
-			unitsExtracted *= 5;
+	// 	if (player->getDistanceTo(richSampleLocation) < 10) {
 
-		} else {
+	// 		player->sendSystemMessage("@survey:node_recovery");
+	// 		unitsExtracted *= 5;
 
-			player->sendSystemMessage("@survey:node_not_close");
-		}
+	// 	} else {
 
-		session->clearRichSampleLocation();
-		xpcap = 50;
-	}
+	// 		player->sendSystemMessage("@survey:node_not_close");
+	// 	}
+
+	// 	session->clearRichSampleLocation();
+	// 	xpcap = 50;
+	// }
 
 	if (unitsExtracted < 2) {
 

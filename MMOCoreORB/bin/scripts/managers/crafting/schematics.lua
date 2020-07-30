@@ -1154,6 +1154,7 @@ schematics = {
 	{path="object/draft_schematic/structure/installation_mining_organic_flora_heavy.iff"},
 	{path="object/draft_schematic/structure/installation_mining_gas_heavy.iff"},
 	{path="object/draft_schematic/structure/installation_mining_ore_heavy.iff"},
+	{path="object/draft_schematic/structure/installation_mining_organic_creature.iff"},
 	{path="object/draft_schematic/structure/installation_generator_fusion.iff"},
 	{path="object/draft_schematic/weapon/component/blade_vibro_unit.iff"},
 	{path="object/draft_schematic/weapon/component/sword_core.iff"},
