@@ -48,8 +48,8 @@ ForceShield2Command = {
 	--animationCRC = hashCode()
 	clientEffect = "clienteffect/pl_force_shield_self.cef",
 	buffClass = SINGLE_USE_BUFF,
-	frsDarkExtraForceCostModifier = -0.003,
-	frsLightExtraForceCostModifier = -0.003,
+	frsDarkExtraForceCostModifier = -0.001,
+	frsLightExtraForceCostModifier = -0.001,
 	frsLightBuffModifier = 0.35,
 	frsDarkBuffModifier = 0.35,
 }
