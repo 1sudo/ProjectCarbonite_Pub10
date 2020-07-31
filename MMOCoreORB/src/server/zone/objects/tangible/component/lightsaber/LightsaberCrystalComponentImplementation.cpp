@@ -43,7 +43,7 @@ void LightsaberCrystalComponentImplementation::notifyLoadFromDatabase() {
 		else
 			itemLevel = 330 + System::random(20);
 
-		attackSpeed = 0.0;
+		attackSpeed = 0.00;
 		minimumDamage = 0;
 		maximumDamage = 0;
 		sacHealth = 0;
@@ -51,7 +51,7 @@ void LightsaberCrystalComponentImplementation::notifyLoadFromDatabase() {
 		sacMind = 0;
 		woundChance = 0;
 		forceCost = 0;
-		floatForceCost = 0.0;
+		floatForceCost = 0.00;
 
 		generateCrystalStats();
 	}
@@ -106,7 +106,7 @@ void LightsaberCrystalComponentImplementation::generateCrystalStats() {
 		float minFloatStat = crystalData->getMinForceCost();
 		float maxFloatStat = crystalData->getMaxForceCost();
 
-		floatForceCost = getRandomizedStat(minFloatStat, maxFloatStat, itemLevel);
+		floatForceCost = Math::getPrecision(getRandomizedStat(minFloatStat, maxFloatStat, itemLevel), 2);
 
 		minFloatStat = crystalData->getMinAttackSpeed();
 		maxFloatStat = crystalData->getMaxAttackSpeed();
@@ -171,7 +171,7 @@ void LightsaberCrystalComponentImplementation::validateCrystalStats() {
 		float maxFloatStat = crystalData->getMaxForceCost();
 
 		if (floatForceCost > maxFloatStat || floatForceCost < minFloatStat)
-			floatForceCost = getRandomizedStat(minFloatStat, maxFloatStat, itemLevel);
+			floatForceCost = Math::getPrecision(getRandomizedStat(minFloatStat, maxFloatStat, itemLevel), 2);
 
 		minFloatStat = crystalData->getMinAttackSpeed();
 		maxFloatStat = crystalData->getMaxAttackSpeed();
@@ -182,17 +182,17 @@ void LightsaberCrystalComponentImplementation::validateCrystalStats() {
 }
 
 int LightsaberCrystalComponentImplementation::getCrystalQuality() {
-	if (itemLevel < 40)
+	if (itemLevel < 30)
 		return POOR;
-	else if (itemLevel < 70)
+	else if (itemLevel < 50)
 		return FAIR;
-	else if (itemLevel < 100)
+	else if (itemLevel < 70)
 		return GOOD;
-	else if (itemLevel < 140)
+	else if (itemLevel < 100)
 		return QUALITY;
-	else if (itemLevel < 220)
+	else if (itemLevel < 150)
 		return SELECT;
-	else if (itemLevel < 330)
+	else if (itemLevel < 280)
 		return PREMIUM;
 	else
 		return FLAWLESS;
@@ -211,7 +211,7 @@ int LightsaberCrystalComponentImplementation::getRandomizedStat(int min, int max
 		invertedValues = true;
 	}
 
-	float avgLevel = (float)(itemLevel - 60) / 220.f;
+	float avgLevel = (float)(itemLevel) / 220.f;
 
 	float midLevel = min + ((max - min) * avgLevel);
 
@@ -230,8 +230,17 @@ int LightsaberCrystalComponentImplementation::getRandomizedStat(int min, int max
 
 	int result = randMin + System::random(randMax - randMin);
 
-	if (invertedValues)
+	if (invertedValues) {
+		if (itemLevel > 325){
+			return invertedMax;
+		}
+
 		result = invertedMin + (invertedMax - result);
+	}
+
+	if (itemLevel > 325){
+		return max;
+	}
 
 	return result;
 }
@@ -249,7 +258,7 @@ float LightsaberCrystalComponentImplementation::getRandomizedStat(float min, flo
 		invertedValues = true;
 	}
 
-	float avgLevel = (float)(itemLevel - 60) / 220.f;
+	float avgLevel = (float)(itemLevel) / 220.f;
 
 	float midLevel = min + ((max - min) * avgLevel);
 
@@ -268,8 +277,17 @@ float LightsaberCrystalComponentImplementation::getRandomizedStat(float min, flo
 
 	float result = System::getMTRand()->rand(randMax - randMin) + randMin;
 
-	if (invertedValues)
+	if (invertedValues){
+		if (itemLevel > 325){
+			return invertedMax;
+		}
+
 		result = invertedMin + (invertedMax - result);
+	}
+
+	if (itemLevel > 325){
+		return max;
+	}
 
 	return result;
 }
@@ -300,7 +318,7 @@ void LightsaberCrystalComponentImplementation::fillAttributeList(AttributeListMe
 				alm->insertAttribute("wpn_attack_cost_health", sacHealth);
 				alm->insertAttribute("wpn_attack_cost_action", sacAction);
 				alm->insertAttribute("wpn_attack_cost_mind", sacMind);
-				alm->insertAttribute("forcecost", (int)getForceCost());
+				alm->insertAttribute("forcecost", (float)getForceCost());
 
 				// For debugging
 				if (player->isPrivileged()) {
