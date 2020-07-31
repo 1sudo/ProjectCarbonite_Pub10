@@ -93,16 +93,16 @@ object_tangible_wearables_robe_robe_jedi_dark_s01 = object_tangible_wearables_ro
 		"object/creature/player/zabrak_male.iff",
 		"object/creature/player/zabrak_female.iff",
 		"object/creature/player/wookiee_male.iff",
-		"object/creature/player/wookiee_female.iff" 
+		"object/creature/player/wookiee_female.iff",
 		"object/creature/player/ithorian_male.iff",
-		"object/creature/player/ithorian_female.iff"
+		"object/creature/player/ithorian_female.iff"	
 	},
 
 	noTrade = 1,
 
 	objectMenuComponent = "RobeObjectMenuComponent",
 	certificationsRequired = {"force_rank_dark_novice"},
-	attributeListComponent = "JediRobeAttributeListComponent",
+	attributeListComponent = "JediRobeAttributeListComponent"
 }
 
 ObjectTemplates:addTemplate(object_tangible_wearables_robe_robe_jedi_dark_s01, "object/tangible/wearables/robe/robe_jedi_dark_s01.iff")

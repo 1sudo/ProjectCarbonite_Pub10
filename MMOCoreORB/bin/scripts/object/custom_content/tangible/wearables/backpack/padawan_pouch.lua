@@ -93,7 +93,7 @@ object_tangible_wearables_backpack_padawan_pouch= object_tangible_wearables_back
 		"object/creature/player/zabrak_male.iff",
 		"object/creature/player/zabrak_female.iff",
 		"object/creature/player/wookiee_male.iff",
-		"object/creature/player/wookiee_female.iff" 
+		"object/creature/player/wookiee_female.iff",
 		"object/creature/player/ithorian_male.iff",
 		"object/creature/player/ithorian_female.iff"
 	},

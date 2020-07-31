@@ -93,7 +93,7 @@ object_tangible_wearables_robe_robe_jedi_dark_s02 = object_tangible_wearables_ro
 		"object/creature/player/zabrak_male.iff",
 		"object/creature/player/zabrak_female.iff",
 		"object/creature/player/wookiee_male.iff",
-		"object/creature/player/wookiee_female.iff" 
+		"object/creature/player/wookiee_female.iff", 
 		"object/creature/player/ithorian_male.iff",
 		"object/creature/player/ithorian_female.iff"
 	},
