@@ -268,14 +268,27 @@ float ArmorObjectImplementation::getTypeValue(int type, float value) {
 			newValue = 80;
 	} else {
 		newValue = baseProtection + value;
-		newValue *= effectivenessSlice;
+		// newValue *= effectivenessSlice;
 
-		if(sliced && effectivenessSlice > 1) {
-			if(newValue > 90)
-				newValue = 90;
-		} else {
-			if(newValue > 80)
-				newValue = 80;
+		// if(sliced && effectivenessSlice > 1) {
+		// 	if(newValue > 90)
+		// 		newValue = 90;
+		// } else {
+		// 	if(newValue > 80)
+		// 		newValue = 80;
+		// }
+
+		// Protect LightSaber resist from Slices
+		if (type != SharedWeaponObjectTemplate::LIGHTSABER) {
+			newValue *= effectivenessSlice;
+
+			if(sliced && effectivenessSlice > 1) {
+				if(newValue > 90)
+					newValue = 90;
+			} else {
+				if(newValue > 80)
+					newValue = 80;
+			}
 		}
 	}
 
