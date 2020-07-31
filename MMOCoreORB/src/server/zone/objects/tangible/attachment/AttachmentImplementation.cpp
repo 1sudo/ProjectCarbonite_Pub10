@@ -37,6 +37,11 @@ void AttachmentImplementation::updateCraftingValues(CraftingValues* values, bool
 
 		int mod = System::random(max - min) + min;
 
+		// Custom overcap
+		if (level > 350) {
+			mod = 25;
+		}
+
 		if(mod == 0)
 			mod = 1;
 

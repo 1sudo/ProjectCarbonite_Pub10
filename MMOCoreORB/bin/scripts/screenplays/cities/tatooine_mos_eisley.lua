@@ -634,4 +634,9 @@ function TatooineMosEisleyScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "trainer_scout",0,3519.76,5,-4786.9,77,0)
 	pNpc = spawnMobile(self.planet, "trainer_smuggler",0,3401,5,-4879,340,0)
 	self:setMoodString(pNpc, "worried")
+
+	--Testing NPCs
+	spawnMobile(self.planet, "TEST1_worrt", 1, 3560.81, 5, -4757.34, -89, 0)
+	spawnMobile(self.planet, "TEST2_worrt", 1, 3558.96, 5, -4759.46, -74, 0)
+	spawnMobile(self.planet, "TEST3_worrt", 1, 3556.54, 5, -4761.73, -94, 0)
 end
