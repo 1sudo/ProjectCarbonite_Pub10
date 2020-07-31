@@ -80,6 +80,7 @@ CreatureTemplate::~CreatureTemplate() {
 }
 
 void CreatureTemplate::readObject(LuaObject* templateData) {
+	int harvestingBonus = 5;
 	conversationTemplate = String(templateData->getStringField("conversationTemplate").trim()).hashCode();
 	objectName = templateData->getStringField("objectName").trim();
 	randomNameType = templateData->getIntField("randomNameType");
@@ -100,12 +101,40 @@ void CreatureTemplate::readObject(LuaObject* templateData) {
 	baseHAMmax = templateData->getIntField("baseHAMmax");
 	armor = templateData->getIntField("armor");
 	meatType = templateData->getStringField("meatType").trim();
-	meatAmount = templateData->getIntField("meatAmount");
+	// meatAmount = templateData->getIntField("meatAmount");
+	// MEAT -- Harvesting Refactor
+	if (templateData->getIntField("meatAmount") < 10) {
+		meatAmount = (templateData->getIntField("meatAmount") * (harvestingBonus * 2));
+	} else {
+		meatAmount = (templateData->getIntField("meatAmount") * harvestingBonus);
+	}
+
 	hideType = templateData->getStringField("hideType").trim();
-	hideAmount = templateData->getIntField("hideAmount");
+	// hideAmount = templateData->getIntField("hideAmount");
+	// HIDE -- Harvesting Refactor
+	if (templateData->getIntField("hideAmount") < 10) {
+		hideAmount = (templateData->getIntField("hideAmount") * (harvestingBonus * 2));
+	} else {
+		hideAmount = (templateData->getIntField("hideAmount") * harvestingBonus);
+	}
+
 	boneType = templateData->getStringField("boneType").trim();
-	boneAmount = templateData->getIntField("boneAmount");
-	milk = templateData->getIntField("milk");
+	// boneAmount = templateData->getIntField("boneAmount");
+	// BONE -- Harvesting Refactor
+	if (templateData->getIntField("boneAmount") < 10) {
+		boneAmount = (templateData->getIntField("boneAmount") * harvestingBonus * 2);
+	} else {
+		boneAmount = (templateData->getIntField("boneAmount") * harvestingBonus);
+	}
+
+	// milk = templateData->getIntField("milk");
+	// MILK -- Harvesting Refactor
+	if (templateData->getIntField("milk") < 10) {
+		milk = (templateData->getIntField("milk") * (harvestingBonus * 3));
+	} else {
+		milk = (templateData->getIntField("milk") * (harvestingBonus * 2));
+	}
+
 	tamingChance = templateData->getFloatField("tamingChance");
 	ferocity = templateData->getIntField("ferocity");
 	aggroRadius = templateData->getIntField("aggroRadius");

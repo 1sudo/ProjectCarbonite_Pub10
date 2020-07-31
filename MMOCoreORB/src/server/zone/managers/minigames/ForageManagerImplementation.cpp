@@ -351,6 +351,12 @@ bool ForageManagerImplementation::forageGiveResource(CreatureObject* player, flo
 	if (player == NULL)
 		return false;
 
+	bool shouldBoostQuant = false;
+
+	if (resType == "meat_egg") {
+		shouldBoostQuant = true;
+	}
+
 	ManagedReference<ResourceManager*> resourceManager = player->getZoneServer()->getResourceManager();
 
 	if (resourceManager == NULL)
@@ -393,6 +399,14 @@ bool ForageManagerImplementation::forageGiveResource(CreatureObject* player, flo
 	}
 
 	int quantity = System::random(30) + 10;
+	// player->sendSystemMessage("You originally found " + String::valueOf(quantity) + " of " + String::valueOf(resType));
+
+	if (shouldBoostQuant) {
+		quantity *= 200; // Harvesting eggs buff
+	}
+
+	// player->sendSystemMessage("You were given more " + String::valueOf(resType) + " at:" + String::valueOf(quantity));
+
 	resourceManager->harvestResourceToPlayer(player, resource, quantity);
 	return true;
 }
