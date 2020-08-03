@@ -316,7 +316,6 @@ public:
 			return TOOFAR;
 
 		parseModifier(arguments.toString(), attribute, objectId);
-
 		CreatureObject* patient = cast<CreatureObject*>( targetCreature);
 
 		Locker clocker(patient, creature);
@@ -413,35 +412,93 @@ public:
 			return GENERALERROR;
 
 		uint32 currentBuff = 0;
-		uint32 buffcrc = BuffCRC::getMedicalBuff(attribute);
+		uint32 buffcrc = 0;
+		uint32 amountEnhanced = 0;
 
-		if (patient->hasBuff(buffcrc)) {
-			Buff* existingbuff = patient->getBuff(buffcrc);
+		// Modified BuffEnhance for custom BuffPacks
+		if (attribute == 69){
+			ArrayList<int> selfBuffs = {0, 1, 2, 3, 4, 5};
 
-			currentBuff = getBuffStrength(existingbuff, attribute);
+			// Loop through selfBuffs array and buff Health & Action at 100% strength
+			for (int x=0; x < selfBuffs.size(); x++){
+				attribute = selfBuffs.get(x);
+				currentBuff = 0;
+				buffcrc = BuffCRC::getMedicalBuff(attribute);
+
+				
+				if (patient->hasBuff(buffcrc)) {
+					Buff* existingbuff = patient->getBuff(buffcrc);
+
+					currentBuff = getBuffStrength(existingbuff, attribute);
+				}
+
+				//Applies battle fatigue
+				uint32 buffPower = getEnhancePackStrength(enhancePack, enhancer, patient);
+
+				if (x == 1 || x == 2 || x == 4 || x == 5){
+					if (buffPower > 100) {
+						buffPower = buffPower / 2;
+					}
+				}
+
+				if (buffPower < currentBuff) {
+					if (patient == enhancer)
+						enhancer->sendSystemMessage("Your current enhancements are of greater power and cannot be re-applied.");
+					else
+						enhancer->sendSystemMessage("Your target's current enhancements are of greater power and cannot be re-applied.");
+
+					return 0;
+				}
+
+				PlayerManager* playerManager = server->getZoneServer()->getPlayerManager();
+
+				amountEnhanced = playerManager->healEnhance(enhancer, patient, attribute, buffPower, enhancePack->getDuration(), enhancePack->getAbsorption());
+				// enhancer->sendSystemMessage("Atrribute Enhanced is: " + String::valueOf(attribute));
+				// enhancer->sendSystemMessage("BuffPower Enhanced is: " + String::valueOf(buffPower));
+				// enhancer->sendSystemMessage("Amount Enhanced is: " + String::valueOf(amountEnhanced));
+
+				if (creature->isPlayerCreature() && targetCreature->isPlayerCreature()) {
+					playerManager->sendBattleFatigueMessage(creature, targetCreature);
+				}
+
+				sendEnhanceMessage(enhancer, patient, attribute, amountEnhanced);
+			}
 		}
+		else {
+			currentBuff = 0;
+			buffcrc = BuffCRC::getMedicalBuff(attribute);
 
-		//Applies battle fatigue
-		uint32 buffPower = getEnhancePackStrength(enhancePack, enhancer, patient);
+			// enhancer->sendSystemMessage("==Attribute== is: " + String::valueOf(attribute));
+			// enhancer->sendSystemMessage("==buffcrc== is: " + String::valueOf(buffcrc));
 
-		if (buffPower < currentBuff) {
-			if (patient == enhancer)
-				enhancer->sendSystemMessage("Your current enhancements are of greater power and cannot be re-applied.");
-			else
-				enhancer->sendSystemMessage("Your target's current enhancements are of greater power and cannot be re-applied.");
+			if (patient->hasBuff(buffcrc)) {
+				Buff* existingbuff = patient->getBuff(buffcrc);
 
-			return 0;
+				currentBuff = getBuffStrength(existingbuff, attribute);
+			}
+
+			//Applies battle fatigue
+			uint32 buffPower = getEnhancePackStrength(enhancePack, enhancer, patient);
+
+			if (buffPower < currentBuff) {
+				if (patient == enhancer)
+					enhancer->sendSystemMessage("Your current enhancements are of greater power and cannot be re-applied.");
+				else
+					enhancer->sendSystemMessage("Your target's current enhancements are of greater power and cannot be re-applied.");
+
+				return 0;
+			}
+
+			PlayerManager* playerManager = server->getZoneServer()->getPlayerManager();
+
+			amountEnhanced = playerManager->healEnhance(enhancer, patient, attribute, buffPower, enhancePack->getDuration(), enhancePack->getAbsorption());
+
+			if (creature->isPlayerCreature() && targetCreature->isPlayerCreature()) {
+				playerManager->sendBattleFatigueMessage(creature, targetCreature);
+			}
+
+			sendEnhanceMessage(enhancer, patient, attribute, amountEnhanced);
 		}
-
-		PlayerManager* playerManager = server->getZoneServer()->getPlayerManager();
-
-		uint32 amountEnhanced = playerManager->healEnhance(enhancer, patient, attribute, buffPower, enhancePack->getDuration(), enhancePack->getAbsorption());
-
-		if (creature->isPlayerCreature() && targetCreature->isPlayerCreature()) {
-			playerManager->sendBattleFatigueMessage(creature, targetCreature);
-		}
-
-		sendEnhanceMessage(enhancer, patient, attribute, amountEnhanced);
 
 		enhancer->inflictDamage(enhancer, CreatureAttribute::MIND, mindCostNew, false);
 
