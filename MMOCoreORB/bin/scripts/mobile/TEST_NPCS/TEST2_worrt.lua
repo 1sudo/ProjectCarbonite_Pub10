@@ -1,6 +1,6 @@
 TEST2_worrt = Creature:new {
 	objectName = "@mob/creature_names:worrt",
-	customName = "ARMOR ATTACHMENTS PINATA",
+	customName = "ARMOR ATTACHMENTS PINATA (CL500)",
 	socialGroup = "",
 	faction = "",
 	level = 650,

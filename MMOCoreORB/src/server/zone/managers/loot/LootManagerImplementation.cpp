@@ -301,6 +301,8 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 	setCustomObjectName(prototype, templateObject);
 
 	float excMod = 1.0;
+	bool legendary = false;
+	bool exceptional = false;
 
 	float adjustment = floor((float)(((level > 50) ? level : 50) - 50) / 10.f + 0.5);
 
@@ -313,6 +315,7 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 		prototype->addMagicBit(false);
 
 		legendaryLooted.increment();
+		legendary = true;
 	} else if (System::random(exceptionalChance) >= exceptionalChance - adjustment) {
 		UnicodeString newName = prototype->getDisplayedName() + " (Exceptional)";
 		prototype->setCustomObjectName(newName, false);
@@ -322,13 +325,15 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 		prototype->addMagicBit(false);
 
 		exceptionalLooted.increment();
+		exceptional = true;
 	}
 
 	if (prototype->isLightsaberCrystalObject()) {
 		LightsaberCrystalComponent* crystal = cast<LightsaberCrystalComponent*> (prototype.get());
 
-		if (crystal != NULL)
+		if (crystal != NULL) {
 			crystal->setItemLevel(uncappedLevel);
+		}
 	}
 
 	String subtitle;
@@ -437,6 +442,20 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 			prototype->setJunkValue((int)(fJunkValue));
 		} else {
 			prototype->setJunkValue((int)(fJunkValue * (excMod/2)));
+		}
+	}
+
+	if (prototype->isLightsaberCrystalObject()) {
+		LightsaberCrystalComponent* crystal = cast<LightsaberCrystalComponent*> (prototype.get());
+
+		if (crystal != nullptr) {
+			if (yellow) {
+				crystal->setRareMod(1);
+			} else if (legendary) {
+				crystal->setRareMod(2);
+			} else if (exceptional) {
+				crystal->setRareMod(3);
+			}
 		}
 	}
 

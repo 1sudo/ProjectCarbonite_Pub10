@@ -1,9 +1,9 @@
-TEST1_worrt = Creature:new {
+TEST4_worrt = Creature:new {
 	objectName = "@mob/creature_names:worrt",
-	customName = "CLOTHING ATTACHMENTS PINATA (CL500)",
+	customName = "COMPONENTS PINATA (CL500)",
 	socialGroup = "",
 	faction = "",
-	level = 650,
+	level = 500,
 	chanceHit = 0.01,
 	damageMin = 1,
 	damageMax = 1,
@@ -33,64 +33,88 @@ TEST1_worrt = Creature:new {
 	lootGroups = {
 		{
 			groups = {
-				{group = "clothing_attachments", chance = 10000000}
+				{group = "krayt_tissue_rare", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
 		{
 			groups = {
-				{group = "clothing_attachments", chance = 10000000}
+				{group = "krayt_tissue_rare", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
 		{
 			groups = {
-				{group = "clothing_attachments", chance = 10000000}
+				{group = "gorax_bone_shards_rare", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
 		{
 			groups = {
-				{group = "clothing_attachments", chance = 10000000}
+				{group = "gorax_bone_shards_rare", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
 		{
 			groups = {
-				{group = "clothing_attachments", chance = 10000000}
+				{group = "axkva_min", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
 		{
 			groups = {
-				{group = "clothing_attachments", chance = 10000000}
+				{group = "axkva_min", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
 		{
 			groups = {
-				{group = "clothing_attachments", chance = 10000000}
+				{group = "rancor_common", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
 		{
 			groups = {
-				{group = "clothing_attachments", chance = 10000000}
+				{group = "rancor_common", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
 		{
 			groups = {
-				{group = "clothing_attachments", chance = 10000000}
+				{group = "acklay", chance = 10000000}
 			},
 			lootChance = 10000000
 		},
 		{
 			groups = {
-				{group = "clothing_attachments", chance = 10000000}
+				{group = "acklay", chance = 10000000}
 			},
 			lootChance = 10000000
-		}
+		},
+		{
+			groups = {
+				{group = "geonosian_common", chance = 10000000}
+			},
+			lootChance = 10000000
+		},
+		{
+			groups = {
+				{group = "geonosian_common", chance = 10000000}
+			},
+			lootChance = 10000000
+		},
+		{
+			groups = {
+				{group = "geonosian_hard", chance = 10000000}
+			},
+			lootChance = 10000000
+		},
+		{
+			groups = {
+				{group = "geonosian_hard", chance = 10000000}
+			},
+			lootChance = 10000000
+		},
 	},
 	weapons = {},
 	conversationTemplate = "",
@@ -98,4 +122,4 @@ TEST1_worrt = Creature:new {
 	}
 }
 
-CreatureTemplates:addCreatureTemplate(TEST1_worrt, "TEST1_worrt")
+CreatureTemplates:addCreatureTemplate(TEST4_worrt, "TEST4_worrt") 

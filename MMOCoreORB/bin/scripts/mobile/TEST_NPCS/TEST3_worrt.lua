@@ -1,6 +1,6 @@
 TEST3_worrt = Creature:new {
 	objectName = "@mob/creature_names:worrt",
-	customName = "CRYSTALS and PEARLS PINATA",
+	customName = "CRYSTALS and PEARLS PINATA (CL500)",
 	socialGroup = "",
 	faction = "",
 	level = 500,
