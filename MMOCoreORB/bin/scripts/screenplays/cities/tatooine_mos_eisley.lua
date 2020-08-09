@@ -640,4 +640,5 @@ function TatooineMosEisleyScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "TEST2_worrt", 1, 3558.96, 5, -4759.46, -74, 0)
 	spawnMobile(self.planet, "TEST3_worrt", 1, 3556.54, 5, -4761.73, -94, 0)
 	spawnMobile(self.planet, "TEST4_worrt", 1, 3554.56, 5, -4763.93, -78, 0)
+	spawnMobile(self.planet, "TEST5_janta", 1, 3552.56, 5, -4765.93, -78, 0)
 end
