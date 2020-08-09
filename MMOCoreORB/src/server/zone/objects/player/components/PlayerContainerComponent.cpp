@@ -54,6 +54,12 @@ int PlayerContainerComponent::canAddObject(SceneObject* sceneObject, SceneObject
 			}
 		}
 
+		// Thanks TOXIC :)
+		if ((wearable->getMaxCondition() - wearable->getConditionDamage()) <= 0) {
+			errorDescription = "It would be a waste of time to try to use this.";
+				return TransferErrorCode::PLAYERUSEMASKERROR;
+		}
+
 		if (object->isArmorObject()) {
 			PlayerManager* playerManager = sceneObject->getZoneServer()->getPlayerManager();
 
