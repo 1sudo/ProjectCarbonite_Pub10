@@ -560,13 +560,15 @@ void LightsaberCrystalComponentImplementation::fillAttributeList(AttributeListMe
 			str3 << "@jedi_spam:saber_color_" << getColor();
 			alm->insertAttribute("color", str3);
 
-			if (damage > 100 || damage < 0) {
-				validateCrystalStats();
-			} else if (damage > 0) { // Color crystals can't have 0 dmg if rare!
-				alm->insertAttribute("mindamage", damage);
-				alm->insertAttribute("maxdamage", damage);
-				alm->insertAttribute("wpn_wound_chance", woundChance);
-				alm->insertAttribute("forcecost", (float)getForceCost());
+			if (ownerID != 0 || player->isPrivileged()) {
+				if (damage > 100 || damage < 0) {
+					validateCrystalStats();
+				} else if (damage > 0) { // Color crystals can't have 0 dmg if rare!
+					alm->insertAttribute("mindamage", damage);
+					alm->insertAttribute("maxdamage", damage);
+					alm->insertAttribute("wpn_wound_chance", woundChance);
+					alm->insertAttribute("forcecost", (float)getForceCost());
+				}
 			}
 		} else {
 			if (damage > 100 || damage < 0) {
