@@ -167,6 +167,10 @@ includeFile("groups/npc/tutorial_pirate.lua")
 includeFile("groups/npc/valarian_common.lua")
 includeFile("groups/npc/weequay_common.lua")
 
+-- Custom Stuff Below here
+includeFile("groups/npc/custom_test/janta_TEST.lua")
+-- Custom Stuff Above here
+
 -- task_loot sub-folder
 includeFile("groups/task_loot/hedon_istee_treasure.lua")
 includeFile("groups/task_loot/task_loot_ancient_lightsaber.lua")
