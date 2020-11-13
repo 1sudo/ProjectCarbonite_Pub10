@@ -4,6 +4,9 @@ The base for this repo was provided by Sudo, saving us a ton of work (see commit
 
 This branch contains a fresh Core3 clone with MTG mobiles and objects included. All custom planets shipped with MTG should be disabled and the MTG planets tre should not be included in the server config. The reason behind this is due to invalid object ID's being used for those planets that will cause issues later down the road. 
 
+Tip: If you want to ignore resource_spawns and not commit them (recommended) run the following command from within the MMOCoreORB folder:
+        git update-index --skip-worktree bin/scripts/managers/resource_manager_spawns.lua
+
 ## What is SWGEmu? ##
 
 Star Wars Galaxies was a massively multi-player online role playing game introduced by Sony Online Entertainment in the year 2003 and shut down in 2011.
