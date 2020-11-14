@@ -86,15 +86,16 @@ void WearableObjectImplementation::fillAttributeList(AttributeListMessage* alm,
 
 bool WearableObjectImplementation::hasSeaRemovalTool(CreatureObject* player, bool removeItem) {
 
-	uint32 crc;
-
-	if (player == NULL)
+	if (player == NULL) {
 		return 0;
+	}
 
+	uint32 crc;
 	ManagedReference<SceneObject*> inventory = player->getSlottedObject("inventory");
 
-	if (inventory == NULL)
+	if (inventory == NULL){
 		return false;
+	}
 
 	Locker inventoryLocker(inventory);
 

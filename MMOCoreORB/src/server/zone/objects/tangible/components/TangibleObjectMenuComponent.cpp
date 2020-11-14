@@ -88,6 +88,11 @@ void TangibleObjectMenuComponent::fillObjectMenuResponse(SceneObject *sceneObjec
 		}
 	}
 
+	if (sceneObject->isAttachment())
+	{
+		menuResponse->addRadialMenuItem(99, 3, "Use Skill Combinator");
+	}
+
 	ManagedReference<SceneObject *> parent = tano->getParent().get();
 	if (parent != NULL && parent->getGameObjectType() == SceneObjectType::STATICLOOTCONTAINER)
 	{
@@ -102,7 +107,7 @@ int TangibleObjectMenuComponent::handleObjectMenuSelect(SceneObject *sceneObject
 
 	TangibleObject *tano = cast<TangibleObject *>(sceneObject);
 
-	player->sendSystemMessage("This item has a selectedID of: " + String::valueOf(selectedID));
+	// player->sendSystemMessage("This item has a selectedID of: " + String::valueOf(selectedID));
 
 	if (selectedID == 69 && player->hasSkill("combat_smuggler_novice"))
 	{ // Slice [PlayerLootCrate]
@@ -251,12 +256,11 @@ int TangibleObjectMenuComponent::handleObjectMenuSelect(SceneObject *sceneObject
 					//Destroy item now that tapes have been generated
 					if (wearable->hasSeaRemovalTool(player, true) == true)
 					{
-						player->sendSystemMessage("Your SEA Tool has been consumed in the process.");
+						player->sendSystemMessage("Successfully extracted skill attachments! Your SEA Tool was destroyed in the process.");
 					}
 
 					wearable->destroyObjectFromWorld(true);
 					wearable->destroyObjectFromDatabase(true);
-					player->sendSystemMessage("Removing SEA");
 
 					// if (convertedMods){
 					// 	player->sendSystemMessage("Old skill mods were converted to new skill mods.");
@@ -266,6 +270,218 @@ int TangibleObjectMenuComponent::handleObjectMenuSelect(SceneObject *sceneObject
 		}
 		return 0;
 	}
+	else if (selectedID == 99)
+	{ //Remove SEA Mods from wearable
+		ManagedReference<SceneObject *> newSEA = NULL;
+		Attachment *attachment = cast<Attachment *>(sceneObject);
+
+		if (attachment != NULL)
+		{
+			Locker currentAttachmentLocker(attachment);
+			HashTable<String, int> *attachmentMods = attachment->getSkillMods();
+			LootGroupMap *lootGroupMap = LootGroupMap::instance();
+			Reference<LootItemTemplate *> itemTemplate = NULL;
+
+			if (attachment->isArmorAttachment())
+			{
+				itemTemplate = lootGroupMap->getLootItemTemplate("attachment_armor");
+			}
+			else if (attachment->isClothingAttachment())
+			{
+				itemTemplate = lootGroupMap->getLootItemTemplate("attachment_clothing");
+			}
+
+			// So long as our attachment has 1 mod then we continue to try and combine
+			if (attachmentMods->size() > 0)
+			{
+				HashTableIterator<String, int> iterator = attachmentMods->iterator();
+				String statName = "";
+				String attachmentName = "";
+				int statValue = 0;
+				int attachmentValue = 0;
+
+				// player->sendSystemMessage("You tried to combine an attachment with the following mods:");
+
+				// Find highest value mod on the attachment to use for combinating
+				for (int x = 0; x < attachmentMods->size(); x++)
+				{
+					iterator.getNextKeyAndValue(statName, statValue);
+					if (statValue > attachmentValue)
+					{
+						attachmentName = statName;
+						attachmentValue = statValue;
+					}
+				}
+
+				// player->sendSystemMessage("ID: [" + String::valueOf(attachment->getObjectID()) +"] Name: [" + attachmentName + "] with Value: [" + String::valueOf(attachmentValue)+"]");
+				Attachment *chosenAttachment = nullptr;
+				int chosenAttachmentValue = 0;
+
+				// We do not want to try to combine if the value is already 25!
+				if (attachmentValue > 24)
+				{
+					player->sendSystemMessage("The chosen Attachment is already the highest it can go!");
+				}
+				else
+				{
+					ManagedReference<SceneObject *> inventory = player->getSlottedObject("inventory");
+
+					// Check player inventory for compatible attachments
+					for (int i = 0; i < inventory->getContainerObjectsSize(); ++i)
+					{
+						ManagedReference<SceneObject *> sceno = inventory->getContainerObject(i);
+						if (sceno != nullptr && sceno->isAttachment())
+						{
+
+							// Prevent looking at the same attachment as a possible combination choice
+							if (attachment->getObjectID() != sceno->getObjectID())
+							{
+								Reference<const LootItemTemplate *> checkedItemTemplate = NULL;
+								Attachment *attachmentToCheck = cast<Attachment *>(sceno.get());
+								if (attachmentToCheck->isArmorAttachment())
+								{
+									checkedItemTemplate = lootGroupMap->getLootItemTemplate("attachment_armor");
+								}
+								else if (attachmentToCheck->isClothingAttachment())
+								{
+									checkedItemTemplate = lootGroupMap->getLootItemTemplate("attachment_clothing");
+								}
+
+								// Check to make sure the Attachments we're looping through are of the same Type as our chosen Attachment!
+								if (itemTemplate == checkedItemTemplate)
+								{
+									// Check attachment for compatibility
+									if (attachmentToCheck != NULL)
+									{
+										Locker objLocker2(attachmentToCheck);
+										HashTable<String, int> *attachmentToCheckMods = attachmentToCheck->getSkillMods();
+										HashTableIterator<String, int> attachmentToCheckiterator = attachmentToCheckMods->iterator();
+										String iterAttachName = "";
+										String attachmentToUseName = "";
+										int iterAttachValue = 0;
+										int attachmentToUseValue = 0;
+										// Make sure the possible attachment has at LEAST 1 mod
+										if (attachmentToCheckMods->size() > 0)
+										{
+											// Find highest value mod on the attachment to use for combinating
+											for (int x = 0; x < attachmentToCheckMods->size(); x++)
+											{
+												attachmentToCheckiterator.getNextKeyAndValue(iterAttachName, iterAttachValue);
+												if (iterAttachValue > attachmentToUseValue)
+												{
+													attachmentToUseName = iterAttachName;
+													attachmentToUseValue = iterAttachValue;
+												}
+											}
+										}
+										// If we find the same type of tape then we want to find the lowest skill value tape in the inventory to combine with!
+										if (attachmentName == attachmentToUseName)
+										{
+											// If we have no currently chosen attachment to begin with, set it to the current one for later comparison
+											if (chosenAttachment == nullptr)
+											{
+												// Make sure we don't allow combining with greater than tapes, only less than or equal to!
+												if (attachmentToUseValue <= attachmentValue)
+												{
+													chosenAttachment = attachmentToCheck;
+													chosenAttachmentValue = attachmentToUseValue;
+												}
+											}
+											// If an attachment of the same type is in player's inventory with a smaller value, use that
+											else if (attachmentToUseValue < chosenAttachmentValue)
+											{
+												chosenAttachment = attachmentToCheck;
+												chosenAttachmentValue = attachmentToUseValue;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					// Make sure the attachment we've picked isn't a bad actor
+					if (chosenAttachment != nullptr)
+					{
+						Locker locker(chosenAttachment);
+						ManagedReference<SceneObject *> combinedSEA = NULL;
+						ManagedReference<LootManager *> lootManager = player->getZoneServer()->getLootManager();
+
+						int combinedValue = 0;
+						combinedValue = attachmentValue + chosenAttachmentValue;
+						int combinationCost = 0;
+						combinationCost = combinedValue * 2000; // 2000 credits per total points combined
+
+						// Make sure the player can afford to combine!
+						if (player->getBankCredits() >= combinationCost)
+						{
+							// Cap combined mods at 25
+							if (combinedValue > 25)
+							{
+								combinedValue = 25;
+							}
+							else if (combinedValue < 1)
+							{ // Make sure we can't go below 1! (just in case)
+								combinedValue = 1;
+							}
+
+							combinedSEA = lootManager->createLootAttachment(itemTemplate, attachmentName, combinedValue);
+							bool successfulCombination = false;
+							if (combinedSEA != NULL)
+							{
+								Attachment *attachmentToMake = cast<Attachment *>(combinedSEA.get());
+
+								if (attachmentToMake != NULL)
+								{
+									Locker objLocker(attachmentToMake);
+									if (inventory->transferObject(attachmentToMake, -1, true, true))
+									{ //Transfer tape to player inventory
+										inventory->broadcastObject(attachmentToMake, true);
+										successfulCombination = true;
+									}
+									else
+									{
+										attachmentToMake->destroyObjectFromDatabase(true);
+										error("Unable to place Skill Attachment in player's inventory!");
+										return false;
+									}
+								}
+							}
+
+							// Get rid of combined attachments
+							if (successfulCombination)
+							{
+								attachment->destroyObjectFromWorld(true);
+								attachment->destroyObjectFromDatabase(true);
+								chosenAttachment->destroyObjectFromWorld(true);
+								chosenAttachment->destroyObjectFromDatabase(true);
+								player->subtractBankCredits(combinationCost);
+								player->sendSystemMessage("++++++++++++++++++++");
+								player->sendSystemMessage("Successfully combined selected SEA with an equal or lesser SEA from your inventory!");
+								player->sendSystemMessage("The [Galactic Civil Authority] has removed " + String::valueOf(combinationCost) + " credits from your bank for this service.");
+								player->sendSystemMessage("++++++++++++++++++++");
+							}
+						}
+						else
+						{
+							player->sendSystemMessage("You must have " + String::valueOf(combinationCost) + " in your bank account to combine the chosen Attachments!");
+							warning("Player: " + player->getDisplayedName() + " has tried and failed to combine attachments due to a lack of credits!");
+						}
+					}
+
+					// Return a helpful message if no viable tapes found in player's inventory for combinating!
+					if (chosenAttachment == nullptr)
+					{
+						player->sendSystemMessage("No viable tape found in your inventory. You must have another attachment of the same type and skill that is equal to or lesser in value!");
+					}
+				}
+			}
+		}
+
+		// Finish up and return
+		return 0;
+	}
 	else
+	{
 		return ObjectMenuComponent::handleObjectMenuSelect(sceneObject, player, selectedID);
+	}
 }
