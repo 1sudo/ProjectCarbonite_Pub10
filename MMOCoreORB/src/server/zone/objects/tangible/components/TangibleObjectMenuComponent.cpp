@@ -90,7 +90,8 @@ void TangibleObjectMenuComponent::fillObjectMenuResponse(SceneObject *sceneObjec
 
 	if (sceneObject->isAttachment())
 	{
-		menuResponse->addRadialMenuItem(99, 3, "Use Skill Combinator");
+		menuResponse->addRadialMenuItem(99, 3, "Combine Attachments");
+		menuResponse->addRadialMenuItem(109, 3, "Convert Attachment Type");
 	}
 
 	ManagedReference<SceneObject *> parent = tano->getParent().get();
@@ -167,6 +168,7 @@ int TangibleObjectMenuComponent::handleObjectMenuSelect(SceneObject *sceneObject
 		WearableObject *wearable = cast<WearableObject *>(tano);
 		ManagedReference<SceneObject *> sea = NULL;
 		bool convertedMods = false;
+
 		ManagedReference<SceneObject *> inventory = player->getSlottedObject("inventory");
 		if (wearable != NULL && inventory != NULL)
 		{ //safety Checks
@@ -253,6 +255,7 @@ int TangibleObjectMenuComponent::handleObjectMenuSelect(SceneObject *sceneObject
 							}
 						}
 					}
+
 					//Destroy item now that tapes have been generated
 					if (wearable->hasSeaRemovalTool(player, true) == true)
 					{
@@ -268,10 +271,11 @@ int TangibleObjectMenuComponent::handleObjectMenuSelect(SceneObject *sceneObject
 				}
 			}
 		}
+
 		return 0;
 	}
 	else if (selectedID == 99)
-	{ //Remove SEA Mods from wearable
+	{ // Combine lesser or equal Attachments together
 		ManagedReference<SceneObject *> newSEA = NULL;
 		Attachment *attachment = cast<Attachment *>(sceneObject);
 
@@ -300,8 +304,6 @@ int TangibleObjectMenuComponent::handleObjectMenuSelect(SceneObject *sceneObject
 				int statValue = 0;
 				int attachmentValue = 0;
 
-				// player->sendSystemMessage("You tried to combine an attachment with the following mods:");
-
 				// Find highest value mod on the attachment to use for combinating
 				for (int x = 0; x < attachmentMods->size(); x++)
 				{
@@ -313,7 +315,6 @@ int TangibleObjectMenuComponent::handleObjectMenuSelect(SceneObject *sceneObject
 					}
 				}
 
-				// player->sendSystemMessage("ID: [" + String::valueOf(attachment->getObjectID()) +"] Name: [" + attachmentName + "] with Value: [" + String::valueOf(attachmentValue)+"]");
 				Attachment *chosenAttachment = nullptr;
 				int chosenAttachmentValue = 0;
 
@@ -463,7 +464,7 @@ int TangibleObjectMenuComponent::handleObjectMenuSelect(SceneObject *sceneObject
 						}
 						else
 						{
-							player->sendSystemMessage("You must have " + String::valueOf(combinationCost) + " in your bank account to combine the chosen Attachments!");
+							player->sendSystemMessage("You must have " + String::valueOf(combinationCost) + " in your bank to combine the chosen Attachments!");
 							warning("Player: " + player->getDisplayedName() + " has tried and failed to combine attachments due to a lack of credits!");
 						}
 					}
@@ -472,6 +473,112 @@ int TangibleObjectMenuComponent::handleObjectMenuSelect(SceneObject *sceneObject
 					if (chosenAttachment == nullptr)
 					{
 						player->sendSystemMessage("No viable tape found in your inventory. You must have another attachment of the same type and skill that is equal to or lesser in value!");
+					}
+				}
+			}
+		}
+
+		// Finish up and return
+		return 0;
+	}
+	else if (selectedID == 109)
+	{ // Convert Attachments from one type to another
+		ManagedReference<SceneObject *> newSEA = NULL;
+		Attachment *attachment = cast<Attachment *>(sceneObject);
+
+		if (attachment != NULL)
+		{
+			Locker currentAttachmentLocker(attachment);
+			HashTable<String, int> *attachmentMods = attachment->getSkillMods();
+			LootGroupMap *lootGroupMap = LootGroupMap::instance();
+			Reference<LootItemTemplate *> itemTemplate = NULL;
+
+			// If one type then set our new attachment to be generated to the other type.
+			if (attachment->isArmorAttachment())
+			{
+				itemTemplate = lootGroupMap->getLootItemTemplate("attachment_clothing");
+			}
+			else if (attachment->isClothingAttachment())
+			{
+				itemTemplate = lootGroupMap->getLootItemTemplate("attachment_armor");
+			}
+
+			// So long as our attachment has 1 mod then we continue to try and flip the attachment type
+			if (attachmentMods->size() > 0)
+			{
+				HashTableIterator<String, int> iterator = attachmentMods->iterator();
+				String statName = "";
+				String attachmentName = "";
+				int statValue = 0;
+				int attachmentValue = 0;
+
+				// Find highest value mod on the attachment to use for creating an opposite type of attachment from
+				for (int x = 0; x < attachmentMods->size(); x++)
+				{
+					iterator.getNextKeyAndValue(statName, statValue);
+					if (statValue > attachmentValue)
+					{
+						attachmentName = statName;
+						attachmentValue = statValue;
+					}
+				}
+
+				// Get player's inventory
+				ManagedReference<SceneObject *> inventory = player->getSlottedObject("inventory");
+
+				// Make sure the attachment we've picked isn't a bad actor
+				if (attachment != nullptr)
+				{
+					Locker locker(attachment);
+					ManagedReference<SceneObject *> flippedSEA = NULL;
+					ManagedReference<LootManager *> lootManager = player->getZoneServer()->getLootManager();
+					int flipCost = 0;
+					flipCost = attachmentValue * 7500; // 7500 credits per point to convert
+
+					// Make sure the player can afford to combine!
+					if (player->getBankCredits() >= flipCost)
+					{
+
+						flippedSEA = lootManager->createLootAttachment(itemTemplate, attachmentName, attachmentValue);
+						bool successfulCombination = false;
+
+						if (flippedSEA != NULL)
+						{
+							Attachment *attachmentToMake = cast<Attachment *>(flippedSEA.get());
+
+							if (attachmentToMake != NULL)
+							{
+								Locker objLocker(attachmentToMake);
+								if (inventory->transferObject(attachmentToMake, -1, true, true))
+								{ //Transfer tape to player inventory
+									inventory->broadcastObject(attachmentToMake, true);
+									successfulCombination = true;
+								}
+								else
+								{
+									attachmentToMake->destroyObjectFromDatabase(true);
+									error("Unable to place Skill Attachment in player's inventory!");
+									return false;
+								}
+							}
+						}
+
+						// Get rid of combined attachments
+						if (successfulCombination)
+						{
+							attachment->destroyObjectFromWorld(true);
+							attachment->destroyObjectFromDatabase(true);
+							player->subtractBankCredits(flipCost);
+							player->sendSystemMessage("++++++++++++++++++++");
+							player->sendSystemMessage("Successfully converted the selected Attachment to the opposite type!");
+							player->sendSystemMessage("The [Galactic Civil Authority] has removed " + String::valueOf(flipCost) + " credits from your bank for this service.");
+							player->sendSystemMessage("++++++++++++++++++++");
+						}
+					}
+					else
+					{
+						player->sendSystemMessage("You must have " + String::valueOf(flipCost) + " in your bank to convert the chosen Attachment to another type!");
+						warning("Player: " + player->getDisplayedName() + " has tried and failed to convert an attachment due to a lack of credits!");
 					}
 				}
 			}

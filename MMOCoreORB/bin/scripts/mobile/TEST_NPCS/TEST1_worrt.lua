@@ -1,9 +1,9 @@
 TEST1_worrt = Creature:new {
 	objectName = "@mob/creature_names:worrt",
-	customName = "CLOTHING ATTACHMENTS PINATA (CL500)",
+	customName = "CLOTHING ATTACHMENTS PINATA (CL100)",
 	socialGroup = "",
 	faction = "",
-	level = 500,
+	level = 100,
 	chanceHit = 0.01,
 	damageMin = 1,
 	damageMax = 1,
