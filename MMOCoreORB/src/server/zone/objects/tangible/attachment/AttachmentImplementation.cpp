@@ -86,3 +86,7 @@ void AttachmentImplementation::fillAttributeList(AttributeListMessage* msg, Crea
 	}
 
 }
+
+void AttachmentImplementation::updateAttachmentValues(const String& modName, int value) {
+        skillModMap.put(modName, value);
+}

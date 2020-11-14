@@ -321,6 +321,9 @@ schematics = {
 	{path="object/draft_schematic/item/component/item_electronic_power_conditioner.iff"},
 	{path="object/draft_schematic/item/component/item_electronic_energy_distributor.iff"},
 	{path="object/draft_schematic/item/component/item_electronic_control_unit.iff"},
+	-- Custom SEA Removal
+	{path="object/draft_schematic/item/clothing_sea_removal_tool.iff"},
+	-- Custom SEA Removal
 	{path="object/draft_schematic/space/repair/generic_repair_kit.iff"},
 	{path="object/draft_schematic/clothing/clothing_backpack_field_03.iff"},
 	{path="object/draft_schematic/clothing/clothing_backpack_field_03_quest.iff"},
