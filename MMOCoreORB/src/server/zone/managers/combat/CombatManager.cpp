@@ -1243,6 +1243,11 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 {
 	int damageType = 0, armorPiercing = 1;
 
+	// Reduce all force attack damage by half from NPCs when attacking a player.
+	if (attacker->isAiAgent() && defender->isPlayerObject() && data.isForceAttack()){
+		damage = damage * 0.5;
+	}
+
 	if (!data.isForceAttack())
 	{
 		damageType = weapon->getDamageType();
@@ -1389,7 +1394,18 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 		// inflict condition damage
 		Locker alocker(armor);
 
-		armor->inflictDamage(armor, 0, damage * 0.2, true, true);
+		// We want to reduce all incoming damage to the ChestPlate to 1/4th to simulate a minisuit durability
+		float chestOnlyReduction = 1.00;
+
+		// If isChestOnly then overwrite our reduction mod with a 4th of normal incoming damage
+		if (isChestOnly){
+			chestOnlyReduction = 0.25;
+		}
+
+		defender->sendSystemMessage("Incoming damage to armor would have been: " + String::valueOf(damage * 0.2));
+		defender->sendSystemMessage("Incoming damage to armor actually is: " + String::valueOf((damage * 0.2) * chestOnlyReduction));
+
+		armor->inflictDamage(armor, 0, (damage * 0.2) * chestOnlyReduction, true, true);
 	}
 
 	return damage;
