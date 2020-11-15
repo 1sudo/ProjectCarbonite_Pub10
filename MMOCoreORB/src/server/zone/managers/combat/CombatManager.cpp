@@ -1335,10 +1335,12 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 			defender->playEffect("clienteffect/pl_force_feedback_block.cef", "");
 		}
 
-		// Force Absorb
+		// Force Absorb -- Disabled while under effect of Avoid Incap
 		if (defender->getSkillMod("force_absorb") > 0 && defender->isPlayerCreature())
 		{
-			defender->notifyObservers(ObserverEventType::FORCEABSORB, attacker, data.getForceCost());
+			if (!defender->hasBuff(BuffCRC::JEDI_AVOID_INCAPACITATION)) {
+				defender->notifyObservers(ObserverEventType::FORCEABSORB, attacker, data.getForceCost());
+			}
 		}
 	}
 
