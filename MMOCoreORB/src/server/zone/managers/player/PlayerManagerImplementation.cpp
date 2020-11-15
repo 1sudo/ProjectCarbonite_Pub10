@@ -110,8 +110,8 @@
 #include "server/zone/objects/creature/buffs/PrivateBuff.h"
 #include "server/zone/objects/creature/buffs/PrivateSkillMultiplierBuff.h"
 
-PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer* zoneServer, ZoneProcessServer* impl) :
-										Logger("PlayerManager") {
+PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer *zoneServer, ZoneProcessServer *impl) : Logger("PlayerManager")
+{
 
 	playerLoggerFilename = "log/player.log";
 	playerLoggerLines = ConfigManager::instance()->getMaxLogLines();
@@ -134,26 +134,32 @@ PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer* zoneServer,
 	setGlobalLogging(true);
 	setLogging(false);
 
-	if (ServerCore::truncateDatabases()) {
-		try {
+	if (ServerCore::truncateDatabases())
+	{
+		try
+		{
 			String query = "TRUNCATE TABLE characters";
 
-			Reference<ResultSet*> res = ServerDatabase::instance()->executeQuery(query);
+			Reference<ResultSet *> res = ServerDatabase::instance()->executeQuery(query);
 
 			info("characters table truncated", true);
-		} catch (Exception& e) {
+		}
+		catch (Exception &e)
+		{
 			error(e.getMessage());
 		}
 	}
 
 	loadNameMap();
 
-	if (ServerCore::hasArgument("listadmins")) {
+	if (ServerCore::hasArgument("listadmins"))
+	{
 		info("generating admin list...", true);
 
 		auto admins = generateAdminList();
 
-		for (auto& entry : admins) {
+		for (auto &entry : admins)
+		{
 			auto name = entry.getKey();
 			auto level = entry.getValue();
 
@@ -162,15 +168,17 @@ PlayerManagerImplementation::PlayerManagerImplementation(ZoneServer* zoneServer,
 	}
 }
 
-bool PlayerManagerImplementation::createPlayer(ClientCreateCharacterCallback* callback) {
-	PlayerCreationManager* pcm = PlayerCreationManager::instance();
+bool PlayerManagerImplementation::createPlayer(ClientCreateCharacterCallback *callback)
+{
+	PlayerCreationManager *pcm = PlayerCreationManager::instance();
 	return pcm->createCharacter(callback);
 }
 
-void PlayerManagerImplementation::loadLuaConfig() {
+void PlayerManagerImplementation::loadLuaConfig()
+{
 	info("Loading configuration script.");
 
-	Lua* lua = new Lua();
+	Lua *lua = new Lua();
 	lua->init();
 
 	lua->runFile("scripts/managers/player_manager.lua");
@@ -195,7 +203,8 @@ void PlayerManagerImplementation::loadLuaConfig() {
 	veteranRewardAdditionalMilestones = lua->getGlobalInt("veteranRewardAdditionalMilestones");
 
 	LuaObject rewardMilestonesLua = lua->getGlobalObject("veteranRewardMilestones");
-	for (int i = 1; i <= rewardMilestonesLua.getTableSize(); ++i) {
+	for (int i = 1; i <= rewardMilestonesLua.getTableSize(); ++i)
+	{
 		veteranRewardMilestones.add(rewardMilestonesLua.getIntAt(i));
 	}
 	rewardMilestonesLua.pop();
@@ -203,9 +212,10 @@ void PlayerManagerImplementation::loadLuaConfig() {
 	LuaObject rewardsListLua = lua->getGlobalObject("veteranRewards");
 	int size = rewardsListLua.getTableSize();
 
-	lua_State* L = rewardsListLua.getLuaState();
+	lua_State *L = rewardsListLua.getLuaState();
 
-	for (int i = 0; i < size; ++i) {
+	for (int i = 0; i < size; ++i)
+	{
 		lua_rawgeti(L, -1, i + 1);
 		LuaObject a(L);
 
@@ -222,22 +232,24 @@ void PlayerManagerImplementation::loadLuaConfig() {
 
 	LuaObject jboxSongs = lua->getGlobalObject("jukeboxSongs");
 
-	if (jboxSongs.isValidTable()) {
-		for (int i = 1; i <= jboxSongs.getTableSize(); ++i) {
+	if (jboxSongs.isValidTable())
+	{
+		for (int i = 1; i <= jboxSongs.getTableSize(); ++i)
+		{
 			LuaObject songData = jboxSongs.getObjectAt(i);
 
-			if (songData.isValidTable()) {
+			if (songData.isValidTable())
+			{
 				String songStringID = songData.getStringAt(1);
 				String songPath = songData.getStringAt(2);
 
-				Reference<JukeboxSong*> data = new JukeboxSong(songStringID, songPath);
+				Reference<JukeboxSong *> data = new JukeboxSong(songStringID, songPath);
 
 				jukeboxSongs.add(data);
 			}
 
 			songData.pop();
 		}
-
 	}
 
 	jboxSongs.pop();
@@ -246,12 +258,14 @@ void PlayerManagerImplementation::loadLuaConfig() {
 	lua = NULL;
 }
 
-void PlayerManagerImplementation::loadStartingLocations() {
+void PlayerManagerImplementation::loadStartingLocations()
+{
 	info("Loading starting locations.");
 
-	IffStream* iffStream = TemplateManager::instance()->openIffFile("datatables/creation/starting_locations.iff");
+	IffStream *iffStream = TemplateManager::instance()->openIffFile("datatables/creation/starting_locations.iff");
 
-	if (iffStream == NULL) {
+	if (iffStream == NULL)
+	{
 		info("Couldn't load starting locations.", true);
 		return;
 	}
@@ -263,10 +277,12 @@ void PlayerManagerImplementation::loadStartingLocations() {
 	info("Loaded " + String::valueOf(startingLocationList.getTotalLocations()) + " starting locations.", true);
 }
 
-void PlayerManagerImplementation::loadXpBonusList() {
-	IffStream* iffStream = TemplateManager::instance()->openIffFile("datatables/xp/species.iff");
+void PlayerManagerImplementation::loadXpBonusList()
+{
+	IffStream *iffStream = TemplateManager::instance()->openIffFile("datatables/xp/species.iff");
 
-	if (iffStream == NULL) {
+	if (iffStream == NULL)
+	{
 		info("Couldn't load species xp bonuses.", true);
 		return;
 	}
@@ -276,16 +292,19 @@ void PlayerManagerImplementation::loadXpBonusList() {
 
 	delete iffStream;
 
-	for (int i = 0; i < dtiff.getTotalColumns(); i++) {
+	for (int i = 0; i < dtiff.getTotalColumns(); i++)
+	{
 		VectorMap<String, int> bonusList;
 		String speciesName = dtiff.getColumnNameByIndex(i);
 
-		for (int j = 0; j < dtiff.getTotalRows(); j++) {
-			DataTableRow* row = dtiff.getRow(j);
+		for (int j = 0; j < dtiff.getTotalRows(); j++)
+		{
+			DataTableRow *row = dtiff.getRow(j);
 			String columnData = "";
 			row->getCell(i)->getValue(columnData);
 
-			if (columnData != "") {
+			if (columnData != "")
+			{
 				StringTokenizer callbackString(columnData);
 				callbackString.setDelimeter(":");
 
@@ -309,12 +328,14 @@ void PlayerManagerImplementation::loadXpBonusList() {
 	info("Loaded xp bonuses for " + String::valueOf(xpBonusList.size()) + " species.", true);
 }
 
-void PlayerManagerImplementation::loadQuestInfo() {
-	TemplateManager* templateManager = TemplateManager::instance();
+void PlayerManagerImplementation::loadQuestInfo()
+{
+	TemplateManager *templateManager = TemplateManager::instance();
 
-	IffStream* iffStream = templateManager->openIffFile("datatables/player/quests.iff");
+	IffStream *iffStream = templateManager->openIffFile("datatables/player/quests.iff");
 
-	if (iffStream == NULL) {
+	if (iffStream == NULL)
+	{
 		info("quests.iff could not be found.", true);
 		return;
 	}
@@ -324,10 +345,11 @@ void PlayerManagerImplementation::loadQuestInfo() {
 
 	delete iffStream;
 
-	for (int i = 0; i < dtable.getTotalRows(); ++i) {
-		DataTableRow* row = dtable.getRow(i);
+	for (int i = 0; i < dtable.getTotalRows(); ++i)
+	{
+		DataTableRow *row = dtable.getRow(i);
 
-		QuestInfo* quest = new QuestInfo();
+		QuestInfo *quest = new QuestInfo();
 		quest->parseDataTableRow(row);
 		questInfo.add(quest);
 	}
@@ -335,18 +357,22 @@ void PlayerManagerImplementation::loadQuestInfo() {
 	info("Loaded " + String::valueOf(questInfo.size()) + " quests.", true);
 }
 
-void PlayerManagerImplementation::loadPermissionLevels() {
-	try {
+void PlayerManagerImplementation::loadPermissionLevels()
+{
+	try
+	{
 		permissionLevelList = PermissionLevelList::instance();
 		permissionLevelList->loadLevels();
 	}
-	catch(Exception& e) {
+	catch (Exception &e)
+	{
 		error("Couldn't load permission levels.");
 		error(e.getMessage());
 	}
 }
 
-void PlayerManagerImplementation::finalize() {
+void PlayerManagerImplementation::finalize()
+{
 	nameMap = NULL;
 
 	permissionLevelList->removeAll();
@@ -357,24 +383,29 @@ void PlayerManagerImplementation::finalize() {
 	questInfo.removeAll();
 }
 
-void PlayerManagerImplementation::loadNameMap() {
+void PlayerManagerImplementation::loadNameMap()
+{
 	info("loading character names");
 
-	try {
+	try
+	{
 		String query = "SELECT character_oid, firstname FROM characters where character_oid > 16777216 and galaxy_id = " + String::valueOf(server->getGalaxyID()) + " order by character_oid asc";
 
-		Reference<ResultSet*> res = ServerDatabase::instance()->executeQuery(query);
+		Reference<ResultSet *> res = ServerDatabase::instance()->executeQuery(query);
 
-		while (res->next()) {
+		while (res->next())
+		{
 			uint64 oid = res->getUnsignedLong(0);
 			String firstName = res->getString(1);
 
-			if (!nameMap->put(firstName.toLowerCase(), oid)) {
+			if (!nameMap->put(firstName.toLowerCase(), oid))
+			{
 				error("error coliding name:" + firstName.toLowerCase());
 			}
 		}
-
-	} catch (Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		error(e.getMessage());
 	}
 
@@ -383,8 +414,9 @@ void PlayerManagerImplementation::loadNameMap() {
 	info(msg.toString(), true);
 }
 
-void PlayerManagerImplementation::writePlayerLogEntry(JSONSerializationType& logEntry) {
-	FileWriter* logFile = playerLogger.getFileLogger();
+void PlayerManagerImplementation::writePlayerLogEntry(JSONSerializationType &logEntry)
+{
+	FileWriter *logFile = playerLogger.getFileLogger();
 	StringBuffer logLine;
 
 	logLine << logEntry.dump().c_str() << "\n";
@@ -396,7 +428,8 @@ void PlayerManagerImplementation::writePlayerLogEntry(JSONSerializationType& log
 	logFile->flush();
 
 	// Check for log rotation
-	if (--playerLoggerLines <= 0) {
+	if (--playerLoggerLines <= 0)
+	{
 		playerLoggerLines = ConfigManager::instance()->getMaxLogLines();
 
 		Time now;
@@ -407,7 +440,8 @@ void PlayerManagerImplementation::writePlayerLogEntry(JSONSerializationType& log
 		int err = std::rename(playerLoggerFilename.toCharArray(), archiveFilename.toString().toCharArray());
 
 		// report failure if any
-		if (err != 0) {
+		if (err != 0)
+		{
 			Logger::info("Failed to archive player log to " + archiveFilename.toString() + " err = " + err);
 		}
 
@@ -415,28 +449,33 @@ void PlayerManagerImplementation::writePlayerLogEntry(JSONSerializationType& log
 	}
 }
 
-JSONSerializationType PlayerManagerImplementation::basePlayerLogEntry(CreatureObject* creature, PlayerObject* ghost) {
+JSONSerializationType PlayerManagerImplementation::basePlayerLogEntry(CreatureObject *creature, PlayerObject *ghost)
+{
 	JSONSerializationType logEntry;
 	Time time;
 
 	logEntry["@timestamp"] = time.getFormattedTimeFull().toCharArray();
 	logEntry["time_msecs"] = time.getMiliTime();
 
-	Thread* currentThread = Thread::getCurrentThread();
+	Thread *currentThread = Thread::getCurrentThread();
 
 	if (currentThread != nullptr)
 		logEntry["thread"] = currentThread->getName();
 
-	if (creature != nullptr) {
+	if (creature != nullptr)
+	{
 		Locker locker(creature);
 		logEntry["oid"] = creature->getObjectID();
 		logEntry["first_name"] = creature->getFirstName();
-	} else {
+	}
+	else
+	{
 		logEntry["oid"] = ghost != nullptr ? ghost->getObjectID() : 0;
 		logEntry["first_name"] = "-ghost-";
 	}
 
-	if (ghost != nullptr) {
+	if (ghost != nullptr)
+	{
 		Locker locker(ghost);
 		logEntry["account_id"] = ghost->getAccountID();
 		logEntry["played_ms"] = ghost->getPlayedMiliSecs();
@@ -448,7 +487,8 @@ JSONSerializationType PlayerManagerImplementation::basePlayerLogEntry(CreatureOb
 	return logEntry;
 }
 
-void PlayerManagerImplementation::writePlayerLog(CreatureObject* creature, PlayerObject* ghost, const String& msg, int logLevelType) {
+void PlayerManagerImplementation::writePlayerLog(CreatureObject *creature, PlayerObject *ghost, const String &msg, int logLevelType)
+{
 	if (logLevelType > ghost->getLogLevel())
 		return;
 
@@ -462,11 +502,12 @@ void PlayerManagerImplementation::writePlayerLog(CreatureObject* creature, Playe
 	writePlayerLogEntry(logEntry);
 }
 
-void PlayerManagerImplementation::writePlayerLog(PlayerObject* ghost, const String& msg, int logLevelType) {
+void PlayerManagerImplementation::writePlayerLog(PlayerObject *ghost, const String &msg, int logLevelType)
+{
 	if (ghost == nullptr)
 		return;
 
-	Reference<CreatureObject*> creature = ghost->getParent().get()->asCreatureObject();
+	Reference<CreatureObject *> creature = ghost->getParent().get()->asCreatureObject();
 
 	if (creature == nullptr)
 		return;
@@ -474,11 +515,12 @@ void PlayerManagerImplementation::writePlayerLog(PlayerObject* ghost, const Stri
 	PlayerManagerImplementation::writePlayerLog(creature, ghost, msg, logLevelType);
 }
 
-void PlayerManagerImplementation::writePlayerLog(CreatureObject* creature, const String& msg, int logLevelType) {
+void PlayerManagerImplementation::writePlayerLog(CreatureObject *creature, const String &msg, int logLevelType)
+{
 	if (creature == nullptr)
 		return;
 
-	Reference<PlayerObject*> ghost = creature->getPlayerObject();
+	Reference<PlayerObject *> ghost = creature->getPlayerObject();
 
 	if (ghost == nullptr)
 		return;
@@ -486,19 +528,22 @@ void PlayerManagerImplementation::writePlayerLog(CreatureObject* creature, const
 	PlayerManagerImplementation::writePlayerLog(creature, ghost, msg, logLevelType);
 }
 
-int PlayerManagerImplementation::getPlayerQuestID(const String& name) {
-	for (int i = 0; i < questInfo.size(); ++i) {
-		QuestInfo* quest = questInfo.get(i);
+int PlayerManagerImplementation::getPlayerQuestID(const String &name)
+{
+	for (int i = 0; i < questInfo.size(); ++i)
+	{
+		QuestInfo *quest = questInfo.get(i);
 
-		if (quest != NULL && quest->getQuestName().hashCode()== name.hashCode())
+		if (quest != NULL && quest->getQuestName().hashCode() == name.hashCode())
 			return i;
 	}
 
 	return -1;
 }
 
-String PlayerManagerImplementation::getPlayerQuestParent(int questID) {
-	QuestInfo* quest = questInfo.get(questID);
+String PlayerManagerImplementation::getPlayerQuestParent(int questID)
+{
+	QuestInfo *quest = questInfo.get(questID);
 
 	if (quest != NULL)
 		return quest->getQuestParent();
@@ -506,42 +551,47 @@ String PlayerManagerImplementation::getPlayerQuestParent(int questID) {
 		return "";
 }
 
-bool PlayerManagerImplementation::existsName(const String& name) {
+bool PlayerManagerImplementation::existsName(const String &name)
+{
 	bool res = false;
 
-	try {
+	try
+	{
 		res = nameMap->containsKey(name.toLowerCase());
-	} catch (DatabaseException& e) {
+	}
+	catch (DatabaseException &e)
+	{
 		error(e.getMessage());
 	}
 
 	return res;
 }
 
-bool PlayerManagerImplementation::existsPlayerCreatureOID(uint64 oid) {
+bool PlayerManagerImplementation::existsPlayerCreatureOID(uint64 oid)
+{
 	return nameMap->containsOID(oid);
 }
 
-bool PlayerManagerImplementation::kickUser(const String& name, const String& admin, String& reason, bool doBan) {
-	ManagedReference<ChatManager*> chatManager = server->getChatManager();
+bool PlayerManagerImplementation::kickUser(const String &name, const String &admin, String &reason, bool doBan)
+{
+	ManagedReference<ChatManager *> chatManager = server->getChatManager();
 
 	if (chatManager == NULL)
 		return false;
 
-	ManagedReference<CreatureObject*> player = chatManager->getPlayer(name);
+	ManagedReference<CreatureObject *> player = chatManager->getPlayer(name);
 
 	if (player == NULL)
 		return false;
 
-	ManagedReference<CreatureObject*> adminplayer = chatManager->getPlayer(admin);
+	ManagedReference<CreatureObject *> adminplayer = chatManager->getPlayer(admin);
 
 	if (adminplayer == NULL)
 		return false;
 
-	Reference<PlayerObject*> ghost = player->getSlottedObject("ghost").castTo<PlayerObject*>();
+	Reference<PlayerObject *> ghost = player->getSlottedObject("ghost").castTo<PlayerObject *>();
 
-
-	Reference<PlayerObject*> adminghost = adminplayer->getSlottedObject("ghost").castTo<PlayerObject*>();
+	Reference<PlayerObject *> adminghost = adminplayer->getSlottedObject("ghost").castTo<PlayerObject *>();
 
 	if (adminghost == NULL)
 		return false;
@@ -553,18 +603,19 @@ bool PlayerManagerImplementation::kickUser(const String& name, const String& adm
 	if (ghost != NULL)
 		ghost->setLoggingOut();
 
-	ErrorMessage* errmsg = new ErrorMessage(admin, "You have been kicked", 0);
+	ErrorMessage *errmsg = new ErrorMessage(admin, "You have been kicked", 0);
 	player->sendMessage(errmsg);
 
 	player->sendMessage(new LogoutMessage());
 
-	ManagedReference<ZoneClientSession*> session = player->getClient();
+	ManagedReference<ZoneClientSession *> session = player->getClient();
 
 	if (session != NULL)
 		session->disconnect(true);
 
 	/// 10 min ban
-	if (doBan) {
+	if (doBan)
+	{
 		String banMessage = banAccount(adminghost, ghost->getAccount(), 60 * 10, reason);
 		adminplayer->sendSystemMessage(banMessage);
 	}
@@ -572,28 +623,33 @@ bool PlayerManagerImplementation::kickUser(const String& name, const String& adm
 	return true;
 }
 
-Reference<CreatureObject*> PlayerManagerImplementation::getPlayer(const String& name) {
+Reference<CreatureObject *> PlayerManagerImplementation::getPlayer(const String &name)
+{
 	uint64 oid = 0;
 
-	try {
+	try
+	{
 		oid = nameMap->get(name.toLowerCase());
-	} catch (ArrayIndexOutOfBoundsException& ex) {
+	}
+	catch (ArrayIndexOutOfBoundsException &ex)
+	{
 		// `oid` is initialized with zero so the method will return NULL after unlocking.
-		error("Didn't find player " +  name);
+		error("Didn't find player " + name);
 	}
 
 	if (oid == 0)
 		return NULL;
 
-	Reference<SceneObject*> obj = server->getObject(oid);
+	Reference<SceneObject *> obj = server->getObject(oid);
 
 	if (obj == NULL || !obj->isPlayerCreature())
 		return NULL;
 
-	return obj.castTo<CreatureObject*>();
+	return obj.castTo<CreatureObject *>();
 }
 
-uint64 PlayerManagerImplementation::getObjectID(const String& name) {
+uint64 PlayerManagerImplementation::getObjectID(const String &name)
+{
 	uint64 oid = 0;
 
 	oid = nameMap->get(name.toLowerCase());
@@ -601,36 +657,41 @@ uint64 PlayerManagerImplementation::getObjectID(const String& name) {
 	return oid;
 }
 
-String PlayerManagerImplementation::getPlayerName(uint64 oid) {
+String PlayerManagerImplementation::getPlayerName(uint64 oid)
+{
 	return nameMap->get(oid);
 }
 
-bool PlayerManagerImplementation::checkExistentNameInDatabase(const String& name) {
+bool PlayerManagerImplementation::checkExistentNameInDatabase(const String &name)
+{
 	if (name.isEmpty())
 		return false;
 
-	try {
+	try
+	{
 		String fname = name.toLowerCase();
 		Database::escapeString(fname);
-		String query = "SELECT * FROM characters WHERE lower(firstname) = \""
-				+ fname + "\"";
+		String query = "SELECT * FROM characters WHERE lower(firstname) = \"" + fname + "\"";
 
-		Reference<ResultSet*> res = ServerDatabase::instance()->executeQuery(query);
+		Reference<ResultSet *> res = ServerDatabase::instance()->executeQuery(query);
 		bool nameExists = res->next();
 
 		return !nameExists;
-	} catch (DatabaseException& e) {
+	}
+	catch (DatabaseException &e)
+	{
 		return false;
 	}
 
 	return false;
 }
 
-bool PlayerManagerImplementation::checkPlayerName(ClientCreateCharacterCallback* callback) {
+bool PlayerManagerImplementation::checkPlayerName(ClientCreateCharacterCallback *callback)
+{
 	auto client = callback->getClient();
 
-	NameManager* nm = processor->getNameManager();
-	BaseMessage* msg = NULL;
+	NameManager *nm = processor->getNameManager();
+	BaseMessage *msg = NULL;
 
 	String firstName;
 
@@ -647,7 +708,8 @@ bool PlayerManagerImplementation::checkPlayerName(ClientCreateCharacterCallback*
 		firstName = name;
 
 	//Does this name already exist?
-	if (nameMap->containsKey(firstName.toLowerCase())) {
+	if (nameMap->containsKey(firstName.toLowerCase()))
+	{
 		msg = new ClientCreateCharacterFailed("name_declined_in_use");
 		client->sendMessage(msg);
 
@@ -657,8 +719,10 @@ bool PlayerManagerImplementation::checkPlayerName(ClientCreateCharacterCallback*
 	//Check to see if name is valid
 	int res = nm->validateName(name, callback->getSpecies());
 
-	if (res != NameManagerResult::ACCEPTED) {
-		switch (res) {
+	if (res != NameManagerResult::ACCEPTED)
+	{
+		switch (res)
+		{
 		case NameManagerResult::DECLINED_EMPTY:
 			msg = new ClientCreateCharacterFailed("name_declined_empty");
 			break;
@@ -692,8 +756,9 @@ bool PlayerManagerImplementation::checkPlayerName(ClientCreateCharacterCallback*
 	return true;
 }
 
-String PlayerManagerImplementation::setFirstName(CreatureObject* creature, const String& newFirstName) {
-    if (creature == nullptr)
+String PlayerManagerImplementation::setFirstName(CreatureObject *creature, const String &newFirstName)
+{
+	if (creature == nullptr)
 		return "nullptr creature specified";
 
 	if (!creature->isPlayerCreature())
@@ -716,7 +781,8 @@ String PlayerManagerImplementation::setFirstName(CreatureObject* creature, const
 
 	int result = nameManager->validateName(newFirstName, creature->getSpecies());
 
-	switch (result) {
+	switch (result)
+	{
 	case NameManagerResult::ACCEPTED:
 		break;
 	case NameManagerResult::DECLINED_EMPTY:
@@ -773,17 +839,17 @@ String PlayerManagerImplementation::setFirstName(CreatureObject* creature, const
 
 	StringBuffer charDirtyQuery;
 	charDirtyQuery
-			<< "UPDATE `characters_dirty` SET `firstname` = '"  << characterFirstName
-			<< "' WHERE `character_oid` = '" << creature->getObjectID()
-			<< "' AND `galaxy_id` = '" << galaxyID << "'";
+		<< "UPDATE `characters_dirty` SET `firstname` = '" << characterFirstName
+		<< "' WHERE `character_oid` = '" << creature->getObjectID()
+		<< "' AND `galaxy_id` = '" << galaxyID << "'";
 
 	ServerDatabase::instance()->executeStatement(charDirtyQuery);
 
 	StringBuffer charQuery;
 	charQuery
-			<< "UPDATE `characters` SET `firstname` = '"  << characterFirstName
-			<< "' WHERE `character_oid` = '" << creature->getObjectID()
-			<< "' AND `galaxy_id` = '" << galaxyID << "'";
+		<< "UPDATE `characters` SET `firstname` = '" << characterFirstName
+		<< "' WHERE `character_oid` = '" << creature->getObjectID()
+		<< "' AND `galaxy_id` = '" << galaxyID << "'";
 
 	ServerDatabase::instance()->executeStatement(charQuery);
 
@@ -791,8 +857,9 @@ String PlayerManagerImplementation::setFirstName(CreatureObject* creature, const
 	return "";
 }
 
-String PlayerManagerImplementation::setLastName(CreatureObject* creature, const String& newLastName, bool skipVerify) {
-    if (creature == nullptr)
+String PlayerManagerImplementation::setLastName(CreatureObject *creature, const String &newLastName, bool skipVerify)
+{
+	if (creature == nullptr)
 		return "nullptr creature specified";
 
 	if (!creature->isPlayerCreature())
@@ -811,12 +878,14 @@ String PlayerManagerImplementation::setLastName(CreatureObject* creature, const 
 	if (!newLastName.isEmpty())
 		newFullName = oldFirstName + " " + newLastName;
 
-	if (!skipVerify) {
+	if (!skipVerify)
+	{
 		auto nameManager = processor->getNameManager();
 
 		int result = nameManager->validateName(newFullName, creature->getSpecies());
 
-		switch (result) {
+		switch (result)
+		{
 		case NameManagerResult::ACCEPTED:
 			break;
 		case NameManagerResult::DECLINED_RACE_INAPP:
@@ -854,17 +923,17 @@ String PlayerManagerImplementation::setLastName(CreatureObject* creature, const 
 
 	StringBuffer charDirtyQuery;
 	charDirtyQuery
-			<< "UPDATE `characters_dirty` SET `surname` = '"  << characterLastName
-			<< "' WHERE `character_oid` = '" << creature->getObjectID()
-			<< "' AND `galaxy_id` = '" << galaxyID << "'";
+		<< "UPDATE `characters_dirty` SET `surname` = '" << characterLastName
+		<< "' WHERE `character_oid` = '" << creature->getObjectID()
+		<< "' AND `galaxy_id` = '" << galaxyID << "'";
 
 	ServerDatabase::instance()->executeStatement(charDirtyQuery);
 
 	StringBuffer charQuery;
 	charQuery
-			<< "UPDATE `characters` SET `surname` = '"  << characterLastName
-			<< "' WHERE `character_oid` = '" << creature->getObjectID()
-			<< "' AND `galaxy_id` = '" << galaxyID << "'";
+		<< "UPDATE `characters` SET `surname` = '" << characterLastName
+		<< "' WHERE `character_oid` = '" << creature->getObjectID()
+		<< "' AND `galaxy_id` = '" << galaxyID << "'";
 
 	ServerDatabase::instance()->executeStatement(charQuery);
 
@@ -872,17 +941,20 @@ String PlayerManagerImplementation::setLastName(CreatureObject* creature, const 
 	return "";
 }
 
-void PlayerManagerImplementation::createTutorialBuilding(CreatureObject* player) {
-	Zone* zone = server->getZone("tutorial");
+void PlayerManagerImplementation::createTutorialBuilding(CreatureObject *player)
+{
+	Zone *zone = server->getZone("tutorial");
 
-	if (zone == NULL) {
+	if (zone == NULL)
+	{
 		error("Character creation failed, tutorial zone disabled.");
 		return;
 	}
 
-	Reference<TutorialBuildingObject*> tutorial = server->createObject(STRING_HASHCODE("object/building/general/newbie_hall.iff"), 1).castTo<TutorialBuildingObject*>();
+	Reference<TutorialBuildingObject *> tutorial = server->createObject(STRING_HASHCODE("object/building/general/newbie_hall.iff"), 1).castTo<TutorialBuildingObject *>();
 
-	if (tutorial == NULL) {
+	if (tutorial == NULL)
+	{
 		error("Tutorial building creation failed.");
 		return;
 	}
@@ -898,30 +970,31 @@ void PlayerManagerImplementation::createTutorialBuilding(CreatureObject* player)
 
 	locker.release();
 
-	SceneObject* cellTut = tutorial->getCell(11);
+	SceneObject *cellTut = tutorial->getCell(11);
 
-	SceneObject* cellTutPlayer = tutorial->getCell(1);
+	SceneObject *cellTutPlayer = tutorial->getCell(1);
 
 	player->initializePosition(0, 0, -3);
 
 	cellTutPlayer->transferObject(player, -1);
-	PlayerObject* ghost = player->getPlayerObject();
+	PlayerObject *ghost = player->getPlayerObject();
 	ghost->setSavedTerrainName(zone->getZoneName());
 	ghost->setSavedParentID(cellTutPlayer->getObjectID());
 
 	tutorial->updateToDatabase();
 }
 
-void PlayerManagerImplementation::createSkippedTutorialBuilding(CreatureObject* player) {
-	Zone* zone = server->getZone("tutorial");
+void PlayerManagerImplementation::createSkippedTutorialBuilding(CreatureObject *player)
+{
+	Zone *zone = server->getZone("tutorial");
 
-	if (zone == NULL) {
+	if (zone == NULL)
+	{
 		error("Character creation failed, tutorial zone disabled.");
 		return;
 	}
 
-
-	Reference<BuildingObject*> tutorial = server->createObject(STRING_HASHCODE("object/building/general/newbie_hall_skipped.iff"), 1).castTo<BuildingObject*>();
+	Reference<BuildingObject *> tutorial = server->createObject(STRING_HASHCODE("object/building/general/newbie_hall_skipped.iff"), 1).castTo<BuildingObject *>();
 
 	Locker locker(tutorial);
 
@@ -931,9 +1004,9 @@ void PlayerManagerImplementation::createSkippedTutorialBuilding(CreatureObject* 
 
 	locker.release();
 
-	Reference<SceneObject*> travelTutorialTerminal = server->createObject(STRING_HASHCODE("object/tangible/terminal/terminal_travel_tutorial.iff"), 1);
+	Reference<SceneObject *> travelTutorialTerminal = server->createObject(STRING_HASHCODE("object/tangible/terminal/terminal_travel_tutorial.iff"), 1);
 
-	SceneObject* cellTut = tutorial->getCell(1);
+	SceneObject *cellTut = tutorial->getCell(1);
 
 	Locker locker2(travelTutorialTerminal);
 
@@ -943,97 +1016,102 @@ void PlayerManagerImplementation::createSkippedTutorialBuilding(CreatureObject* 
 
 	player->initializePosition(27.0f, -3.5f, -165.0f);
 	cellTut->transferObject(player, -1);
-	PlayerObject* ghost = player->getPlayerObject();
+	PlayerObject *ghost = player->getPlayerObject();
 	ghost->setSavedTerrainName(zone->getZoneName());
 	ghost->setSavedParentID(cellTut->getObjectID());
 
 	tutorial->updateToDatabase();
 }
 
-uint8 PlayerManagerImplementation::calculateIncapacitationTimer(CreatureObject* playerCreature, int condition) {
-	//Switch the sign of the value
-	int32 value = -condition;
+uint8 PlayerManagerImplementation::calculateIncapacitationTimer(CreatureObject *playerCreature, int condition)
+{
+	// Switch the sign of the value
+	int value = -condition;
 
 	if (value < 0)
 		return 0;
 
-	uint32 recoveryTime = (value / 5); //In seconds - 3 seconds is recoveryEvent timer
+	int recoveryTime = (value / 5); // In seconds - 3 seconds is recoveryEvent timer
 
-	//Recovery time is gated between 10 and 60 seconds.
-	recoveryTime = Math::min(Math::max(recoveryTime, 10u), 60u);
+	// Recovery time cannot be higher than 60 seconds.
+	recoveryTime = (recoveryTime > 60) ? 60 : recoveryTime;
 
 	//Check for incap recovery food buff - overrides recovery time gate.
-	/*if (hasBuff(BuffCRC::FOOD_INCAP_RECOVERY)) {
-		Buff* buff = getBuff(BuffCRC::FOOD_INCAP_RECOVERY);
+	if (playerCreature->hasBuff(STRING_HASHCODE("food.incap_recovery")))
+	{
+		Buff *buff = playerCreature->getBuff(STRING_HASHCODE("food.incap_recovery"));
 
-		if (buff != NULL) {
+		if (buff != nullptr)
+		{
 			float percent = buff->getSkillModifierValue("incap_recovery");
 
 			recoveryTime = round(recoveryTime * ((100.0f - percent) / 100.0f));
 
-			StfParameter* params = new StfParameter();
-			params->addDI(percent);
+			StringIdChatParameter message("combat_effects", "incap_recovery");
+			message.setDI(recoveryTime);
+			playerCreature->sendSystemMessage(message); // Incapacitation recovery time reduced by %DI%.
 
-			sendSystemMessage("combat_effects", "incap_recovery", params); //Incapacitation recovery time reduced by %DI%.
-			delete params;
-
-			removeBuff(buff);
+			playerCreature->removeBuff(buff);
 		}
-	}*/
+	}
 
 	return recoveryTime;
 }
 
-int PlayerManagerImplementation::notifyDestruction(TangibleObject* destructor, TangibleObject* destructedObject, int condition, bool isCombatAction) {
-	if (destructor == NULL) {
-		assert(0 && "destructor should always be != NULL.");
-	}
+int PlayerManagerImplementation::notifyDestruction(TangibleObject *destructor, TangibleObject *destructedObject, int condition, bool isCombatAction)
+{
+	fatal(destructor, "destructor cant be nullptr.");
 
 	if (!destructedObject->isPlayerCreature())
 		return 1;
 
-	CreatureObject* playerCreature = cast<CreatureObject*>( destructedObject);
+	CreatureObject *playerCreature = cast<CreatureObject *>(destructedObject);
 
 	if ((playerCreature->isIncapacitated() && !(playerCreature->isFeigningDeath())) || playerCreature->isDead())
 		return 1;
 
-	if (playerCreature->isRidingMount()) {
+	if (playerCreature->isRidingMount())
+	{
 		playerCreature->updateCooldownTimer("mount_dismount", 0);
 		playerCreature->executeObjectControllerAction(STRING_HASHCODE("dismount"));
 	}
 
-	PlayerObject* ghost = playerCreature->getPlayerObject();
+	PlayerObject *ghost = playerCreature->getPlayerObject();
 
 	ghost->addIncapacitationTime();
 
-	DeltaVector<ManagedReference<SceneObject*> >* defenderList = destructor->getDefenderList();
+	DeltaVector<ManagedReference<SceneObject *>> *defenderList = destructor->getDefenderList();
 
 	bool isDefender = false;
 
-	if (defenderList->contains(destructedObject)) {
+	if (defenderList->contains(destructedObject))
+	{
 		isDefender = true;
 		destructor->removeDefender(destructedObject);
 	}
 
-	if ((destructor->isKiller() && isDefender) || ghost->getIncapacitationCounter() >= 3) {
+	if ((destructor->isKiller() && isDefender) || ghost->getIncapacitationCounter() >= 3)
+	{
 		killPlayer(destructor, playerCreature, 0, isCombatAction);
-	} else {
+	}
+	else
+	{
 
 		playerCreature->setPosture(CreaturePosture::INCAPACITATED, !isCombatAction, !isCombatAction);
 		playerCreature->clearState(CreatureState::FEIGNDEATH); // We got incapped for real - Remove the state so we can be DB'd
 
-
 		uint32 incapTime = calculateIncapacitationTimer(playerCreature, condition);
 		playerCreature->setCountdownTimer(incapTime, true);
 
-		Reference<Task*> oldTask = playerCreature->getPendingTask("incapacitationRecovery");
+		Reference<Task *> oldTask = playerCreature->getPendingTask("incapacitationRecovery");
 
-		if (oldTask != NULL && oldTask->isScheduled()) {
+		if (oldTask != NULL && oldTask->isScheduled())
+		{
 			oldTask->cancel();
 			playerCreature->removePendingTask("incapacitationRecovery");
 		}
 
-		Reference<Task*> task = new PlayerIncapacitationRecoverTask(playerCreature, false);
+		Reference<Task *> task = new PlayerIncapacitationRecoverTask(playerCreature, false);
 		playerCreature->addPendingTask("incapacitationRecovery", task, incapTime * 1000);
 
 		StringIdChatParameter toVictim;
@@ -1043,30 +1121,34 @@ int PlayerManagerImplementation::notifyDestruction(TangibleObject* destructor, T
 
 		playerCreature->sendSystemMessage(toVictim);
 
-		if (destructor->isPlayerCreature()) {
-			ManagedReference<CreatureObject*> destructorCreature = destructor->asCreatureObject();
+		if (destructor->isPlayerCreature())
+		{
+			ManagedReference<CreatureObject *> destructorCreature = destructor->asCreatureObject();
 
-			PlayerObject* attackerGhost = destructorCreature->getPlayerObject();
-			PlayerObject* victimGhost = playerCreature->getPlayerObject();
+			PlayerObject *attackerGhost = destructorCreature->getPlayerObject();
+			PlayerObject *victimGhost = playerCreature->getPlayerObject();
 
-			if (attackerGhost != NULL && victimGhost != NULL) {
-				FrsData* attackerData = attackerGhost->getFrsData();
+			if (attackerGhost != NULL && victimGhost != NULL)
+			{
+				FrsData *attackerData = attackerGhost->getFrsData();
 				int attackerCouncil = attackerData->getCouncilType();
 
-				FrsData* victimData = victimGhost->getFrsData();
+				FrsData *victimData = victimGhost->getFrsData();
 				int victimCouncil = victimData->getCouncilType();
 
-				ManagedReference<FrsManager*> strongMan = playerCreature->getZoneServer()->getFrsManager();
-				ManagedReference<CreatureObject*> strongRef = playerCreature->asCreatureObject();
+				ManagedReference<FrsManager *> strongMan = playerCreature->getZoneServer()->getFrsManager();
+				ManagedReference<CreatureObject *> strongRef = playerCreature->asCreatureObject();
 
-				if (attackerCouncil == FrsManager::COUNCIL_DARK && victimCouncil == FrsManager::COUNCIL_DARK) {
-					Core::getTaskManager()->executeTask([strongRef, destructorCreature, attackerCouncil, victimCouncil, strongMan] () {
+				if (attackerCouncil == FrsManager::COUNCIL_DARK && victimCouncil == FrsManager::COUNCIL_DARK)
+				{
+					Core::getTaskManager()->executeTask([strongRef, destructorCreature, attackerCouncil, victimCouncil, strongMan]() {
 						bool isFrsBattle = false;
 
 						if (attackerCouncil == FrsManager::COUNCIL_DARK && victimCouncil == FrsManager::COUNCIL_DARK)
 							isFrsBattle = strongMan->handleDarkCouncilIncap(destructorCreature, strongRef);
 
-						if (!isFrsBattle) {
+						if (!isFrsBattle)
+						{
 							StringIdChatParameter toKiller;
 
 							toKiller.setStringId("base_player", "prose_target_incap");
@@ -1074,8 +1156,11 @@ int PlayerManagerImplementation::notifyDestruction(TangibleObject* destructor, T
 
 							destructorCreature->sendSystemMessage(toKiller);
 						}
-					}, "PvPFRSIncapTask");
-				} else {
+					},
+														"PvPFRSIncapTask");
+				}
+				else
+				{
 					StringIdChatParameter toKiller;
 
 					toKiller.setStringId("base_player", "prose_target_incap");
@@ -1090,10 +1175,12 @@ int PlayerManagerImplementation::notifyDestruction(TangibleObject* destructor, T
 	return 0;
 }
 
-void PlayerManagerImplementation::killPlayer(TangibleObject* attacker, CreatureObject* player, int typeofdeath, bool isCombatAction) {
+void PlayerManagerImplementation::killPlayer(TangibleObject *attacker, CreatureObject *player, int typeofdeath, bool isCombatAction)
+{
 	StringIdChatParameter stringId;
 
-	if (player->isRidingMount()) {
+	if (player->isRidingMount())
+	{
 		player->updateCooldownTimer("mount_dismount", 0);
 		player->executeObjectControllerAction(STRING_HASHCODE("dismount"));
 	}
@@ -1111,56 +1198,67 @@ void PlayerManagerImplementation::killPlayer(TangibleObject* attacker, CreatureO
 	player->updateTimeOfDeath();
 	player->clearBuffs(true, false);
 
-	PlayerObject* ghost = player->getPlayerObject();
+	PlayerObject *ghost = player->getPlayerObject();
 
-	if (ghost != NULL) {
+	if (ghost != NULL)
+	{
 		ghost->resetIncapacitationTimes();
-		if (ghost->hasPvpTef()) {
+		if (ghost->hasPvpTef())
+		{
 			ghost->schedulePvpTefRemovalTask(true, true);
 		}
 	}
 
-	ThreatMap* threatMap = player->getThreatMap();
+	ThreatMap *threatMap = player->getThreatMap();
 
-	if (attacker->getFaction() != 0) {
-		if (attacker->isPlayerCreature() || attacker->isPet()) {
-			CreatureObject* attackerCreature = attacker->asCreatureObject();
+	if (attacker->getFaction() != 0)
+	{
+		if (attacker->isPlayerCreature() || attacker->isPet())
+		{
+			CreatureObject *attackerCreature = attacker->asCreatureObject();
 
-			if (attackerCreature->isPet()) {
-				CreatureObject* owner = attackerCreature->getLinkedCreature().get();
+			if (attackerCreature->isPet())
+			{
+				CreatureObject *owner = attackerCreature->getLinkedCreature().get();
 
-				if (owner != NULL && owner->isPlayerCreature()) {
+				if (owner != NULL && owner->isPlayerCreature())
+				{
 					attackerCreature = owner;
 				}
 			}
 
-			if (attackerCreature->isPlayerCreature()) {
-				if (!CombatManager::instance()->areInDuel(attackerCreature, player)) {
+			if (attackerCreature->isPlayerCreature())
+			{
+				if (!CombatManager::instance()->areInDuel(attackerCreature, player))
+				{
 					FactionManager::instance()->awardPvpFactionPoints(attackerCreature, player);
 				}
 			}
 
-			PlayerObject* attackerGhost = attackerCreature->getPlayerObject();
-			PlayerObject* victimGhost = player->getPlayerObject();
+			PlayerObject *attackerGhost = attackerCreature->getPlayerObject();
+			PlayerObject *victimGhost = player->getPlayerObject();
 
-			if (attackerGhost != NULL && victimGhost != NULL) {
-				FrsData* attackerData = attackerGhost->getFrsData();
+			if (attackerGhost != NULL && victimGhost != NULL)
+			{
+				FrsData *attackerData = attackerGhost->getFrsData();
 				int attackerCouncil = attackerData->getCouncilType();
 
-				FrsData* victimData = victimGhost->getFrsData();
+				FrsData *victimData = victimGhost->getFrsData();
 				int victimCouncil = victimData->getCouncilType();
 
-				if (attackerCouncil == FrsManager::COUNCIL_DARK && victimCouncil == FrsManager::COUNCIL_DARK) {
-					ManagedReference<FrsManager*> strongMan = player->getZoneServer()->getFrsManager();
-					ManagedReference<CreatureObject*> attackerStrongRef = attackerCreature->asCreatureObject();
-					ManagedReference<CreatureObject*> playerStrongRef = player->asCreatureObject();
+				if (attackerCouncil == FrsManager::COUNCIL_DARK && victimCouncil == FrsManager::COUNCIL_DARK)
+				{
+					ManagedReference<FrsManager *> strongMan = player->getZoneServer()->getFrsManager();
+					ManagedReference<CreatureObject *> attackerStrongRef = attackerCreature->asCreatureObject();
+					ManagedReference<CreatureObject *> playerStrongRef = player->asCreatureObject();
 
-					Reference<ThreatMap*> copyThreatMap = new ThreatMap(*threatMap);
+					Reference<ThreatMap *> copyThreatMap = new ThreatMap(*threatMap);
 
-					Core::getTaskManager()->executeTask([attackerStrongRef, playerStrongRef, strongMan, copyThreatMap] () {
+					Core::getTaskManager()->executeTask([attackerStrongRef, playerStrongRef, strongMan, copyThreatMap]() {
 						if (!strongMan->handleDarkCouncilDeath(attackerStrongRef, playerStrongRef))
 							strongMan->handleSuddenDeathLoss(playerStrongRef, copyThreatMap);
-					}, "PvPFRSKillTask");
+					},
+														"PvPFRSKillTask");
 				}
 			}
 		}
@@ -1168,21 +1266,24 @@ void PlayerManagerImplementation::killPlayer(TangibleObject* attacker, CreatureO
 
 	CombatManager::instance()->freeDuelList(player, false);
 
-	if (attacker->isPlayerCreature()) {
-		ManagedReference<CreatureObject*> playerRef = player->asCreatureObject();
+	if (attacker->isPlayerCreature())
+	{
+		ManagedReference<CreatureObject *> playerRef = player->asCreatureObject();
 
 		stringId.setStringId("base_player", "prose_target_dead");
 		stringId.setTT(player->getDisplayedName());
 		playerRef->sendSystemMessage(stringId);
 
-		Reference<ThreatMap*> copyThreatMap = new ThreatMap(*threatMap);
+		Reference<ThreatMap *> copyThreatMap = new ThreatMap(*threatMap);
 
-		Core::getTaskManager()->executeTask([=] () {
-			if (playerRef != NULL) {
+		Core::getTaskManager()->executeTask([=]() {
+			if (playerRef != NULL)
+			{
 				Locker locker(playerRef);
 				doPvpDeathRatingUpdate(playerRef, copyThreatMap);
 			}
-		}, "PvpDeathRatingUpdateLambda");
+		},
+											"PvpDeathRatingUpdateLambda");
 	}
 
 	threatMap->removeAll(true);
@@ -1193,77 +1294,92 @@ void PlayerManagerImplementation::killPlayer(TangibleObject* attacker, CreatureO
 	player->notifyObjectKillObservers(attacker);
 }
 
-void PlayerManagerImplementation::sendActivateCloneRequest(CreatureObject* player, int typeofdeath) {
-	Zone* zone = player->getZone();
+void PlayerManagerImplementation::sendActivateCloneRequest(CreatureObject *player, int typeofdeath)
+{
+	Zone *zone = player->getZone();
 
 	if (zone == NULL)
 		return;
 
-	PlayerObject* ghost = player->getPlayerObject();
+	PlayerObject *ghost = player->getPlayerObject();
 
 	if (ghost == NULL)
 		return;
 
 	ghost->removeSuiBoxType(SuiWindowType::CLONE_REQUEST);
 
-	ManagedReference<SuiListBox*> cloneMenu = new SuiListBox(player, SuiWindowType::CLONE_REQUEST);
+	ManagedReference<SuiListBox *> cloneMenu = new SuiListBox(player, SuiWindowType::CLONE_REQUEST);
 	cloneMenu->setCallback(new CloningRequestSuiCallback(player->getZoneServer(), typeofdeath));
 	cloneMenu->setPromptTitle("@base_player:revive_title");
 
 	uint64 preDesignatedFacilityOid = ghost->getCloningFacility();
-	ManagedReference<SceneObject*> preDesignatedFacility = server->getObject(preDesignatedFacilityOid);
+	ManagedReference<SceneObject *> preDesignatedFacility = server->getObject(preDesignatedFacilityOid);
 	String predesignatedName = "None";
 
 	//Get the name of the pre-designated facility
-	if (preDesignatedFacility != NULL) {
-		ManagedReference<CityRegion*> cr = preDesignatedFacility->getCityRegion().get();
+	if (preDesignatedFacility != NULL)
+	{
+		ManagedReference<CityRegion *> cr = preDesignatedFacility->getCityRegion().get();
 
-		if (preDesignatedFacility->getZone() != zone) {
+		if (preDesignatedFacility->getZone() != zone)
+		{
 			predesignatedName = "off-planet (unavailable)";
-		} else if (cr != NULL) {
+		}
+		else if (cr != NULL)
+		{
 			predesignatedName = cr->getRegionDisplayedName();
-		} else {
+		}
+		else
+		{
 			predesignatedName = preDesignatedFacility->getDisplayedName();
 		}
 	}
 
-	SortedVector<ManagedReference<SceneObject*> > locations = zone->getPlanetaryObjectList("cloningfacility");
+	SortedVector<ManagedReference<SceneObject *>> locations = zone->getPlanetaryObjectList("cloningfacility");
 
-	ManagedReference<SceneObject*> closestCloning = zone->getNearestPlanetaryObject(player, "cloningfacility");
-	if (closestCloning == NULL) {
+	ManagedReference<SceneObject *> closestCloning = zone->getNearestPlanetaryObject(player, "cloningfacility");
+	if (closestCloning == NULL)
+	{
 		warning("nearest cloning facility for player is NULL");
 		return;
 	}
 	String closestName = "None";
 
 	//Check if player is city banned where the closest facility is or if it's not a valid cloner
-	if (!isValidClosestCloner(player, closestCloning)) {
+	if (!isValidClosestCloner(player, closestCloning))
+	{
 		int distance = 50000;
-		for (int j = 0; j < locations.size(); j++) {
-			ManagedReference<SceneObject*> location = locations.get(j);
+		for (int j = 0; j < locations.size(); j++)
+		{
+			ManagedReference<SceneObject *> location = locations.get(j);
 
 			if (!isValidClosestCloner(player, location))
 				continue;
 
-			ManagedReference<CityRegion*> cr = location->getCityRegion().get();
+			ManagedReference<CityRegion *> cr = location->getCityRegion().get();
 
 			String name = "";
 
-			if (cr != NULL) {
+			if (cr != NULL)
+			{
 				name = cr->getRegionDisplayedName();
-			} else {
+			}
+			else
+			{
 				name = location->getDisplayedName();
 			}
 
-			if (location->getDistanceTo(player) < distance) {
+			if (location->getDistanceTo(player) < distance)
+			{
 				distance = location->getDistanceTo(player);
 				closestName = name;
 				closestCloning = location;
 			}
 		}
-
-	} else {
-		ManagedReference<CityRegion*> cr = closestCloning->getCityRegion().get();
+	}
+	else
+	{
+		ManagedReference<CityRegion *> cr = closestCloning->getCityRegion().get();
 
 		if (cr != NULL)
 			closestName = cr->getRegionDisplayedName();
@@ -1273,9 +1389,9 @@ void PlayerManagerImplementation::sendActivateCloneRequest(CreatureObject* playe
 
 	StringBuffer promptText;
 	promptText << "Closest:\t\t " << closestName << "\n"
-			<< "Pre-Designated: " << predesignatedName << "\n"
-			<< "Cash Balance:\t " << player->getCashCredits() << "\n\n"
-			<< "Select the desired option and click OK.";
+			   << "Pre-Designated: " << predesignatedName << "\n"
+			   << "Cash Balance:\t " << player->getCashCredits() << "\n\n"
+			   << "Select the desired option and click OK.";
 
 	cloneMenu->setPromptText(promptText.toString());
 
@@ -1285,25 +1401,30 @@ void PlayerManagerImplementation::sendActivateCloneRequest(CreatureObject* playe
 	if (preDesignatedFacility != NULL && preDesignatedFacility->getZone() == zone)
 		cloneMenu->addMenuItem("@base_player:revive_bind", preDesignatedFacility->getObjectID());
 
-	for (int i = 0; i < locations.size(); i++) {
-		ManagedReference<SceneObject*> loc = locations.get(i);
+	for (int i = 0; i < locations.size(); i++)
+	{
+		ManagedReference<SceneObject *> loc = locations.get(i);
 
 		if (loc == NULL)
 			continue;
 
-		CloningBuildingObjectTemplate* cbot = cast<CloningBuildingObjectTemplate*>(loc->getObjectTemplate());
+		CloningBuildingObjectTemplate *cbot = cast<CloningBuildingObjectTemplate *>(loc->getObjectTemplate());
 
 		if (cbot == NULL)
 			continue;
 
-		if (cbot->getFacilityType() == CloningBuildingObjectTemplate::JEDI_ONLY && player->hasSkill("force_title_jedi_rank_01")) {
+		if (cbot->getFacilityType() == CloningBuildingObjectTemplate::JEDI_ONLY && player->hasSkill("force_title_jedi_rank_01"))
+		{
 			String name = "Force Shrine (" + String::valueOf((int)loc->getWorldPositionX()) + ", " + String::valueOf((int)loc->getWorldPositionY()) + ")";
 			cloneMenu->addMenuItem(name, loc->getObjectID());
-		} else if ((cbot->getFacilityType() == CloningBuildingObjectTemplate::LIGHT_JEDI_ONLY && player->hasSkill("force_rank_light_novice")) ||
-				(cbot->getFacilityType() == CloningBuildingObjectTemplate::DARK_JEDI_ONLY && player->hasSkill("force_rank_dark_novice"))) {
-			FrsManager* frsManager = server->getFrsManager();
+		}
+		else if ((cbot->getFacilityType() == CloningBuildingObjectTemplate::LIGHT_JEDI_ONLY && player->hasSkill("force_rank_light_novice")) ||
+				 (cbot->getFacilityType() == CloningBuildingObjectTemplate::DARK_JEDI_ONLY && player->hasSkill("force_rank_dark_novice")))
+		{
+			FrsManager *frsManager = server->getFrsManager();
 
-			if (frsManager->isFrsEnabled()) {
+			if (frsManager->isFrsEnabled())
+			{
 				String name = "Jedi Enclave (" + String::valueOf((int)loc->getWorldPositionX()) + ", " + String::valueOf((int)loc->getWorldPositionY()) + ")";
 				cloneMenu->addMenuItem(name, loc->getObjectID());
 			}
@@ -1314,16 +1435,17 @@ void PlayerManagerImplementation::sendActivateCloneRequest(CreatureObject* playe
 	player->sendMessage(cloneMenu->generateMessage());
 }
 
-bool PlayerManagerImplementation::isValidClosestCloner(CreatureObject* player, SceneObject* cloner) {
+bool PlayerManagerImplementation::isValidClosestCloner(CreatureObject *player, SceneObject *cloner)
+{
 	if (cloner == NULL)
 		return false;
 
-	ManagedReference<CityRegion*> cr = cloner->getCityRegion().get();
+	ManagedReference<CityRegion *> cr = cloner->getCityRegion().get();
 
 	if (cr != NULL && cr->isBanned(player->getObjectID()))
 		return false;
 
-	CloningBuildingObjectTemplate* cbot = cast<CloningBuildingObjectTemplate*>(cloner->getObjectTemplate());
+	CloningBuildingObjectTemplate *cbot = cast<CloningBuildingObjectTemplate *>(cloner->getObjectTemplate());
 
 	if (cbot == NULL)
 		return false;
@@ -1340,53 +1462,60 @@ bool PlayerManagerImplementation::isValidClosestCloner(CreatureObject* player, S
 	return true;
 }
 
-void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uint64 clonerID, int typeofdeath) {
-	ManagedReference<SceneObject*> cloner = server->getObject(clonerID);
+void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject *player, uint64 clonerID, int typeofdeath)
+{
+	ManagedReference<SceneObject *> cloner = server->getObject(clonerID);
 
-	if (cloner == NULL) {
+	if (cloner == NULL)
+	{
 		error("Cloning structure is null");
 		return;
 	}
 
-	PlayerObject* ghost = player->getPlayerObject();
+	PlayerObject *ghost = player->getPlayerObject();
 
-	if (ghost == NULL)	{
+	if (ghost == NULL)
+	{
 		error("The player to be cloned is null");
 		return;
 	}
 
+	CloningBuildingObjectTemplate *cbot = cast<CloningBuildingObjectTemplate *>(cloner->getObjectTemplate());
 
-	CloningBuildingObjectTemplate* cbot = cast<CloningBuildingObjectTemplate*>(cloner->getObjectTemplate());
-
-	if (cbot == NULL) {
+	if (cbot == NULL)
+	{
 		error("Not a cloning building template.");
 		return;
 	}
 
-	CloneSpawnPoint* clonePoint = cbot->getRandomSpawnPoint();
+	CloneSpawnPoint *clonePoint = cbot->getRandomSpawnPoint();
 
-	if (clonePoint == NULL) {
+	if (clonePoint == NULL)
+	{
 		error("clone point null");
 		return;
 	}
 
-	Coordinate* coordinate = clonePoint->getCoordinate();
-	Quaternion* direction = clonePoint->getDirection();
+	Coordinate *coordinate = clonePoint->getCoordinate();
+	Quaternion *direction = clonePoint->getDirection();
 
 	int cellID = clonePoint->getCellID();
-	SceneObject* cell = NULL;
+	SceneObject *cell = NULL;
 
-	if (cellID != 0) {
-		BuildingObject* cloningBuilding = cloner.castTo<BuildingObject*>();
+	if (cellID != 0)
+	{
+		BuildingObject *cloningBuilding = cloner.castTo<BuildingObject *>();
 
-		if (cloningBuilding == NULL)  {
+		if (cloningBuilding == NULL)
+		{
 			error("Cloning building is null");
 			return;
 		}
 
 		cell = cloningBuilding->getCell(cellID);
 
-		if (cell == NULL) {
+		if (cell == NULL)
+		{
 			StringBuffer msg;
 			msg << "null cell for cellID " << cellID << " in building: " << cbot->getFullTemplateString();
 			error(msg.toString());
@@ -1394,7 +1523,7 @@ void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uin
 		}
 	}
 
-	Zone* zone = player->getZone();
+	Zone *zone = player->getZone();
 
 	ghost->setCloning(true);
 
@@ -1404,9 +1533,10 @@ void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uin
 		player->switchZone(zone->getZoneName(), coordinate->getPositionX(), coordinate->getPositionZ(), coordinate->getPositionY(), cell->getObjectID());
 
 	uint64 preDesignatedFacilityOid = ghost->getCloningFacility();
-	ManagedReference<SceneObject*> preDesignatedFacility = server->getObject(preDesignatedFacilityOid);
+	ManagedReference<SceneObject *> preDesignatedFacility = server->getObject(preDesignatedFacilityOid);
 
-	if (preDesignatedFacility == NULL || preDesignatedFacility != cloner) {
+	if (preDesignatedFacility == NULL || preDesignatedFacility != cloner)
+	{
 		player->addWounds(CreatureAttribute::HEALTH, 100, true, false);
 		player->addWounds(CreatureAttribute::ACTION, 100, true, false);
 		player->addWounds(CreatureAttribute::MIND, 100, true, false);
@@ -1416,31 +1546,37 @@ void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uin
 	if (player->getFactionStatus() != FactionStatus::ONLEAVE && cbot->getFacilityType() != CloningBuildingObjectTemplate::FACTION_IMPERIAL && cbot->getFacilityType() != CloningBuildingObjectTemplate::FACTION_REBEL && !player->hasSkill("force_title_jedi_rank_03"))
 		player->setFactionStatus(FactionStatus::ONLEAVE);
 
-	SortedVector<ManagedReference<SceneObject*> > insurableItems = getInsurableItems(player, false);
+	SortedVector<ManagedReference<SceneObject *>> insurableItems = getInsurableItems(player, false);
 
 	// Decay
-	if (typeofdeath == 0 && insurableItems.size() > 0) {
+	if (typeofdeath == 0 && insurableItems.size() > 0)
+	{
 
-		ManagedReference<SuiListBox*> suiCloneDecayReport = new SuiListBox(player, SuiWindowType::CLONE_REQUEST_DECAY, SuiListBox::HANDLESINGLEBUTTON);
+		ManagedReference<SuiListBox *> suiCloneDecayReport = new SuiListBox(player, SuiWindowType::CLONE_REQUEST_DECAY, SuiListBox::HANDLESINGLEBUTTON);
 		suiCloneDecayReport->setPromptTitle("DECAY REPORT");
 		suiCloneDecayReport->setPromptText("The following report summarizes the status of your items after the decay event.");
 		suiCloneDecayReport->addMenuItem("\\#00FF00DECAYED ITEMS");
 
-		for (int i = 0; i < insurableItems.size(); i++) {
-			SceneObject* item = insurableItems.get(i);
+		for (int i = 0; i < insurableItems.size(); i++)
+		{
+			SceneObject *item = insurableItems.get(i);
 
-			if (item != NULL && item->isTangibleObject()) {
-				ManagedReference<TangibleObject*> obj = cast<TangibleObject*>(item);
+			if (item != NULL && item->isTangibleObject())
+			{
+				ManagedReference<TangibleObject *> obj = cast<TangibleObject *>(item);
 
 				Locker clocker(obj, player);
 
-				if (obj->getOptionsBitmask() & OptionBitmask::INSURED) {
+				if (obj->getOptionsBitmask() & OptionBitmask::INSURED)
+				{
 					//1% Decay for insured items
 					obj->inflictDamage(obj, 0, 0.01 * obj->getMaxCondition(), true, true);
 					//Set uninsured
 					uint32 bitmask = obj->getOptionsBitmask() - OptionBitmask::INSURED;
 					obj->setOptionsBitmask(bitmask);
-				} else {
+				}
+				else
+				{
 					//5% Decay for uninsured items
 					obj->inflictDamage(obj, 0, 0.05 * obj->getMaxCondition(), true, true);
 				}
@@ -1448,8 +1584,8 @@ void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uin
 				// Calculate condition percentage for decay report
 				int max = obj->getMaxCondition();
 				int min = max - obj->getConditionDamage();
-				int condPercentage = ( min / (float)max ) * 100.0f;
-				String line = " - " + obj->getDisplayedName() + " (@"+String::valueOf(condPercentage)+"%)";
+				int condPercentage = (min / (float)max) * 100.0f;
+				String line = " - " + obj->getDisplayedName() + " (@" + String::valueOf(condPercentage) + "%)";
 
 				suiCloneDecayReport->addMenuItem(line, item->getObjectID());
 			}
@@ -1457,11 +1593,11 @@ void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uin
 
 		ghost->addSuiBox(suiCloneDecayReport);
 		player->sendMessage(suiCloneDecayReport->generateMessage());
-
 	}
 
 	// PvP-Death Debuff -- 5minutes
-	if (typeofdeath == 1) {
+	if (typeofdeath == 1)
+	{
 		// Variables for deathDebuff
 		int deathDebuffVal = -2000;
 		int deathDebuffTime = 300;
@@ -1471,7 +1607,8 @@ void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uin
 		Locker locker(deathDebuff);
 
 		// Loops through all stats and applies our death debuff
-		for(int i = 0; i < CreatureAttribute::ARRAYSIZE; i++){
+		for (int i = 0; i < CreatureAttribute::ARRAYSIZE; i++)
+		{
 			deathDebuff->setAttributeModifier(i, deathDebuffVal);
 		}
 
@@ -1482,15 +1619,14 @@ void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uin
 		locker.release();
 	}
 
-
-	Reference<Task*> task = new PlayerIncapacitationRecoverTask(player, true);
+	Reference<Task *> task = new PlayerIncapacitationRecoverTask(player, true);
 	task->schedule(3 * 1000);
 
 	player->notifyObservers(ObserverEventType::PLAYERCLONED, player, 0);
 
-
 	// Jedi experience loss.
-	if (ghost->getJediState() >= 2) {
+	if (ghost->getJediState() >= 2)
+	{
 		int jediXpCap = ghost->getXpCap("jedi_general");
 		int xpLoss = (int)(jediXpCap * -0.05);
 		int curExp = ghost->getExperience("jedi_general");
@@ -1501,80 +1637,87 @@ void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uin
 			xpLoss = negXpCap - curExp;
 
 		awardExperience(player, "jedi_general", xpLoss, true);
-		StringIdChatParameter message("base_player","prose_revoke_xp");
+		StringIdChatParameter message("base_player", "prose_revoke_xp");
 		message.setDI(xpLoss * -1);
 		message.setTO("exp_n", "jedi_general");
 		player->sendSystemMessage(message);
 	}
 }
 
-void PlayerManagerImplementation::ejectPlayerFromBuilding(CreatureObject* player) {
-	Zone* zone = player->getZone();
+void PlayerManagerImplementation::ejectPlayerFromBuilding(CreatureObject *player)
+{
+	Zone *zone = player->getZone();
 
 	if (zone == NULL)
 		return;
 
-	ManagedReference<SceneObject*> parent = player->getParent().get();
+	ManagedReference<SceneObject *> parent = player->getParent().get();
 
 	if (parent == NULL || !parent->isCellObject())
 		return;
 
-	ManagedReference<CellObject*> cell = cast<CellObject*>(parent.get());
+	ManagedReference<CellObject *> cell = cast<CellObject *>(parent.get());
 
 	if (cell == NULL)
 		return;
 
-	ManagedReference<BuildingObject*> building = cell->getParent().get().castTo<BuildingObject*>();
+	ManagedReference<BuildingObject *> building = cell->getParent().get().castTo<BuildingObject *>();
 
 	if (building == NULL)
 		return;
 
-	if (building->hasTemplateEjectionPoint()) {
+	if (building->hasTemplateEjectionPoint())
+	{
 		Vector3 ejectionPoint = building->getEjectionPoint();
 		player->switchZone(zone->getZoneName(), ejectionPoint.getX(), ejectionPoint.getZ(), ejectionPoint.getY(), 0);
 	}
 }
 
-
-
-void PlayerManagerImplementation::disseminateExperience(TangibleObject* destructedObject, ThreatMap* threatMap,
-		SynchronizedVector<ManagedReference<CreatureObject*> >* spawnedCreatures,Zone* lairZone) {
+void PlayerManagerImplementation::disseminateExperience(TangibleObject *destructedObject, ThreatMap *threatMap,
+														SynchronizedVector<ManagedReference<CreatureObject *>> *spawnedCreatures, Zone *lairZone)
+{
 	uint32 totalDamage = threatMap->getTotalDamage();
 
-	if (totalDamage == 0) {
+	if (totalDamage == 0)
+	{
 		threatMap->removeAll();
 		return;
 	}
 
-	VectorMap<ManagedReference<CreatureObject*>, int> slExperience;
+	VectorMap<ManagedReference<CreatureObject *>, int> slExperience;
 	slExperience.setAllowOverwriteInsertPlan();
 	slExperience.setNullValue(0);
-
 
 	float gcwBonus = 1.0f;
 	uint32 winningFaction = -1;
 	int baseXp = 0;
-	Zone* zone = lairZone;
-	if (zone==NULL) {
+	Zone *zone = lairZone;
+	if (zone == NULL)
+	{
 		zone = destructedObject->getZone();
 	}
-	if (zone != NULL) {
-		GCWManager* gcwMan = zone->getGCWManager();
+	if (zone != NULL)
+	{
+		GCWManager *gcwMan = zone->getGCWManager();
 
-		if (gcwMan != NULL) {
+		if (gcwMan != NULL)
+		{
 			gcwBonus += (gcwMan->getGCWXPBonus() / 100.0f);
 			winningFaction = gcwMan->getWinningFaction();
 		}
 	}
 
-	if (!destructedObject->isCreatureObject() && spawnedCreatures != NULL) {
-		ManagedReference<AiAgent*> ai = NULL;
+	if (!destructedObject->isCreatureObject() && spawnedCreatures != NULL)
+	{
+		ManagedReference<AiAgent *> ai = NULL;
 
-		for (int i = 0; i < spawnedCreatures->size(); i++) {
-			ai = cast<AiAgent*>(spawnedCreatures->get(i).get());
+		for (int i = 0; i < spawnedCreatures->size(); i++)
+		{
+			ai = cast<AiAgent *>(spawnedCreatures->get(i).get());
 
-			if (ai != NULL) {
-				Creature* creature = cast<Creature*>(ai.get());
+			if (ai != NULL)
+			{
+				Creature *creature = cast<Creature *>(ai.get());
 
 				if (creature != NULL && creature->isBaby())
 					continue;
@@ -1585,52 +1728,61 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 
 		if (ai != NULL)
 			baseXp = ai->getBaseXp();
-
-	} else {
-		ManagedReference<AiAgent*> ai = cast<AiAgent*>(destructedObject);
+	}
+	else
+	{
+		ManagedReference<AiAgent *> ai = cast<AiAgent *>(destructedObject);
 
 		if (ai != NULL)
 			baseXp = ai->getBaseXp();
 	}
 
-	for (int i = 0; i < threatMap->size(); ++i) {
-		ThreatMapEntry* entry = &threatMap->elementAt(i).getValue();
-		CreatureObject* attacker = threatMap->elementAt(i).getKey();
+	for (int i = 0; i < threatMap->size(); ++i)
+	{
+		ThreatMapEntry *entry = &threatMap->elementAt(i).getValue();
+		CreatureObject *attacker = threatMap->elementAt(i).getKey();
 
-		if (entry == NULL || attacker == NULL) {
+		if (entry == NULL || attacker == NULL)
+		{
 			continue;
 		}
 
-		if (attacker->isPet()) {
-			PetControlDevice* pcd = attacker->getControlDevice().get().castTo<PetControlDevice*>();
+		if (attacker->isPet())
+		{
+			PetControlDevice *pcd = attacker->getControlDevice().get().castTo<PetControlDevice *>();
 
 			// only creature pets will award exp, so discard anything else
-			if (pcd == NULL || pcd->getPetType() != PetManager::CREATUREPET) {
+			if (pcd == NULL || pcd->getPetType() != PetManager::CREATUREPET)
+			{
 				continue;
 			}
 
-			CreatureObject* owner = attacker->getLinkedCreature().get();
-			if (owner == NULL || !owner->isPlayerCreature()) {
+			CreatureObject *owner = attacker->getLinkedCreature().get();
+			if (owner == NULL || !owner->isPlayerCreature())
+			{
 				continue;
 			}
 
 			Locker crossLocker(owner, destructedObject);
 
-			PlayerObject* ownerGhost = owner->getPlayerObject();
-			if (ownerGhost == NULL || !owner->hasSkill("outdoors_creaturehandler_novice") || !destructedObject->isInRange(owner, 80)) {
+			PlayerObject *ownerGhost = owner->getPlayerObject();
+			if (ownerGhost == NULL || !owner->hasSkill("outdoors_creaturehandler_novice") || !destructedObject->isInRange(owner, 80))
+			{
 				continue;
 			}
 
 			int totalPets = 1;
 
-			for (int i = 0; i < ownerGhost->getActivePetsSize(); i++) {
-				ManagedReference<AiAgent*> object = ownerGhost->getActivePet(i);
+			for (int i = 0; i < ownerGhost->getActivePetsSize(); i++)
+			{
+				ManagedReference<AiAgent *> object = ownerGhost->getActivePet(i);
 
-				if (object != NULL && object->isCreature()) {
+				if (object != NULL && object->isCreature())
+				{
 					if (object == attacker)
 						continue;
 
-					PetControlDevice* petControlDevice = object->getControlDevice().get().castTo<PetControlDevice*>();
+					PetControlDevice *petControlDevice = object->getControlDevice().get().castTo<PetControlDevice *>();
 					if (petControlDevice != NULL && petControlDevice->getPetType() == PetManager::CREATUREPET)
 						totalPets++;
 				}
@@ -1641,9 +1793,12 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 
 			float xpAmount = levelRatio * 500.f;
 
-			if (levelRatio <= 0.5) {
+			if (levelRatio <= 0.5)
+			{
 				xpAmount = 1;
-			} else {
+			}
+			else
+			{
 				xpAmount = Math::min(xpAmount, (float)attacker->getLevel() * 50.f);
 				xpAmount /= totalPets;
 
@@ -1652,23 +1807,26 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 			}
 
 			awardExperience(owner, "creaturehandler", xpAmount);
-
-		} else if (attacker->isPlayerCreature()) {
-			if (!(attacker->getZone() == zone && destructedObject->isInRangeZoneless(attacker, 80))) {
+		}
+		else if (attacker->isPlayerCreature())
+		{
+			if (!(attacker->getZone() == zone && destructedObject->isInRangeZoneless(attacker, 80)))
+			{
 				continue;
 			}
-			ManagedReference<GroupObject*> group = attacker->getGroup();
+			ManagedReference<GroupObject *> group = attacker->getGroup();
 
 			uint32 combatXp = 0;
 
 			Locker crossLocker(attacker, destructedObject);
 
-			for (int j = 0; j < entry->size(); ++j) {
+			for (int j = 0; j < entry->size(); ++j)
+			{
 				uint32 damage = entry->elementAt(j).getValue();
 				String xpType = entry->elementAt(j).getKey();
 				float xpAmount = baseXp;
 
-				xpAmount *= (float) damage / totalDamage;
+				xpAmount *= (float)damage / totalDamage;
 
 				//Cap xp based on level
 				xpAmount = Math::min(xpAmount, calculatePlayerLevel(attacker, xpType) * 300.f);
@@ -1700,7 +1858,7 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 
 			crossLocker.release();
 
-			ManagedReference<CreatureObject*> groupLeader = group->getLeader();
+			ManagedReference<CreatureObject *> groupLeader = group->getLeader();
 
 			if (groupLeader == NULL || !groupLeader->isPlayerCreature())
 				continue;
@@ -1708,7 +1866,8 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 			Locker squadLock(groupLeader, destructedObject);
 
 			//If he is a squad leader, and is in range of this player, then add the combat exp for him to use.
-			if (groupLeader->hasSkill("outdoors_squadleader_novice") && pos.distanceTo(attacker->getWorldPosition()) <= ZoneServer::CLOSEOBJECTRANGE) {
+			if (groupLeader->hasSkill("outdoors_squadleader_novice") && pos.distanceTo(attacker->getWorldPosition()) <= ZoneServer::CLOSEOBJECTRANGE)
+			{
 				int v = slExperience.get(groupLeader) + combatXp;
 				slExperience.put(groupLeader, v);
 			}
@@ -1716,9 +1875,10 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 	}
 
 	//Send out squad leader experience.
-	for (int i = 0; i < slExperience.size(); ++i) {
-		VectorMapEntry<ManagedReference<CreatureObject*>, int>* entry = &slExperience.elementAt(i);
-		CreatureObject* leader = entry->getKey();
+	for (int i = 0; i < slExperience.size(); ++i)
+	{
+		VectorMapEntry<ManagedReference<CreatureObject *>, int> *entry = &slExperience.elementAt(i);
+		CreatureObject *leader = entry->getKey();
 
 		if (leader == NULL)
 			continue;
@@ -1731,7 +1891,8 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 	threatMap->removeAll();
 }
 
-bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, ArmorObject* armor) {
+bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject *player, ArmorObject *armor)
+{
 	int strength = player->getHAM(CreatureAttribute::STRENGTH);
 	int constitution = player->getHAM(CreatureAttribute::CONSTITUTION);
 	int quickness = player->getHAM(CreatureAttribute::QUICKNESS);
@@ -1747,11 +1908,13 @@ bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, Arm
 		return true;
 
 	if (healthEncumb >= strength || healthEncumb >= constitution ||
-			actionEncumb >= quickness || actionEncumb >= stamina ||
-			mindEncumb >= focus || mindEncumb >= willpower) {
+		actionEncumb >= quickness || actionEncumb >= stamina ||
+		mindEncumb >= focus || mindEncumb >= willpower)
+	{
 		player->sendSystemMessage("@system_msg:equip_armor_fail"); // You are not healthy enough to wear this armor!
 
-		if (healthEncumb >= strength) {
+		if (healthEncumb >= strength)
+		{
 			int statStr = (healthEncumb - strength) + 1;
 			StringIdChatParameter params("@system_msg:equip_armor_fail_prose"); // You need %DI more %TT to wear this armor.
 			params.setDI(statStr);
@@ -1759,7 +1922,8 @@ bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, Arm
 			player->sendSystemMessage(params);
 		}
 
-		if (healthEncumb >= constitution) {
+		if (healthEncumb >= constitution)
+		{
 			int statCon = (healthEncumb - constitution) + 1;
 			StringIdChatParameter params("@system_msg:equip_armor_fail_prose");
 			params.setDI(statCon);
@@ -1767,7 +1931,8 @@ bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, Arm
 			player->sendSystemMessage(params);
 		}
 
-		if (actionEncumb >= quickness) {
+		if (actionEncumb >= quickness)
+		{
 			int statQuick = (actionEncumb - quickness) + 1;
 			StringIdChatParameter params("@system_msg:equip_armor_fail_prose");
 			params.setDI(statQuick);
@@ -1775,7 +1940,8 @@ bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, Arm
 			player->sendSystemMessage(params);
 		}
 
-		if (actionEncumb >= stamina) {
+		if (actionEncumb >= stamina)
+		{
 			int statStam = (actionEncumb - stamina) + 1;
 			StringIdChatParameter params("@system_msg:equip_armor_fail_prose");
 			params.setDI(statStam);
@@ -1783,7 +1949,8 @@ bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, Arm
 			player->sendSystemMessage(params);
 		}
 
-		if (mindEncumb >= focus) {
+		if (mindEncumb >= focus)
+		{
 			int statFoc = (mindEncumb - focus) + 1;
 			StringIdChatParameter params("@system_msg:equip_armor_fail_prose");
 			params.setDI(statFoc);
@@ -1791,7 +1958,8 @@ bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, Arm
 			player->sendSystemMessage(params);
 		}
 
-		if (mindEncumb >= willpower) {
+		if (mindEncumb >= willpower)
+		{
 			int statWill = (mindEncumb - willpower) + 1;
 			StringIdChatParameter params("@system_msg:equip_armor_fail_prose");
 			params.setDI(statWill);
@@ -1805,70 +1973,84 @@ bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, Arm
 		return true;
 }
 
-void PlayerManagerImplementation::applyEncumbrancies(CreatureObject* player, ArmorObject* armor) {
+void PlayerManagerImplementation::applyEncumbrancies(CreatureObject *player, ArmorObject *armor)
+{
+	CombatManager *combatManager = CombatManager::instance();
 	int healthEncumb = Math::max(0, armor->getHealthEncumbrance());
 	int actionEncumb = Math::max(0, armor->getActionEncumbrance());
 	int mindEncumb = Math::max(0, armor->getMindEncumbrance());
 
-	player->addEncumbrance(CreatureEncumbrance::HEALTH, healthEncumb, true);
-	player->addEncumbrance(CreatureEncumbrance::ACTION, actionEncumb, true);
-	player->addEncumbrance(CreatureEncumbrance::MIND, mindEncumb, true);
+	// Applying the flag for isChestOnly so we can only care about chest armor encumberance!
+	if ((combatManager->isChestOnly && armor->getHitLocation() == 1) || !combatManager->isChestOnly)
+	{
+		player->addEncumbrance(CreatureEncumbrance::HEALTH, healthEncumb, true);
+		player->addEncumbrance(CreatureEncumbrance::ACTION, actionEncumb, true);
+		player->addEncumbrance(CreatureEncumbrance::MIND, mindEncumb, true);
 
-	player->inflictDamage(player, CreatureAttribute::STRENGTH, healthEncumb, true);
-	player->addMaxHAM(CreatureAttribute::STRENGTH, -healthEncumb, true);
+		player->inflictDamage(player, CreatureAttribute::STRENGTH, healthEncumb, true);
+		player->addMaxHAM(CreatureAttribute::STRENGTH, -healthEncumb, true);
 
-	player->inflictDamage(player, CreatureAttribute::CONSTITUTION, healthEncumb, true);
-	player->addMaxHAM(CreatureAttribute::CONSTITUTION, -healthEncumb, true);
+		player->inflictDamage(player, CreatureAttribute::CONSTITUTION, healthEncumb, true);
+		player->addMaxHAM(CreatureAttribute::CONSTITUTION, -healthEncumb, true);
 
-	player->inflictDamage(player, CreatureAttribute::QUICKNESS, actionEncumb, true);
-	player->addMaxHAM(CreatureAttribute::QUICKNESS, -actionEncumb, true);
+		player->inflictDamage(player, CreatureAttribute::QUICKNESS, actionEncumb, true);
+		player->addMaxHAM(CreatureAttribute::QUICKNESS, -actionEncumb, true);
 
-	player->inflictDamage(player, CreatureAttribute::STAMINA, actionEncumb, true);
-	player->addMaxHAM(CreatureAttribute::STAMINA, -actionEncumb, true);
+		player->inflictDamage(player, CreatureAttribute::STAMINA, actionEncumb, true);
+		player->addMaxHAM(CreatureAttribute::STAMINA, -actionEncumb, true);
 
-	player->inflictDamage(player, CreatureAttribute::FOCUS, mindEncumb, true);
-	player->addMaxHAM(CreatureAttribute::FOCUS, -mindEncumb, true);
+		player->inflictDamage(player, CreatureAttribute::FOCUS, mindEncumb, true);
+		player->addMaxHAM(CreatureAttribute::FOCUS, -mindEncumb, true);
 
-	player->inflictDamage(player, CreatureAttribute::WILLPOWER, mindEncumb, true);
-	player->addMaxHAM(CreatureAttribute::WILLPOWER, -mindEncumb, true);
+		player->inflictDamage(player, CreatureAttribute::WILLPOWER, mindEncumb, true);
+		player->addMaxHAM(CreatureAttribute::WILLPOWER, -mindEncumb, true);
+	}
 }
 
-void PlayerManagerImplementation::removeEncumbrancies(CreatureObject* player, ArmorObject* armor) {
+void PlayerManagerImplementation::removeEncumbrancies(CreatureObject *player, ArmorObject *armor)
+{
+	CombatManager *combatManager = CombatManager::instance();
 	int healthEncumb = Math::max(0, armor->getHealthEncumbrance());
 	int actionEncumb = Math::max(0, armor->getActionEncumbrance());
 	int mindEncumb = Math::max(0, armor->getMindEncumbrance());
 
-	player->addEncumbrance(CreatureEncumbrance::HEALTH, -healthEncumb, true);
-	player->addEncumbrance(CreatureEncumbrance::ACTION, -actionEncumb, true);
-	player->addEncumbrance(CreatureEncumbrance::MIND, -mindEncumb, true);
+	if ((combatManager->isChestOnly && armor->getHitLocation() == 1) || !combatManager->isChestOnly)
+	{
+		player->addEncumbrance(CreatureEncumbrance::HEALTH, -healthEncumb, true);
+		player->addEncumbrance(CreatureEncumbrance::ACTION, -actionEncumb, true);
+		player->addEncumbrance(CreatureEncumbrance::MIND, -mindEncumb, true);
 
-	player->addMaxHAM(CreatureAttribute::STRENGTH, healthEncumb, true);
-	player->healDamage(player, CreatureAttribute::STRENGTH, healthEncumb, true);
+		player->addMaxHAM(CreatureAttribute::STRENGTH, healthEncumb, true);
+		player->healDamage(player, CreatureAttribute::STRENGTH, healthEncumb, true);
 
-	player->addMaxHAM(CreatureAttribute::CONSTITUTION, healthEncumb, true);
-	player->healDamage(player, CreatureAttribute::CONSTITUTION, healthEncumb, true);
+		player->addMaxHAM(CreatureAttribute::CONSTITUTION, healthEncumb, true);
+		player->healDamage(player, CreatureAttribute::CONSTITUTION, healthEncumb, true);
 
-	player->addMaxHAM(CreatureAttribute::QUICKNESS, actionEncumb, true);
-	player->healDamage(player, CreatureAttribute::QUICKNESS, actionEncumb, true);
+		player->addMaxHAM(CreatureAttribute::QUICKNESS, actionEncumb, true);
+		player->healDamage(player, CreatureAttribute::QUICKNESS, actionEncumb, true);
 
-	player->addMaxHAM(CreatureAttribute::STAMINA, actionEncumb, true);
-	player->healDamage(player, CreatureAttribute::STAMINA, actionEncumb, true);
+		player->addMaxHAM(CreatureAttribute::STAMINA, actionEncumb, true);
+		player->healDamage(player, CreatureAttribute::STAMINA, actionEncumb, true);
 
-	player->addMaxHAM(CreatureAttribute::FOCUS, mindEncumb, true);
-	player->healDamage(player, CreatureAttribute::FOCUS, mindEncumb, true);
+		player->addMaxHAM(CreatureAttribute::FOCUS, mindEncumb, true);
+		player->healDamage(player, CreatureAttribute::FOCUS, mindEncumb, true);
 
-	player->addMaxHAM(CreatureAttribute::WILLPOWER, mindEncumb, true);
-	player->healDamage(player, CreatureAttribute::WILLPOWER, mindEncumb, true);
+		player->addMaxHAM(CreatureAttribute::WILLPOWER, mindEncumb, true);
+		player->healDamage(player, CreatureAttribute::WILLPOWER, mindEncumb, true);
+	}
 }
 
-void PlayerManagerImplementation::awardBadge(PlayerObject* ghost, uint32 badgeId) {
-	const Badge* badge = BadgeList::instance()->get(badgeId);
+void PlayerManagerImplementation::awardBadge(PlayerObject *ghost, uint32 badgeId)
+{
+	const Badge *badge = BadgeList::instance()->get(badgeId);
 	if (badge != NULL)
 		awardBadge(ghost, badge);
 }
 
-void PlayerManagerImplementation::awardBadge(PlayerObject* ghost, const Badge* badge) {
-	if (badge == NULL) {
+void PlayerManagerImplementation::awardBadge(PlayerObject *ghost, const Badge *badge)
+{
+	if (badge == NULL)
+	{
 		ghost->error("Failed to award null badge.");
 		return;
 	}
@@ -1876,9 +2058,10 @@ void PlayerManagerImplementation::awardBadge(PlayerObject* ghost, const Badge* b
 	StringIdChatParameter stringId("badge_n", "");
 	stringId.setTO("badge_n", badge->getKey());
 
-	ManagedReference<CreatureObject*> player = dynamic_cast<CreatureObject*>(ghost->getParent().get().get());
+	ManagedReference<CreatureObject *> player = dynamic_cast<CreatureObject *>(ghost->getParent().get().get());
 	const unsigned int badgeId = badge->getIndex();
-	if (ghost->hasBadge(badgeId)) {
+	if (ghost->hasBadge(badgeId))
+	{
 		stringId.setStringId("badge_n", "prose_hasbadge");
 		player->sendSystemMessage(stringId);
 		return;
@@ -1888,15 +2071,17 @@ void PlayerManagerImplementation::awardBadge(PlayerObject* ghost, const Badge* b
 	stringId.setStringId("badge_n", "prose_grant");
 	player->sendSystemMessage(stringId);
 
-	if (badge->getHasMusic()) {
+	if (badge->getHasMusic())
+	{
 		String music = badge->getMusic();
-		PlayMusicMessage* musicMessage = new PlayMusicMessage(music);
+		PlayMusicMessage *musicMessage = new PlayMusicMessage(music);
 		player->sendMessage(musicMessage);
 	}
 
 	player->notifyObservers(ObserverEventType::BADGEAWARDED, player, badgeId);
-	BadgeList* badgeList = BadgeList::instance();
-	switch (ghost->getNumBadges()) {
+	BadgeList *badgeList = BadgeList::instance();
+	switch (ghost->getNumBadges())
+	{
 	case 5:
 		awardBadge(ghost, badgeList->get("count_5"));
 		break;
@@ -1922,8 +2107,10 @@ void PlayerManagerImplementation::awardBadge(PlayerObject* ghost, const Badge* b
 		break;
 	}
 
-	if (badge->getType() == Badge::EXPLORATION) {
-		switch (ghost->getBadgeTypeCount(static_cast<uint8>(Badge::EXPLORATION))) {
+	if (badge->getType() == Badge::EXPLORATION)
+	{
+		switch (ghost->getBadgeTypeCount(static_cast<uint8>(Badge::EXPLORATION)))
+		{
 		case 10:
 			awardBadge(ghost, badgeList->get("bdg_exp_10_badges"));
 			break;
@@ -1945,7 +2132,8 @@ void PlayerManagerImplementation::awardBadge(PlayerObject* ghost, const Badge* b
 	}
 }
 
-void PlayerManagerImplementation::setExperienceMultiplier(float globalMultiplier) {
+void PlayerManagerImplementation::setExperienceMultiplier(float globalMultiplier)
+{
 	globalExpMultiplier = globalMultiplier;
 }
 
@@ -1956,19 +2144,21 @@ void PlayerManagerImplementation::setExperienceMultiplier(float globalMultiplier
 	playerManager->awardExperience(playerCreature, "resource_harvesting_inorganic", 500);
  *
  */
-int PlayerManagerImplementation::awardExperience(CreatureObject* player, const String& xpType,
-		int amount, bool sendSystemMessage, float localMultiplier, bool applyModifiers) {
+int PlayerManagerImplementation::awardExperience(CreatureObject *player, const String &xpType,
+												 int amount, bool sendSystemMessage, float localMultiplier, bool applyModifiers)
+{
 
-	PlayerObject* playerObject = player->getPlayerObject();
+	PlayerObject *playerObject = player->getPlayerObject();
 
 	if (playerObject == NULL)
 		return 0;
 
 	float speciesModifier = 1.0f;
 	float musicBuff = 1.0f;
-	musicBuff += ((float)player->getSkillMod("music_exp_buff")*2) / 100; // ie: ((12.5 * 2) / 100) == (0.25 + 1.0) == (1.25), or +25% bonus
+	musicBuff += ((float)player->getSkillMod("music_exp_buff") * 2) / 100; // ie: ((12.5 * 2) / 100) == (0.25 + 1.0) == (1.25), or +25% bonus
 
-	if (musicBuff > 1.25f){
+	if (musicBuff > 1.25f)
+	{
 		musicBuff = 1.25f;
 	}
 
@@ -1982,29 +2172,34 @@ int PlayerManagerImplementation::awardExperience(CreatureObject* player, const S
 
 	int xp = 0;
 
-	if (applyModifiers){
+	if (applyModifiers)
+	{
 		float modifiedExpToGrant = (amount * speciesModifier * buffMultiplier * localMultiplier * globalExpMultiplier);
 		// player->sendSystemMessage("Music Buff Amount:" + String::valueOf(musicBuff));
 		// player->sendSystemMessage("Effective Experience Pre-EntBuff :" + String::valueOf(modifiedExpToGrant));
 		modifiedExpToGrant *= musicBuff;
 		// player->sendSystemMessage("Effective Experience Post-EntBuff :" + String::valueOf(modifiedExpToGrant));
 
-		xp = playerObject->addExperience(xpType, (int) (modifiedExpToGrant)); // Round float value down to a flat int for experience granting.
+		xp = playerObject->addExperience(xpType, (int)(modifiedExpToGrant)); // Round float value down to a flat int for experience granting.
 	}
-	else {
+	else
+	{
 		xp = playerObject->addExperience(xpType, (int)amount);
 	}
 
 	player->notifyObservers(ObserverEventType::XPAWARDED, player, xp);
 
-	if (sendSystemMessage) {
-		if (xp > 0) {
-			StringIdChatParameter message("base_player","prose_grant_xp");
+	if (sendSystemMessage)
+	{
+		if (xp > 0)
+		{
+			StringIdChatParameter message("base_player", "prose_grant_xp");
 			message.setDI(xp);
 			message.setTO("exp_n", xpType);
 			player->sendSystemMessage(message);
 		}
-		if (xp > 0 && playerObject->hasCappedExperience(xpType)) {
+		if (xp > 0 && playerObject->hasCappedExperience(xpType))
+		{
 			StringIdChatParameter message("base_player", "prose_hit_xp_cap"); //You have achieved your current limit for %TO experience.
 			message.setTO("exp_n", xpType);
 			player->sendSystemMessage(message);
@@ -2014,49 +2209,56 @@ int PlayerManagerImplementation::awardExperience(CreatureObject* player, const S
 	return xp;
 }
 
-void PlayerManagerImplementation::sendLoginMessage(CreatureObject* creature) {
+void PlayerManagerImplementation::sendLoginMessage(CreatureObject *creature)
+{
 	String motd = server->getLoginMessage();
 
-	ChatSystemMessage* csm = new ChatSystemMessage(UnicodeString(motd), ChatSystemMessage::DISPLAY_CHATONLY);
+	ChatSystemMessage *csm = new ChatSystemMessage(UnicodeString(motd), ChatSystemMessage::DISPLAY_CHATONLY);
 	creature->sendMessage(csm);
 }
 
-void PlayerManagerImplementation::resendLoginMessageToAll() {
-	ChatManager* chatManager = server->getChatManager();
+void PlayerManagerImplementation::resendLoginMessageToAll()
+{
+	ChatManager *chatManager = server->getChatManager();
 
-	if (chatManager != NULL) {
+	if (chatManager != NULL)
+	{
 		String motd = server->getLoginMessage();
 
-		ChatSystemMessage* csm = new ChatSystemMessage(UnicodeString(motd), ChatSystemMessage::DISPLAY_CHATONLY);
+		ChatSystemMessage *csm = new ChatSystemMessage(UnicodeString(motd), ChatSystemMessage::DISPLAY_CHATONLY);
 		chatManager->broadcastMessage(csm);
 	}
 }
 
-void PlayerManagerImplementation::handleAbortTradeMessage(CreatureObject* player) {
+void PlayerManagerImplementation::handleAbortTradeMessage(CreatureObject *player)
+{
 	Locker _locker(player);
 
-	ManagedReference<TradeSession*> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession*>();
+	ManagedReference<TradeSession *> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession *>();
 
-	if (tradeContainer == NULL) {
-		AbortTradeMessage* msg = new AbortTradeMessage();
+	if (tradeContainer == NULL)
+	{
+		AbortTradeMessage *msg = new AbortTradeMessage();
 		player->sendMessage(msg);
 
 		return;
 	}
 
 	uint64 targID = tradeContainer->getTradeTargetPlayer();
-	ManagedReference<SceneObject*> obj = server->getObject(targID);
+	ManagedReference<SceneObject *> obj = server->getObject(targID);
 
-	AbortTradeMessage* msg = new AbortTradeMessage();
+	AbortTradeMessage *msg = new AbortTradeMessage();
 
-	if (obj != NULL && obj->isPlayerCreature()) {
-		CreatureObject* receiver = cast<CreatureObject*>( obj.get());
+	if (obj != NULL && obj->isPlayerCreature())
+	{
+		CreatureObject *receiver = cast<CreatureObject *>(obj.get());
 
 		Locker locker(receiver, player);
 
-		ManagedReference<TradeSession*> receiverContainer = receiver->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession*>();
+		ManagedReference<TradeSession *> receiverContainer = receiver->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession *>();
 
-		if (receiverContainer != NULL && receiverContainer->getTradeTargetPlayer() == player->getObjectID()) {
+		if (receiverContainer != NULL && receiverContainer->getTradeTargetPlayer() == player->getObjectID())
+		{
 			receiver->dropActiveSession(SessionFacadeType::TRADE);
 			receiver->sendMessage(msg->clone());
 		}
@@ -2071,50 +2273,56 @@ void PlayerManagerImplementation::handleAbortTradeMessage(CreatureObject* player
 	player->dropActiveSession(SessionFacadeType::TRADE);
 }
 
-void PlayerManagerImplementation::handleAddItemToTradeWindow(CreatureObject* player, uint64 itemID) {
+void PlayerManagerImplementation::handleAddItemToTradeWindow(CreatureObject *player, uint64 itemID)
+{
 	Locker _locker(player);
 
-	ManagedReference<TradeSession*> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession*>();
+	ManagedReference<TradeSession *> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession *>();
 
 	if (tradeContainer == NULL)
 		return;
 
 	// First Verify Target is Player
 	uint64 targID = tradeContainer->getTradeTargetPlayer();
-	ManagedReference<SceneObject*> obj = server->getObject(targID);
+	ManagedReference<SceneObject *> obj = server->getObject(targID);
 
 	if (obj == NULL || !obj->isPlayerCreature())
 		return;
 
-	CreatureObject* receiver = cast<CreatureObject*>( obj.get());
+	CreatureObject *receiver = cast<CreatureObject *>(obj.get());
 
-	ManagedReference<SceneObject*> objectToTrade = server->getObject(itemID);
+	ManagedReference<SceneObject *> objectToTrade = server->getObject(itemID);
 
 	if (objectToTrade == NULL || !objectToTrade->isASubChildOf(player) ||
-			!objectToTrade->checkContainerPermission(player, ContainerPermissions::MOVECONTAINER)) {
+		!objectToTrade->checkContainerPermission(player, ContainerPermissions::MOVECONTAINER))
+	{
 		player->sendSystemMessage("@container_error_message:container26");
 		handleAbortTradeMessage(player);
 		return;
 	}
 
-	if (objectToTrade->isNoTrade()) {
+	if (objectToTrade->isNoTrade())
+	{
 		player->sendSystemMessage("@container_error_message:container26");
 		handleAbortTradeMessage(player);
 		return;
 	}
 
 	// Containers containing notrade items...
-	if (objectToTrade->containsNoTradeObjectRecursive()) {
+	if (objectToTrade->containsNoTradeObjectRecursive())
+	{
 		player->sendSystemMessage("@container_error_message:container26");
 		handleAbortTradeMessage(player);
 		return;
 	}
 
-	if (objectToTrade->isControlDevice()) {
-		Reference<ControlDevice*> controlDevice = cast<ControlDevice*>(objectToTrade.get());
-		Reference<TangibleObject*> controlledObject = controlDevice->getControlledObject();
+	if (objectToTrade->isControlDevice())
+	{
+		Reference<ControlDevice *> controlDevice = cast<ControlDevice *>(objectToTrade.get());
+		Reference<TangibleObject *> controlledObject = controlDevice->getControlledObject();
 
-		if (controlledObject != NULL) {
+		if (controlledObject != NULL)
+		{
 			Locker crossLocker(controlledObject, player);
 
 			controlDevice->storeObject(player, true);
@@ -2123,15 +2331,16 @@ void PlayerManagerImplementation::handleAddItemToTradeWindow(CreatureObject* pla
 
 	tradeContainer->addTradeItem(objectToTrade);
 
-	SceneObject* inventory = player->getSlottedObject("inventory");
+	SceneObject *inventory = player->getSlottedObject("inventory");
 	inventory->sendWithoutContainerObjectsTo(receiver);
 	objectToTrade->sendTo(receiver, true);
 
-	AddItemMessage* msg = new AddItemMessage(itemID);
+	AddItemMessage *msg = new AddItemMessage(itemID);
 	receiver->sendMessage(msg);
 }
 
-void PlayerManagerImplementation::handleGiveMoneyMessage(CreatureObject* player, uint32 value) {
+void PlayerManagerImplementation::handleGiveMoneyMessage(CreatureObject *player, uint32 value)
+{
 	Locker _locker(player);
 
 	int currentMoney = player->getCashCredits();
@@ -2139,7 +2348,7 @@ void PlayerManagerImplementation::handleGiveMoneyMessage(CreatureObject* player,
 	if (value > currentMoney)
 		value = currentMoney;
 
-	ManagedReference<TradeSession*> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession*>();
+	ManagedReference<TradeSession *> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession *>();
 
 	if (tradeContainer == NULL)
 		return;
@@ -2147,20 +2356,22 @@ void PlayerManagerImplementation::handleGiveMoneyMessage(CreatureObject* player,
 	tradeContainer->setMoneyToTrade(value);
 
 	uint64 targID = tradeContainer->getTradeTargetPlayer();
-	ManagedReference<SceneObject*> obj = server->getObject(targID);
+	ManagedReference<SceneObject *> obj = server->getObject(targID);
 
-	if (obj != NULL && obj->isPlayerCreature()) {
-		CreatureObject* receiver = cast<CreatureObject*>( obj.get());
+	if (obj != NULL && obj->isPlayerCreature())
+	{
+		CreatureObject *receiver = cast<CreatureObject *>(obj.get());
 
-		GiveMoneyMessage* msg = new GiveMoneyMessage(value);
+		GiveMoneyMessage *msg = new GiveMoneyMessage(value);
 		receiver->sendMessage(msg);
 	}
 }
 
-void PlayerManagerImplementation::handleAcceptTransactionMessage(CreatureObject* player) {
+void PlayerManagerImplementation::handleAcceptTransactionMessage(CreatureObject *player)
+{
 	Locker _locker(player);
 
-	ManagedReference<TradeSession*> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession*>();
+	ManagedReference<TradeSession *> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession *>();
 
 	if (tradeContainer == NULL)
 		return;
@@ -2168,20 +2379,22 @@ void PlayerManagerImplementation::handleAcceptTransactionMessage(CreatureObject*
 	tradeContainer->setAcceptedTrade(true);
 
 	uint64 targID = tradeContainer->getTradeTargetPlayer();
-	ManagedReference<SceneObject*> obj = server->getObject(targID);
+	ManagedReference<SceneObject *> obj = server->getObject(targID);
 
-	if (obj != NULL && obj->isPlayerCreature()) {
-		CreatureObject* receiver = cast<CreatureObject*>(obj.get());
+	if (obj != NULL && obj->isPlayerCreature())
+	{
+		CreatureObject *receiver = cast<CreatureObject *>(obj.get());
 
-		AcceptTransactionMessage* msg = new AcceptTransactionMessage();
+		AcceptTransactionMessage *msg = new AcceptTransactionMessage();
 		receiver->sendMessage(msg);
 	}
 }
 
-void PlayerManagerImplementation::handleUnAcceptTransactionMessage(CreatureObject* player) {
+void PlayerManagerImplementation::handleUnAcceptTransactionMessage(CreatureObject *player)
+{
 	Locker _locker(player);
 
-	ManagedReference<TradeSession*> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession*>();
+	ManagedReference<TradeSession *> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession *>();
 
 	if (tradeContainer == NULL)
 		return;
@@ -2189,23 +2402,24 @@ void PlayerManagerImplementation::handleUnAcceptTransactionMessage(CreatureObjec
 	tradeContainer->setAcceptedTrade(false);
 
 	uint64 targID = tradeContainer->getTradeTargetPlayer();
-	ManagedReference<SceneObject*> obj = server->getObject(targID);
+	ManagedReference<SceneObject *> obj = server->getObject(targID);
 
-	if (obj != NULL && obj->isPlayerCreature()) {
-		CreatureObject* receiver = cast<CreatureObject*>(obj.get());
+	if (obj != NULL && obj->isPlayerCreature())
+	{
+		CreatureObject *receiver = cast<CreatureObject *>(obj.get());
 
-		UnAcceptTransactionMessage* msg = new UnAcceptTransactionMessage();
+		UnAcceptTransactionMessage *msg = new UnAcceptTransactionMessage();
 		receiver->sendMessage(msg);
 	}
-
 }
 
-bool PlayerManagerImplementation::checkTradeItems(CreatureObject* player, CreatureObject* receiver) {
-	PlayerObject* ghost = player->getPlayerObject();
-	PlayerObject* targetGhost = receiver->getPlayerObject();
+bool PlayerManagerImplementation::checkTradeItems(CreatureObject *player, CreatureObject *receiver)
+{
+	PlayerObject *ghost = player->getPlayerObject();
+	PlayerObject *targetGhost = receiver->getPlayerObject();
 
-	ManagedReference<TradeSession*> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession*>();
-	ManagedReference<TradeSession*> receiverContainer = receiver->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession*>();
+	ManagedReference<TradeSession *> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession *>();
+	ManagedReference<TradeSession *> receiverContainer = receiver->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession *>();
 
 	if (tradeContainer == NULL || receiverContainer == NULL)
 		return false;
@@ -2216,11 +2430,11 @@ bool PlayerManagerImplementation::checkTradeItems(CreatureObject* player, Creatu
 	if (receiverContainer->getTradeTargetPlayer() != player->getObjectID())
 		return false;
 
-	SceneObject* playerInventory = player->getSlottedObject("inventory");
-	SceneObject* receiverInventory = receiver->getSlottedObject("inventory");
+	SceneObject *playerInventory = player->getSlottedObject("inventory");
+	SceneObject *receiverInventory = receiver->getSlottedObject("inventory");
 
-	SceneObject* playerDatapad = player->getSlottedObject("datapad");
-	SceneObject* receiverDatapad = receiver->getSlottedObject("datapad");
+	SceneObject *playerDatapad = player->getSlottedObject("datapad");
+	SceneObject *receiverDatapad = receiver->getSlottedObject("datapad");
 
 	int playerTanos = 0;
 	int playerItnos = 0;
@@ -2237,13 +2451,15 @@ bool PlayerManagerImplementation::checkTradeItems(CreatureObject* player, Creatu
 	int playerShipsTraded = 0;
 	int receiverShipsTraded = 0;
 
-	for (int i = 0; i < tradeContainer->getTradeSize(); ++i) {
-		ManagedReference<SceneObject*> scene = tradeContainer->getTradeItem(i);
+	for (int i = 0; i < tradeContainer->getTradeSize(); ++i)
+	{
+		ManagedReference<SceneObject *> scene = tradeContainer->getTradeItem(i);
 
 		if (scene->isNoTrade())
 			return false;
 
-		if (scene->isTangibleObject()) {
+		if (scene->isTangibleObject())
+		{
 
 			String err;
 			if (receiverInventory->canAddObject(scene, -1, err) != 0)
@@ -2253,8 +2469,9 @@ bool PlayerManagerImplementation::checkTradeItems(CreatureObject* player, Creatu
 				return false;
 
 			recieverTanos++;
-
-		} else if (scene->isIntangibleObject()) {
+		}
+		else if (scene->isIntangibleObject())
+		{
 
 			String err;
 			if (receiverDatapad->canAddObject(scene, -1, err) != 0)
@@ -2263,34 +2480,44 @@ bool PlayerManagerImplementation::checkTradeItems(CreatureObject* player, Creatu
 			if (!playerDatapad->hasObjectInContainer(scene->getObjectID()))
 				return false;
 
-			if (scene->isPetControlDevice()) {
-				PetControlDevice* petControlDevice = cast<PetControlDevice*>(scene.get());
+			if (scene->isPetControlDevice())
+			{
+				PetControlDevice *petControlDevice = cast<PetControlDevice *>(scene.get());
 
-				if (petControlDevice->getPetType() == PetManager::CREATUREPET) {
+				if (petControlDevice->getPetType() == PetManager::CREATUREPET)
+				{
 					if (!petControlDevice->canBeTradedTo(player, receiver, receiverCreaturePetsTraded))
 						return false;
 
 					receiverCreaturePetsTraded++;
-				} else if (petControlDevice->getPetType() == PetManager::FACTIONPET) {
+				}
+				else if (petControlDevice->getPetType() == PetManager::FACTIONPET)
+				{
 					if (!petControlDevice->canBeTradedTo(player, receiver, receiverFactionPetsTraded))
 						return false;
 
 					receiverFactionPetsTraded++;
-				} else if (petControlDevice->getPetType() == PetManager::DROIDPET) {
+				}
+				else if (petControlDevice->getPetType() == PetManager::DROIDPET)
+				{
 					if (!petControlDevice->canBeTradedTo(player, receiver, receiverDroidsTraded))
 						return false;
 
 					receiverDroidsTraded++;
 				}
-			} else if (scene->isVehicleControlDevice()) {
-				VehicleControlDevice* vehicleControlDevice = cast<VehicleControlDevice*>(scene.get());
+			}
+			else if (scene->isVehicleControlDevice())
+			{
+				VehicleControlDevice *vehicleControlDevice = cast<VehicleControlDevice *>(scene.get());
 
 				if (!vehicleControlDevice->canBeTradedTo(player, receiver, receiverVehiclesTraded))
 					return false;
 
 				receiverVehiclesTraded++;
-			} else if (scene->isShipControlDevice()) {
-				ShipControlDevice* shipControlDevice = cast<ShipControlDevice*>(scene.get());
+			}
+			else if (scene->isShipControlDevice())
+			{
+				ShipControlDevice *shipControlDevice = cast<ShipControlDevice *>(scene.get());
 
 				if (!shipControlDevice->canBeTradedTo(player, receiver, receiverShipsTraded))
 					return false;
@@ -2299,19 +2526,22 @@ bool PlayerManagerImplementation::checkTradeItems(CreatureObject* player, Creatu
 			}
 
 			recieverItnos++;
-
-		} else {
+		}
+		else
+		{
 			return false;
 		}
 	}
 
-	for (int i = 0; i < receiverContainer->getTradeSize(); ++i) {
-		ManagedReference<SceneObject*> scene = receiverContainer->getTradeItem(i);
+	for (int i = 0; i < receiverContainer->getTradeSize(); ++i)
+	{
+		ManagedReference<SceneObject *> scene = receiverContainer->getTradeItem(i);
 
 		if (scene->isNoTrade())
 			return false;
 
-		if (scene->isTangibleObject()) {
+		if (scene->isTangibleObject())
+		{
 
 			String err;
 			if (playerInventory->canAddObject(scene, -1, err) != 0)
@@ -2321,8 +2551,9 @@ bool PlayerManagerImplementation::checkTradeItems(CreatureObject* player, Creatu
 				return false;
 
 			playerTanos++;
-
-		} else if (scene->isIntangibleObject()) {
+		}
+		else if (scene->isIntangibleObject())
+		{
 
 			String err;
 			if (playerDatapad->canAddObject(scene, -1, err) != 0)
@@ -2331,34 +2562,44 @@ bool PlayerManagerImplementation::checkTradeItems(CreatureObject* player, Creatu
 			if (!receiverDatapad->hasObjectInContainer(scene->getObjectID()))
 				return false;
 
-			if (scene->isPetControlDevice()) {
-				PetControlDevice* petControlDevice = cast<PetControlDevice*>(scene.get());
+			if (scene->isPetControlDevice())
+			{
+				PetControlDevice *petControlDevice = cast<PetControlDevice *>(scene.get());
 
-				if (petControlDevice->getPetType() == PetManager::CREATUREPET) {
+				if (petControlDevice->getPetType() == PetManager::CREATUREPET)
+				{
 					if (!petControlDevice->canBeTradedTo(receiver, player, playerCreaturePetsTraded))
 						return false;
 
 					playerCreaturePetsTraded++;
-				} else if (petControlDevice->getPetType() == PetManager::FACTIONPET) {
+				}
+				else if (petControlDevice->getPetType() == PetManager::FACTIONPET)
+				{
 					if (!petControlDevice->canBeTradedTo(receiver, player, playerFactionPetsTraded))
 						return false;
 
 					playerFactionPetsTraded++;
-				} else if (petControlDevice->getPetType() == PetManager::DROIDPET) {
+				}
+				else if (petControlDevice->getPetType() == PetManager::DROIDPET)
+				{
 					if (!petControlDevice->canBeTradedTo(receiver, player, playerDroidsTraded))
 						return false;
 
 					playerDroidsTraded++;
 				}
-			} else if (scene->isVehicleControlDevice()) {
-				VehicleControlDevice* vehicleControlDevice = cast<VehicleControlDevice*>(scene.get());
+			}
+			else if (scene->isVehicleControlDevice())
+			{
+				VehicleControlDevice *vehicleControlDevice = cast<VehicleControlDevice *>(scene.get());
 
 				if (!vehicleControlDevice->canBeTradedTo(receiver, player, playerVehiclesTraded))
 					return false;
 
 				playerVehiclesTraded++;
-			} else if (scene->isShipControlDevice()) {
-				ShipControlDevice* shipControlDevice = cast<ShipControlDevice*>(scene.get());
+			}
+			else if (scene->isShipControlDevice())
+			{
+				ShipControlDevice *shipControlDevice = cast<ShipControlDevice *>(scene.get());
 
 				if (!shipControlDevice->canBeTradedTo(receiver, player, playerShipsTraded))
 					return false;
@@ -2367,31 +2608,36 @@ bool PlayerManagerImplementation::checkTradeItems(CreatureObject* player, Creatu
 			}
 
 			playerItnos++;
-
-		} else {
+		}
+		else
+		{
 			return false;
 		}
 	}
 
-	if (recieverTanos != 0 && (receiverInventory->getContainerObjectsSize() + recieverTanos >= receiverInventory->getContainerVolumeLimit())) {
+	if (recieverTanos != 0 && (receiverInventory->getContainerObjectsSize() + recieverTanos >= receiverInventory->getContainerVolumeLimit()))
+	{
 		player->sendSystemMessage("@container_error_message:container19");
 		receiver->sendSystemMessage("@container_error_message:container19");
 		return false;
 	}
 
-	if (playerTanos != 0 && (playerInventory->getContainerObjectsSize() + playerTanos >= playerInventory->getContainerVolumeLimit())) {
+	if (playerTanos != 0 && (playerInventory->getContainerObjectsSize() + playerTanos >= playerInventory->getContainerVolumeLimit()))
+	{
 		player->sendSystemMessage("@container_error_message:container19");
 		receiver->sendSystemMessage("@container_error_message:container19");
 		return false;
 	}
 
-	if (receiverDatapad->getContainerObjectsSize() + recieverItnos >= receiverDatapad->getContainerVolumeLimit()) {
+	if (receiverDatapad->getContainerObjectsSize() + recieverItnos >= receiverDatapad->getContainerVolumeLimit())
+	{
 		player->sendSystemMessage("@container_error_message:container19");
 		receiver->sendSystemMessage("@container_error_message:container19");
 		return false;
 	}
 
-	if (playerDatapad->getContainerObjectsSize() + playerItnos >= playerDatapad->getContainerVolumeLimit()) {
+	if (playerDatapad->getContainerObjectsSize() + playerItnos >= playerDatapad->getContainerVolumeLimit())
+	{
 		player->sendSystemMessage("@container_error_message:container19");
 		receiver->sendSystemMessage("@container_error_message:container19");
 		return false;
@@ -2413,45 +2659,50 @@ bool PlayerManagerImplementation::checkTradeItems(CreatureObject* player, Creatu
 	if (receiverMoneyToTrade > receiver->getCashCredits())
 		return false;
 
-	if (player->getDistanceTo(receiver) >= 15.f) {
+	if (player->getDistanceTo(receiver) >= 15.f)
+	{
 		player->sendSystemMessage("You are too far to trade");
 		receiver->sendSystemMessage("You are too far to trade");
 		return false;
 	}
 
-
 	return true;
 }
 
-void PlayerManagerImplementation::handleVerifyTradeMessage(CreatureObject* player) {
-	ManagedReference<ObjectController*> objectController = server->getObjectController();
+void PlayerManagerImplementation::handleVerifyTradeMessage(CreatureObject *player)
+{
+	ManagedReference<ObjectController *> objectController = server->getObjectController();
 
 	Locker locker(player);
 
-	ManagedReference<TradeSession*> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession*>();
+	ManagedReference<TradeSession *> tradeContainer = player->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession *>();
 
-	if (tradeContainer == NULL) {
+	if (tradeContainer == NULL)
+	{
 		return;
 	}
 
 	tradeContainer->setVerifiedTrade(true);
 
 	uint64 targID = tradeContainer->getTradeTargetPlayer();
-	ManagedReference<SceneObject*> obj = server->getObject(targID);
+	ManagedReference<SceneObject *> obj = server->getObject(targID);
 
-	if (obj != NULL && obj->isPlayerCreature()) {
-		CreatureObject* receiver = cast<CreatureObject*>(obj.get());
+	if (obj != NULL && obj->isPlayerCreature())
+	{
+		CreatureObject *receiver = cast<CreatureObject *>(obj.get());
 
 		Locker clocker(receiver, player);
 
-		ManagedReference<TradeSession*> receiverTradeContainer = receiver->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession*>();
+		ManagedReference<TradeSession *> receiverTradeContainer = receiver->getActiveSession(SessionFacadeType::TRADE).castTo<TradeSession *>();
 
-		if (receiverTradeContainer == NULL) {
+		if (receiverTradeContainer == NULL)
+		{
 			tradeContainer->setVerifiedTrade(false);
 			return;
 		}
 
-		if (!checkTradeItems(player, receiver)) {
+		if (!checkTradeItems(player, receiver))
+		{
 			clocker.release();
 			handleAbortTradeMessage(player);
 
@@ -2459,32 +2710,41 @@ void PlayerManagerImplementation::handleVerifyTradeMessage(CreatureObject* playe
 			return;
 		}
 
-		if (receiverTradeContainer->hasVerifiedTrade()) {
-			SceneObject* receiverInventory = receiver->getSlottedObject("inventory");
-			SceneObject* receiverDatapad = receiver->getSlottedObject("datapad");
+		if (receiverTradeContainer->hasVerifiedTrade())
+		{
+			SceneObject *receiverInventory = receiver->getSlottedObject("inventory");
+			SceneObject *receiverDatapad = receiver->getSlottedObject("datapad");
 
-			for (int i = 0; i < tradeContainer->getTradeSize(); ++i) {
-				ManagedReference<SceneObject*> item = tradeContainer->getTradeItem(i);
+			for (int i = 0; i < tradeContainer->getTradeSize(); ++i)
+			{
+				ManagedReference<SceneObject *> item = tradeContainer->getTradeItem(i);
 
-				if (item->isTangibleObject()) {
+				if (item->isTangibleObject())
+				{
 					if (objectController->transferObject(item, receiverInventory, -1, true))
 						item->sendDestroyTo(player);
-				} else {
+				}
+				else
+				{
 					if (objectController->transferObject(item, receiverDatapad, -1, true))
 						item->sendDestroyTo(player);
 				}
 			}
 
-			SceneObject* playerInventory = player->getSlottedObject("inventory");
-			SceneObject* playerDatapad = player->getSlottedObject("datapad");
+			SceneObject *playerInventory = player->getSlottedObject("inventory");
+			SceneObject *playerDatapad = player->getSlottedObject("datapad");
 
-			for (int i = 0; i < receiverTradeContainer->getTradeSize(); ++i) {
-				ManagedReference<SceneObject*> item = receiverTradeContainer->getTradeItem(i);
+			for (int i = 0; i < receiverTradeContainer->getTradeSize(); ++i)
+			{
+				ManagedReference<SceneObject *> item = receiverTradeContainer->getTradeItem(i);
 
-				if (item->isTangibleObject()) {
+				if (item->isTangibleObject())
+				{
 					if (objectController->transferObject(item, playerInventory, -1, true))
 						item->sendDestroyTo(receiver);
-				} else {
+				}
+				else
+				{
 					if (objectController->transferObject(item, playerDatapad, -1, true))
 						item->sendDestroyTo(receiver);
 				}
@@ -2492,14 +2752,16 @@ void PlayerManagerImplementation::handleVerifyTradeMessage(CreatureObject* playe
 
 			uint32 giveMoney = tradeContainer->getMoneyToTrade();
 
-			if (giveMoney > 0) {
+			if (giveMoney > 0)
+			{
 				player->subtractCashCredits(giveMoney);
 				receiver->addCashCredits(giveMoney);
 			}
 
 			giveMoney = receiverTradeContainer->getMoneyToTrade();
 
-			if (giveMoney > 0) {
+			if (giveMoney > 0)
+			{
 				receiver->subtractCashCredits(giveMoney);
 				player->addCashCredits(giveMoney);
 			}
@@ -2507,7 +2769,7 @@ void PlayerManagerImplementation::handleVerifyTradeMessage(CreatureObject* playe
 			receiver->dropActiveSession(SessionFacadeType::TRADE);
 			player->dropActiveSession(SessionFacadeType::TRADE);
 
-			TradeCompleteMessage* msg = new TradeCompleteMessage();
+			TradeCompleteMessage *msg = new TradeCompleteMessage();
 			receiver->sendMessage(msg->clone());
 			player->sendMessage(msg->clone());
 
@@ -2516,22 +2778,26 @@ void PlayerManagerImplementation::handleVerifyTradeMessage(CreatureObject* playe
 	}
 }
 
-int PlayerManagerImplementation::notifyObserverEvent(uint32 eventType, Observable* observable, ManagedObject* arg1, int64 arg2) {
+int PlayerManagerImplementation::notifyObserverEvent(uint32 eventType, Observable *observable, ManagedObject *arg1, int64 arg2)
+{
 
-	if (eventType == ObserverEventType::POSTURECHANGED) {
-		CreatureObject* creature = cast<CreatureObject*>(observable);
+	if (eventType == ObserverEventType::POSTURECHANGED)
+	{
+		CreatureObject *creature = cast<CreatureObject *>(observable);
 
 		if (creature == NULL)
 			return 1;
 
-		if (creature->hasState(CreatureState::ALERT)) { // This can apply to TKA AND Jedi meditate since they share the same sysmsgs / moods.
+		if (creature->hasState(CreatureState::ALERT))
+		{ // This can apply to TKA AND Jedi meditate since they share the same sysmsgs / moods.
 			creature->sendSystemMessage("@teraskasi:med_end");
 			creature->setMood(creature->getMoodID(), true);
 			creature->clearState(CreatureState::ALERT, true);
 
 			// Check POSTERCHANGE on Meditate...
-			Reference<MeditateTask*> meditateTask = creature->getPendingTask("meditate").castTo<MeditateTask*>();
-			if (meditateTask != NULL) {
+			Reference<MeditateTask *> meditateTask = creature->getPendingTask("meditate").castTo<MeditateTask *>();
+			if (meditateTask != NULL)
+			{
 				creature->removePendingTask("meditate");
 
 				if (meditateTask->isScheduled())
@@ -2539,9 +2805,10 @@ int PlayerManagerImplementation::notifyObserverEvent(uint32 eventType, Observabl
 			}
 
 			// Check POSTERCHANGE on Force Meditate...
-			Reference<ForceMeditateTask*> fmeditateTask = creature->getPendingTask("forcemeditate").castTo<ForceMeditateTask*>( );
+			Reference<ForceMeditateTask *> fmeditateTask = creature->getPendingTask("forcemeditate").castTo<ForceMeditateTask *>();
 
-			if (fmeditateTask != NULL) {
+			if (fmeditateTask != NULL)
+			{
 				creature->removePendingTask("forcemeditate");
 
 				if (fmeditateTask->isScheduled())
@@ -2550,8 +2817,9 @@ int PlayerManagerImplementation::notifyObserverEvent(uint32 eventType, Observabl
 		}
 
 		// Check POSTURECHANGED disrupting Logout...
-		Reference<LogoutTask*> logoutTask = creature->getPendingTask("logout").castTo<LogoutTask*>();
-		if (logoutTask != NULL) {
+		Reference<LogoutTask *> logoutTask = creature->getPendingTask("logout").castTo<LogoutTask *>();
+		if (logoutTask != nullptr && !creature->isSitting())
+		{
 			logoutTask->cancelLogout();
 		}
 
@@ -2561,38 +2829,55 @@ int PlayerManagerImplementation::notifyObserverEvent(uint32 eventType, Observabl
 	return 0;
 }
 
-void PlayerManagerImplementation::sendBattleFatigueMessage(CreatureObject* player, CreatureObject* target) {
+void PlayerManagerImplementation::sendBattleFatigueMessage(CreatureObject *player, CreatureObject *target)
+{
 	uint32 targetBattleFatigue = target->getShockWounds();
 
-	if (player == target) {
-		if (targetBattleFatigue >= 250 && targetBattleFatigue < 500) {
+	if (player == target)
+	{
+		if (targetBattleFatigue >= 250 && targetBattleFatigue < 500)
+		{
 			player->sendSystemMessage("@healing:shock_effect_low");
-		} else if (targetBattleFatigue >= 500 && targetBattleFatigue < 750) {
+		}
+		else if (targetBattleFatigue >= 500 && targetBattleFatigue < 750)
+		{
 			player->sendSystemMessage("@healing:shock_effect_medium");
-		} else if (targetBattleFatigue >= 750) {
+		}
+		else if (targetBattleFatigue >= 750)
+		{
 			player->sendSystemMessage("@healing:shock_effect_high");
 		}
-	} else if (target->isPlayerCreature()) {
-		if (targetBattleFatigue >= 250 && targetBattleFatigue < 500) {
+	}
+	else if (target->isPlayerCreature())
+	{
+		if (targetBattleFatigue >= 250 && targetBattleFatigue < 500)
+		{
 			target->sendSystemMessage("@healing:shock_effect_low_target");
-		} else if (targetBattleFatigue >= 500 && targetBattleFatigue < 750) {
+		}
+		else if (targetBattleFatigue >= 500 && targetBattleFatigue < 750)
+		{
 			target->sendSystemMessage("@healing:shock_effect_medium_target");
-		} else if (targetBattleFatigue >= 750) {
+		}
+		else if (targetBattleFatigue >= 750)
+		{
 			target->sendSystemMessage("@healing:shock_effec_high_target");
 		}
 	}
 }
 
-int PlayerManagerImplementation::healEnhance(CreatureObject* enhancer, CreatureObject* patient, byte attribute, int buffvalue, float duration, int absorption) {
+int PlayerManagerImplementation::healEnhance(CreatureObject *enhancer, CreatureObject *patient, byte attribute, int buffvalue, float duration, int absorption)
+{
 	String buffname = "medical_enhance_" + BuffAttribute::getName(attribute);
 	uint32 buffcrc = buffname.hashCode();
 	uint32 buffdiff = buffvalue;
 
 	//If a stronger buff already exists, then we don't buff the patient.
-	if (patient->hasBuff(buffcrc)) {
-		Buff* buff = patient->getBuff(buffcrc);
+	if (patient->hasBuff(buffcrc))
+	{
+		Buff *buff = patient->getBuff(buffcrc);
 
-		if (buff != NULL) {
+		if (buff != NULL)
+		{
 			int value = buff->getAttributeModifierValue(attribute);
 
 			if (BuffAttribute::isProtection(attribute))
@@ -2605,16 +2890,19 @@ int PlayerManagerImplementation::healEnhance(CreatureObject* enhancer, CreatureO
 		}
 	}
 
-	Reference<Buff*> buff = new Buff(patient, buffcrc, duration, BuffType::MEDICAL);
+	Reference<Buff *> buff = new Buff(patient, buffcrc, duration, BuffType::MEDICAL);
 
 	Locker locker(buff);
 
-	if (BuffAttribute::isProtection(attribute)) {
+	if (BuffAttribute::isProtection(attribute))
+	{
 		buff->setSkillModifier(BuffAttribute::getProtectionString(attribute), buffvalue);
 
 		if (absorption > 0)
 			buff->setSkillModifier(BuffAttribute::getAbsorptionString(attribute), absorption);
-	} else {
+	}
+	else
+	{
 		buff->setAttributeModifier(attribute, buffvalue);
 		buff->setFillAttributesOnBuff(true);
 	}
@@ -2626,7 +2914,8 @@ int PlayerManagerImplementation::healEnhance(CreatureObject* enhancer, CreatureO
 	return buffdiff;
 }
 
-void PlayerManagerImplementation::stopListen(CreatureObject* creature, uint64 entid, bool doSendPackets, bool forced, bool doLock, bool outOfRange) {
+void PlayerManagerImplementation::stopListen(CreatureObject *creature, uint64 entid, bool doSendPackets, bool forced, bool doLock, bool outOfRange)
+{
 	Locker locker(creature);
 
 	uint64 listenID = creature->getListenID();
@@ -2634,37 +2923,46 @@ void PlayerManagerImplementation::stopListen(CreatureObject* creature, uint64 en
 	// If the player selected "Stop listening" by using a radial menu created on a
 	// musician other than the one that they are currently listening to then change
 	// entid to their listenID so that the player can still stop listening.
-	if (entid != listenID && listenID != 0 && creature->isListening()) {
+	if (entid != listenID && listenID != 0 && creature->isListening())
+	{
 		entid = listenID;
 	}
 
-	ManagedReference<SceneObject*> object = server->getObject(entid);
+	ManagedReference<SceneObject *> object = server->getObject(entid);
 
 	if (object == NULL)
 		return;
 
-	if (object->isDroidObject()) {
+	if (object->isDroidObject())
+	{
 		creature->setMood(creature->getMoodID());
-		if (doSendPackets) {
+		if (doSendPackets)
+		{
 			creature->setListenToID(0, true);
 			creature->setMoodString(creature->getMoodString(), true);
 		}
-		if (creature->isPlayerCreature()) {
-			CreatureObject* player = cast<CreatureObject*>( creature);
+		if (creature->isPlayerCreature())
+		{
+			CreatureObject *player = cast<CreatureObject *>(creature);
 			StringIdChatParameter stringID;
-			if (forced) {
+			if (forced)
+			{
 				stringID.setTU(entid);
 				stringID.setStringId("performance", "music_stop_other"); // "%TU stops playing."
 				player->sendSystemMessage(stringID);
 				return;
-			} else if (outOfRange) {
+			}
+			else if (outOfRange)
+			{
 				// The correct string id is @performance:music_listen_out_of_range ("You stop listening to %TT because %OT is too far away.")
 				// but %OT will get replaced by him/her which gives an incorrect message.
 				StringBuffer msg;
 				msg << "You stop listening to " << object->getDisplayedName() << " because they are too far away.";
 				player->sendSystemMessage(msg.toString());
 				return;
-			} else {
+			}
+			else
+			{
 				player->sendSystemMessage("@performance:music_listen_stop_self"); // "You stop listening."
 				return;
 			}
@@ -2672,30 +2970,34 @@ void PlayerManagerImplementation::stopListen(CreatureObject* creature, uint64 en
 		return;
 	}
 
-	if (!object->isPlayerCreature()) {
+	if (!object->isPlayerCreature())
+	{
 		creature->sendSystemMessage("@performance:music_listen_npc"); // "You cannot /listen to NPCs."
 		return;
 	}
 
-	CreatureObject* entertainer = cast<CreatureObject*>( object.get());
+	CreatureObject *entertainer = cast<CreatureObject *>(object.get());
 
 	if (entertainer == creature)
 		return;
 
 	String entName;
-	ManagedReference<EntertainingSession*> esession;
+	ManagedReference<EntertainingSession *> esession;
 
-	if (entertainer != NULL) {
+	if (entertainer != NULL)
+	{
 		Locker clocker(entertainer, creature);
 
 		entName = entertainer->getFirstName();
 
-		ManagedReference<Facade*> session = entertainer->getActiveSession(SessionFacadeType::ENTERTAINING);
+		ManagedReference<Facade *> session = entertainer->getActiveSession(SessionFacadeType::ENTERTAINING);
 
-		if (session != NULL) {
-			esession = dynamic_cast<EntertainingSession*>(session.get());
+		if (session != NULL)
+		{
+			esession = dynamic_cast<EntertainingSession *>(session.get());
 
-			if (esession != NULL) {
+			if (esession != NULL)
+			{
 				esession->activateEntertainerBuff(creature, PerformanceType::MUSIC);
 
 				esession->removeListener(creature);
@@ -2710,27 +3012,33 @@ void PlayerManagerImplementation::stopListen(CreatureObject* creature, uint64 en
 	if (doSendPackets && esession != NULL)
 		esession->sendEntertainmentUpdate(creature, 0, creature->getMoodString());
 
-	if (creature->isPlayerCreature() && entertainer != NULL) {
-		CreatureObject* player = cast<CreatureObject*>( creature);
+	if (creature->isPlayerCreature() && entertainer != NULL)
+	{
+		CreatureObject *player = cast<CreatureObject *>(creature);
 
 		StringIdChatParameter stringID;
 
-		if (forced) {
+		if (forced)
+		{
 			stringID.setTU(entid);
 			stringID.setStringId("performance", "music_stop_other"); // "%TU stops playing."
 
 			player->sendSystemMessage(stringID);
-		} else if (outOfRange) {
+		}
+		else if (outOfRange)
+		{
 			// The correct string id is @performance:music_listen_out_of_range ("You stop listening to %TT because %OT is too far away.")
 			// but %OT will get replaced by him/her which gives an incorrect message.
 			StringBuffer msg;
 			msg << "You stop listening to " << entertainer->getFirstName() << " because they are too far away.";
 			player->sendSystemMessage(msg.toString());
-		} else {
+		}
+		else
+		{
 			player->sendSystemMessage("@performance:music_listen_stop_self"); // "You stop listening."
 		}
 
-		ManagedReference<PlayerObject*> entPlayer = entertainer->getPlayerObject();
+		ManagedReference<PlayerObject *> entPlayer = entertainer->getPlayerObject();
 		if (entPlayer != NULL && entPlayer->getPerformanceBuffTarget() == player->getObjectID())
 			entPlayer->setPerformanceBuffTarget(0);
 	}
@@ -2741,8 +3049,8 @@ void PlayerManagerImplementation::stopListen(CreatureObject* creature, uint64 en
 	creature->setListenToID(0, true);
 }
 
-
-void PlayerManagerImplementation::stopWatch(CreatureObject* creature, uint64 entid, bool doSendPackets, bool forced, bool doLock, bool outOfRange) {
+void PlayerManagerImplementation::stopWatch(CreatureObject *creature, uint64 entid, bool doSendPackets, bool forced, bool doLock, bool outOfRange)
+{
 	Locker locker(creature);
 
 	uint64 watchID = creature->getWatchToID();
@@ -2750,39 +3058,44 @@ void PlayerManagerImplementation::stopWatch(CreatureObject* creature, uint64 ent
 	// If the player selected "Stop watching" by using a radial menu created on a
 	// dancer other than the one that they are currently watching then change
 	// entid to their watchID so that the player can still stop watching.
-	if (entid != watchID && watchID != 0 && creature->isWatching()) {
+	if (entid != watchID && watchID != 0 && creature->isWatching())
+	{
 		entid = watchID;
 	}
 
-	ManagedReference<SceneObject*> object = server->getObject(entid);
+	ManagedReference<SceneObject *> object = server->getObject(entid);
 
 	if (object == NULL)
 		return;
 
-	if (!object->isPlayerCreature()) {
+	if (!object->isPlayerCreature())
+	{
 		creature->sendSystemMessage("@performance:dance_watch_npc"); // "You cannot /watch NPCs."
 		return;
 	}
 
-	CreatureObject* entertainer = cast<CreatureObject*>( object.get());
+	CreatureObject *entertainer = cast<CreatureObject *>(object.get());
 
 	if (entertainer == creature)
 		return;
 
-	ManagedReference<EntertainingSession*> esession = NULL;
+	ManagedReference<EntertainingSession *> esession = NULL;
 
 	String entName;
-	if (entertainer != NULL) {
+	if (entertainer != NULL)
+	{
 		Locker clocker(entertainer, creature);
 
 		entName = entertainer->getFirstName();
 
-		ManagedReference<Facade*> session = entertainer->getActiveSession(SessionFacadeType::ENTERTAINING);
+		ManagedReference<Facade *> session = entertainer->getActiveSession(SessionFacadeType::ENTERTAINING);
 
-		if (session != NULL) {
-			esession = dynamic_cast<EntertainingSession*>(session.get());
+		if (session != NULL)
+		{
+			esession = dynamic_cast<EntertainingSession *>(session.get());
 
-			if (esession != NULL) {
+			if (esession != NULL)
+			{
 				esession->activateEntertainerBuff(creature, PerformanceType::DANCE);
 
 				esession->removeWatcher(creature);
@@ -2798,31 +3111,36 @@ void PlayerManagerImplementation::stopWatch(CreatureObject* creature, uint64 ent
 		esession->sendEntertainmentUpdate(creature, 0, creature->getMoodString());
 
 	//System Message.
-	if (creature->isPlayerCreature() && entertainer != NULL) {
-		CreatureObject* player = cast<CreatureObject*>( creature);
+	if (creature->isPlayerCreature() && entertainer != NULL)
+	{
+		CreatureObject *player = cast<CreatureObject *>(creature);
 
 		StringIdChatParameter stringID;
 
-		if (forced) {
+		if (forced)
+		{
 			stringID.setTU(entid);
 			stringID.setStringId("performance", "dance_stop_other"); // %TU stops dancing.
 
 			player->sendSystemMessage(stringID);
-		} else if (outOfRange) {
+		}
+		else if (outOfRange)
+		{
 			// The correct string id is @performance:dance_watch_out_of_range ("You stop watching %TT because %OT is too far away.")
 			// but %OT will get replaced by him/her which gives an incorrect message.
 			StringBuffer msg;
 			msg << "You stop watching " << entertainer->getFirstName() << " because they are too far away.";
 			player->sendSystemMessage(msg.toString());
-		} else {
+		}
+		else
+		{
 			player->sendSystemMessage("@performance:dance_watch_stop_self"); //"You stop watching."
 		}
 
-		ManagedReference<PlayerObject*> entPlayer = entertainer->getPlayerObject();
+		ManagedReference<PlayerObject *> entPlayer = entertainer->getPlayerObject();
 		if (entPlayer != NULL && entPlayer->getPerformanceBuffTarget() == player->getObjectID())
 			entPlayer->setPerformanceBuffTarget(0);
 	}
-
 
 	//esession->setEntertainerBuffDuration(creature, PerformanceType::DANCE, 0.0f); // reset
 	//esession->setEntertainerBuffStrength(creature, PerformanceType::DANCE, 0.0f);
@@ -2833,10 +3151,11 @@ void PlayerManagerImplementation::stopWatch(CreatureObject* creature, uint64 ent
 	watchID = 0;*/
 }
 
-void PlayerManagerImplementation::startWatch(CreatureObject* creature, uint64 entid) {
+void PlayerManagerImplementation::startWatch(CreatureObject *creature, uint64 entid)
+{
 	Locker locker(creature);
 
-	ManagedReference<SceneObject*> object = server->getObject(entid);
+	ManagedReference<SceneObject *> object = server->getObject(entid);
 	uint64 watchID = creature->getWatchToID();
 
 	if (watchID == entid)
@@ -2850,19 +3169,21 @@ void PlayerManagerImplementation::startWatch(CreatureObject* creature, uint64 en
 		return;
 	}*/
 
-	if (!object->isPlayerCreature()) {
+	if (!object->isPlayerCreature())
+	{
 		creature->sendSystemMessage("@performance:dance_watch_npc"); // "You can not /watch NPCs."
 		return;
 	}
 
-	CreatureObject* entertainer = cast<CreatureObject*>( object.get());
+	CreatureObject *entertainer = cast<CreatureObject *>(object.get());
 
 	if (creature == entertainer)
 		return;
 
 	Locker clocker(entertainer, creature);
 
-	if (creature->isDancing() || creature->isPlayingMusic()) {
+	if (creature->isDancing() || creature->isPlayingMusic())
+	{
 		StringIdChatParameter stringID;
 		stringID.setStringId("cmd_err", "locomotion_prose"); // "You cannot %TO while %TU."
 		stringID.setTO("/watch");
@@ -2870,7 +3191,9 @@ void PlayerManagerImplementation::startWatch(CreatureObject* creature, uint64 en
 		creature->sendSystemMessage(stringID);
 
 		return;
-	} else if (!entertainer->isDancing()) {
+	}
+	else if (!entertainer->isDancing())
+	{
 		StringIdChatParameter stringID;
 		stringID.setStringId("performance", "dance_watch_not_dancing"); // "%TT is not dancing."
 		stringID.setTT(entid);
@@ -2878,17 +3201,18 @@ void PlayerManagerImplementation::startWatch(CreatureObject* creature, uint64 en
 		return;
 	}
 
-	ManagedReference<Facade*> facade = entertainer->getActiveSession(SessionFacadeType::ENTERTAINING);
+	ManagedReference<Facade *> facade = entertainer->getActiveSession(SessionFacadeType::ENTERTAINING);
 
 	if (facade == NULL)
 		return;
 
-	EntertainingSession* entertainingSession = dynamic_cast<EntertainingSession*>(facade.get());
+	EntertainingSession *entertainingSession = dynamic_cast<EntertainingSession *>(facade.get());
 
 	if (entertainingSession == NULL)
 		return;
 
-	if (creature->isWatching()) {
+	if (creature->isWatching())
+	{
 		stopWatch(creature, watchID, false);
 	}
 
@@ -2915,10 +3239,11 @@ void PlayerManagerImplementation::startWatch(CreatureObject* creature, uint64 en
 	//watchID =  entid;
 }
 
-void PlayerManagerImplementation::startListen(CreatureObject* creature, uint64 entid) {
+void PlayerManagerImplementation::startListen(CreatureObject *creature, uint64 entid)
+{
 	Locker locker(creature);
 
-	ManagedReference<SceneObject*> object = server->getObject(entid);
+	ManagedReference<SceneObject *> object = server->getObject(entid);
 	uint64 listenID = creature->getListenID();
 
 	if (listenID == entid)
@@ -2933,17 +3258,22 @@ void PlayerManagerImplementation::startListen(CreatureObject* creature, uint64 e
 	}*/
 
 	// Droid playback handling
-	if (object->isDroidObject()) {
-		DroidObject* droid = cast<DroidObject*>( object.get());
-		if (droid == NULL) {
+	if (object->isDroidObject())
+	{
+		DroidObject *droid = cast<DroidObject *>(object.get());
+		if (droid == NULL)
+		{
 			creature->sendSystemMessage("@performance:music_listen_npc"); // "You cannot /listen to NPCs."
 			return;
 		}
 		auto bmodule = droid->getModule("playback_module");
-		if (bmodule != NULL) {
-			DroidPlaybackModuleDataComponent* module = cast<DroidPlaybackModuleDataComponent*>(bmodule.get());
-			if (module != NULL) {
-				if (creature->isDancing() || creature->isPlayingMusic()) {
+		if (bmodule != NULL)
+		{
+			DroidPlaybackModuleDataComponent *module = cast<DroidPlaybackModuleDataComponent *>(bmodule.get());
+			if (module != NULL)
+			{
+				if (creature->isDancing() || creature->isPlayingMusic())
+				{
 					StringIdChatParameter stringID;
 					stringID.setStringId("cmd_err", "locomotion_prose"); // "You cannot %TO while %TU."
 					stringID.setTO("/listen");
@@ -2952,9 +3282,11 @@ void PlayerManagerImplementation::startListen(CreatureObject* creature, uint64 e
 					return;
 				}
 
-				if (module->isActive()) {
+				if (module->isActive())
+				{
 					// the droid is playing so we can do something
-					if (creature->isListening()) {
+					if (creature->isListening())
+					{
 						stopListen(creature, listenID, false);
 					}
 
@@ -2969,42 +3301,52 @@ void PlayerManagerImplementation::startListen(CreatureObject* creature, uint64 e
 					creature->setListenToID(droid->getObjectID());
 					module->addListener(creature->getObjectID());
 					return;
-				} else {
+				}
+				else
+				{
 					StringIdChatParameter stringID;
 					stringID.setTT(entid);
 					stringID.setStringId("performance", "music_listen_not_playing"); // %TT is not playing a song.
 					creature->sendSystemMessage(stringID);
 					return;
 				}
-			} else {
+			}
+			else
+			{
 				creature->sendSystemMessage("@performance:music_listen_npc"); // "You cannot /listen to NPCs."
 			}
-		} else {
+		}
+		else
+		{
 			creature->sendSystemMessage("@performance:music_listen_npc"); // "You cannot /listen to NPCs."
 		}
 		return;
 	}
 
-	if (!object->isPlayerCreature()) {
+	if (!object->isPlayerCreature())
+	{
 		creature->sendSystemMessage("@performance:music_listen_npc"); // "You cannot /listen to NPCs."
 		return;
 	}
 
-	CreatureObject* entertainer = cast<CreatureObject*>( object.get());
+	CreatureObject *entertainer = cast<CreatureObject *>(object.get());
 
 	if (creature == entertainer)
 		return;
 
 	Locker clocker(entertainer, creature);
 
-	if (creature->isDancing() || creature->isPlayingMusic()) {
+	if (creature->isDancing() || creature->isPlayingMusic())
+	{
 		StringIdChatParameter stringID;
 		stringID.setStringId("cmd_err", "locomotion_prose"); // "You cannot %TO while %TU."
 		stringID.setTO("/listen");
 		stringID.setTU("@locomotion_n:skillanimating"); // "Skill Animating"
 		creature->sendSystemMessage(stringID);
 		return;
-	} else if (!entertainer->isPlayingMusic()) {
+	}
+	else if (!entertainer->isPlayingMusic())
+	{
 		StringIdChatParameter stringID;
 		stringID.setTT(entid);
 		stringID.setStringId("performance", "music_listen_not_playing"); // %TT is not playing a song.
@@ -3013,17 +3355,18 @@ void PlayerManagerImplementation::startListen(CreatureObject* creature, uint64 e
 		return;
 	}
 
-	ManagedReference<Facade*> facade = entertainer->getActiveSession(SessionFacadeType::ENTERTAINING);
+	ManagedReference<Facade *> facade = entertainer->getActiveSession(SessionFacadeType::ENTERTAINING);
 
 	if (facade == NULL)
 		return;
 
-	EntertainingSession* entertainingSession = dynamic_cast<EntertainingSession*>(facade.get());
+	EntertainingSession *entertainingSession = dynamic_cast<EntertainingSession *>(facade.get());
 
 	if (entertainingSession == NULL)
 		return;
 
-	if (creature->isListening()) {
+	if (creature->isListening())
+	{
 		stopListen(creature, listenID, false);
 	}
 
@@ -3050,56 +3393,62 @@ void PlayerManagerImplementation::startListen(CreatureObject* creature, uint64 e
 	//watchID =  entid;
 }
 
-
-SceneObject* PlayerManagerImplementation::getInRangeStructureWithAdminRights(CreatureObject* creature, uint64 targetID) {
-	ZoneServer* zoneServer = server;
+SceneObject *PlayerManagerImplementation::getInRangeStructureWithAdminRights(CreatureObject *creature, uint64 targetID)
+{
+	ZoneServer *zoneServer = server;
 
 	//First we need to check if the target. if it's not right...
 	//Check the building they are standing in, if it's not right...
 	//Find the nearest installation.
 
-	ManagedReference<SceneObject*> obj = NULL;
+	ManagedReference<SceneObject *> obj = NULL;
 
-	if (targetID != 0) {
+	if (targetID != 0)
+	{
 		obj = zoneServer->getObject(targetID);
 
-		if (obj != NULL && obj->isStructureObject() && (cast<StructureObject*>(obj.get()))->isOnAdminList(creature))
+		if (obj != NULL && obj->isStructureObject() && (cast<StructureObject *>(obj.get()))->isOnAdminList(creature))
 			return obj.get();
 	}
 
+	ManagedReference<SceneObject *> rootParent = creature->getRootParent();
 
-	ManagedReference<SceneObject*> rootParent = creature->getRootParent();
-
-	if (rootParent != NULL && rootParent->isStructureObject() && (cast<StructureObject*>(rootParent.get()))->isOnAdminList(creature)) {
+	if (rootParent != NULL && rootParent->isStructureObject() && (cast<StructureObject *>(rootParent.get()))->isOnAdminList(creature))
+	{
 		return rootParent;
 	}
 
-	StructureObject* structure = NULL;
+	StructureObject *structure = NULL;
 	float distance = 16000;
 
-	Zone* zone = creature->getZone();
+	Zone *zone = creature->getZone();
 
-	if (zone == NULL) {
+	if (zone == NULL)
+	{
 		return NULL;
 	}
 
 	//We need to search nearby for an installation that belongs to the player.
 	Locker _locker(zone);
 
-	CloseObjectsVector* closeObjs = (CloseObjectsVector*)creature->getCloseObjects();
-	SortedVector<QuadTreeEntry*> closeObjects;
+	CloseObjectsVector *closeObjs = (CloseObjectsVector *)creature->getCloseObjects();
+	SortedVector<QuadTreeEntry *> closeObjects;
 	closeObjs->safeCopyReceiversTo(closeObjects, CloseObjectsVector::STRUCTURETYPE);
 
-	for (int i = 0; i < closeObjects.size(); ++i) {
-		ManagedReference<SceneObject*> tObj = cast<SceneObject*>( closeObjects.get(i));
+	for (int i = 0; i < closeObjects.size(); ++i)
+	{
+		ManagedReference<SceneObject *> tObj = cast<SceneObject *>(closeObjects.get(i));
 
-		if (tObj != NULL) {
-			if (tObj->isStructureObject()) {
+		if (tObj != NULL)
+		{
+			if (tObj->isStructureObject())
+			{
 				float dist = tObj->getDistanceTo(creature);
 
-				StructureObject* structureObject = cast<StructureObject*>( tObj.get());
+				StructureObject *structureObject = cast<StructureObject *>(tObj.get());
 
-				if (structureObject->isOnAdminList(creature) && dist < distance) {
+				if (structureObject->isOnAdminList(creature) && dist < distance)
+				{
 					structure = structureObject;
 					distance = dist;
 				}
@@ -3113,21 +3462,23 @@ SceneObject* PlayerManagerImplementation::getInRangeStructureWithAdminRights(Cre
 	return NULL;
 }
 
-StructureObject* PlayerManagerImplementation::getInRangeOwnedStructure(CreatureObject* creature, float range) {
+StructureObject *PlayerManagerImplementation::getInRangeOwnedStructure(CreatureObject *creature, float range)
+{
 	Locker _lock(creature);
 
-	ManagedReference<PlayerObject*> ghost = creature->getPlayerObject();
+	ManagedReference<PlayerObject *> ghost = creature->getPlayerObject();
 
 	if (ghost == NULL)
 		return NULL;
 
-	ManagedReference<StructureObject*> closestStructure = NULL;
+	ManagedReference<StructureObject *> closestStructure = NULL;
 	float closestDistance = 16000.f;
 
-	for (int i = 0; i < ghost->getTotalOwnedStructureCount(); ++i) {
+	for (int i = 0; i < ghost->getTotalOwnedStructureCount(); ++i)
+	{
 		uint64 oid = ghost->getOwnedStructure(i);
 
-		ManagedReference<StructureObject*> structure = (ghost->getZoneServer()->getObject(oid)).castTo<StructureObject*>();
+		ManagedReference<StructureObject *> structure = (ghost->getZoneServer()->getObject(oid)).castTo<StructureObject *>();
 
 		Locker _slock(structure, creature);
 
@@ -3136,7 +3487,8 @@ StructureObject* PlayerManagerImplementation::getInRangeOwnedStructure(CreatureO
 
 		float distance = structure->getDistanceTo(creature);
 
-		if (distance <= range && distance < closestDistance) {
+		if (distance <= range && distance < closestDistance)
+		{
 			closestStructure = structure;
 			closestDistance = distance;
 		}
@@ -3145,20 +3497,23 @@ StructureObject* PlayerManagerImplementation::getInRangeOwnedStructure(CreatureO
 	return closestStructure;
 }
 
-void PlayerManagerImplementation::updatePermissionLevel(CreatureObject* targetPlayer, int permissionLevel) {
+void PlayerManagerImplementation::updatePermissionLevel(CreatureObject *targetPlayer, int permissionLevel)
+{
 
-	if (targetPlayer == NULL) {
+	if (targetPlayer == NULL)
+	{
 		return;
 	}
 
 	Locker locker(targetPlayer);
-	ManagedReference<PlayerObject*> ghost = targetPlayer->getPlayerObject();
+	ManagedReference<PlayerObject *> ghost = targetPlayer->getPlayerObject();
 
-	if (ghost == NULL) {
+	if (ghost == NULL)
+	{
 		return;
 	}
 
-	SkillManager* skillManager = server->getSkillManager();
+	SkillManager *skillManager = server->getSkillManager();
 
 	int currentPermissionLevel = ghost->getAdminLevel();
 
@@ -3166,11 +3521,14 @@ void PlayerManagerImplementation::updatePermissionLevel(CreatureObject* targetPl
 	if (currentPermissionLevel == permissionLevel)
 		return;*/
 
-	if (currentPermissionLevel != 0) {
-		Vector<String>* skillsToBeRemoved = permissionLevelList->getPermissionSkills(currentPermissionLevel);
-		if (skillsToBeRemoved != NULL) {
-			for (int i = 0; i < skillsToBeRemoved->size(); i++) {
-				const String& skill = skillsToBeRemoved->get(i);
+	if (currentPermissionLevel != 0)
+	{
+		Vector<String> *skillsToBeRemoved = permissionLevelList->getPermissionSkills(currentPermissionLevel);
+		if (skillsToBeRemoved != NULL)
+		{
+			for (int i = 0; i < skillsToBeRemoved->size(); i++)
+			{
+				const String &skill = skillsToBeRemoved->get(i);
 				targetPlayer->sendSystemMessage("Staff skill revoked: " + skill);
 				skillManager->surrenderSkill(skill, targetPlayer, true);
 			}
@@ -3179,11 +3537,14 @@ void PlayerManagerImplementation::updatePermissionLevel(CreatureObject* targetPl
 
 	ghost->setAdminLevel(permissionLevel);
 
-	if (permissionLevel != 0) {
-		Vector<String>* skillsToBeAdded = permissionLevelList->getPermissionSkills(permissionLevel);
-		if (skillsToBeAdded != NULL) {
-			for (int i = 0; i < skillsToBeAdded->size(); ++i) {
-				const String& skill = skillsToBeAdded->get(i);
+	if (permissionLevel != 0)
+	{
+		Vector<String> *skillsToBeAdded = permissionLevelList->getPermissionSkills(permissionLevel);
+		if (skillsToBeAdded != NULL)
+		{
+			for (int i = 0; i < skillsToBeAdded->size(); ++i)
+			{
+				const String &skill = skillsToBeAdded->get(i);
 				targetPlayer->sendSystemMessage("Staff skill granted: " + skill);
 				skillManager->awardSkill(skill, targetPlayer, false, true, true);
 			}
@@ -3193,16 +3554,18 @@ void PlayerManagerImplementation::updatePermissionLevel(CreatureObject* targetPl
 	updatePermissionName(targetPlayer, permissionLevel);
 }
 
-void PlayerManagerImplementation::updatePermissionName(CreatureObject* player, int permissionLevel) {
-	ManagedReference<PlayerObject*> ghost = player->getPlayerObject();
+void PlayerManagerImplementation::updatePermissionName(CreatureObject *player, int permissionLevel)
+{
+	ManagedReference<PlayerObject *> ghost = player->getPlayerObject();
 	int priviledgeFlag = permissionLevelList->getPriviledgeFlag(permissionLevel);
 
 	ghost->setPriviledgeFlag(priviledgeFlag);
 	//Send deltas
-	if (player->isOnline()) {
+	if (player->isOnline())
+	{
 		UnicodeString tag = permissionLevelList->getPermissionTag(permissionLevel);
 
-		TangibleObjectDeltaMessage3* tanod3 = new TangibleObjectDeltaMessage3(player);
+		TangibleObjectDeltaMessage3 *tanod3 = new TangibleObjectDeltaMessage3(player);
 		tanod3->updateCustomName(player->getDisplayedName(), tag);
 		tanod3->close();
 		player->broadcastMessage(tanod3, true);
@@ -3216,29 +3579,34 @@ void PlayerManagerImplementation::updatePermissionName(CreatureObject* player, i
 	}
 }
 
-void PlayerManagerImplementation::updateSwimmingState(CreatureObject* player, float newZ, IntersectionResults* intersections, CloseObjectsVector* closeObjectsVector) {
+void PlayerManagerImplementation::updateSwimmingState(CreatureObject *player, float newZ, IntersectionResults *intersections, CloseObjectsVector *closeObjectsVector)
+{
 	player->notifySelfPositionUpdate();
-	if (player->getParent() != NULL) {
+	if (player->getParent() != NULL)
+	{
 		return;
 	}
 
-	Zone* zone = player->getZone();
+	Zone *zone = player->getZone();
 
-	if (zone == NULL) {
+	if (zone == NULL)
+	{
 		player->info("No zone.", true);
 		return;
 	}
 
-	PlanetManager* planetManager = zone->getPlanetManager();
+	PlanetManager *planetManager = zone->getPlanetManager();
 
-	if (planetManager == NULL) {
+	if (planetManager == NULL)
+	{
 		player->info("No planet manager.", true);
 		return;
 	}
 
-	TerrainManager* terrainManager = planetManager->getTerrainManager();
+	TerrainManager *terrainManager = planetManager->getTerrainManager();
 
-	if (terrainManager == NULL) {
+	if (terrainManager == NULL)
+	{
 		player->info("No terrain manager.", true);
 		return;
 	}
@@ -3247,20 +3615,24 @@ void PlayerManagerImplementation::updateSwimmingState(CreatureObject* player, fl
 	float waterHeight = landHeight;
 	bool waterIsDefined = terrainManager->getWaterHeight(player->getPositionX(), player->getPositionY(), waterHeight);
 
-	if (waterIsDefined && (waterHeight > landHeight) && (landHeight + player->getSwimHeight() - waterHeight < 0.2)) {
+	if (waterIsDefined && (waterHeight > landHeight) && (landHeight + player->getSwimHeight() - waterHeight < 0.2))
+	{
 		//Water level is higher than the terrain level and is deep enough for the player to be swimming.
 		//Check if the player is on a bridge or other terrain above the water level.
 		//SortedVector<IntersectionResult> intersections;
-		Reference<IntersectionResults*> ref;
+		Reference<IntersectionResults *> ref;
 
-		if (intersections == NULL) {
+		if (intersections == NULL)
+		{
 			ref = intersections = new IntersectionResults();
 
 			CollisionManager::getWorldFloorCollisions(player->getPositionX(), player->getPositionY(), zone, intersections, closeObjectsVector);
 		}
 
-		for (int i = 0; i < intersections->size(); i++) {
-			if (fabs(16384 - intersections->get(i).getIntersectionDistance() - newZ) < 0.2) {
+		for (int i = 0; i < intersections->size(); i++)
+		{
+			if (fabs(16384 - intersections->get(i).getIntersectionDistance() - newZ) < 0.2)
+			{
 				//Player is on terrain above the water.
 				player->clearState(CreatureState::SWIMMING, true);
 				return;
@@ -3276,38 +3648,44 @@ void PlayerManagerImplementation::updateSwimmingState(CreatureObject* player, fl
 	player->clearState(CreatureState::SWIMMING, true);
 }
 
-int PlayerManagerImplementation::checkSpeedHackFirstTest(CreatureObject* player, float parsedSpeed, ValidatedPosition& teleportPosition, float errorMultiplier) {
+int PlayerManagerImplementation::checkSpeedHackFirstTest(CreatureObject *player, float parsedSpeed, ValidatedPosition &teleportPosition, float errorMultiplier)
+{
 	float allowedSpeedMod = player->getSpeedMultiplierMod();
 	float allowedSpeedBase = player->getRunSpeed();
-	ManagedReference<SceneObject*> parent = player->getParent().get();
-	SpeedMultiplierModChanges* changeBuffer = player->getSpeedMultiplierModChanges();
+	ManagedReference<SceneObject *> parent = player->getParent().get();
+	SpeedMultiplierModChanges *changeBuffer = player->getSpeedMultiplierModChanges();
 	Vector3 teleportPoint = teleportPosition.getPosition();
 	uint64 teleportParentID = teleportPosition.getParent();
 
-	if (parent != NULL && parent->isVehicleObject()) {
-		VehicleObject* vehicle = cast<VehicleObject*>( parent.get());
+	if (parent != NULL && parent->isVehicleObject())
+	{
+		VehicleObject *vehicle = cast<VehicleObject *>(parent.get());
 
 		allowedSpeedMod = vehicle->getSpeedMultiplierMod();
 		allowedSpeedBase = vehicle->getRunSpeed();
-	} else if (parent != NULL && parent->isMount()) {
-		Creature* mount = cast<Creature*>( parent.get());
+	}
+	else if (parent != NULL && parent->isMount())
+	{
+		Creature *mount = cast<Creature *>(parent.get());
 
 		allowedSpeedMod = mount->getSpeedMultiplierMod();
 
-		PetManager* petManager = server->getPetManager();
+		PetManager *petManager = server->getPetManager();
 
-		if (petManager != NULL) {
+		if (petManager != NULL)
+		{
 			allowedSpeedBase = petManager->getMountedRunSpeed(mount);
 		}
-
 	}
 
 	float maxAllowedSpeed = allowedSpeedMod * allowedSpeedBase;
 
-	if (parsedSpeed > maxAllowedSpeed * errorMultiplier) {
+	if (parsedSpeed > maxAllowedSpeed * errorMultiplier)
+	{
 		//float delta = abs(parsedSpeed - maxAllowedSpeed);
 
-		if (changeBuffer->size() == 0) { // no speed changes
+		if (changeBuffer->size() == 0)
+		{ // no speed changes
 			StringBuffer msg;
 			msg << "max allowed speed should be " << maxAllowedSpeed * errorMultiplier;
 			msg << " parsed " << parsedSpeed;
@@ -3318,10 +3696,11 @@ int PlayerManagerImplementation::checkSpeedHackFirstTest(CreatureObject* player,
 			return 1;
 		}
 
-		SpeedModChange* firstChange = &changeBuffer->get(changeBuffer->size() - 1);
-		const Time* timeStamp = &firstChange->getTimeStamp();
+		SpeedModChange *firstChange = &changeBuffer->get(changeBuffer->size() - 1);
+		const Time *timeStamp = &firstChange->getTimeStamp();
 
-		if (timeStamp->miliDifference() > 2000) { // we already should have lowered the speed, 2 seconds lag
+		if (timeStamp->miliDifference() > 2000)
+		{ // we already should have lowered the speed, 2 seconds lag
 			StringBuffer msg;
 			msg << "max allowed speed should be " << maxAllowedSpeed * errorMultiplier;
 			msg << " parsed " << parsedSpeed;
@@ -3332,14 +3711,16 @@ int PlayerManagerImplementation::checkSpeedHackFirstTest(CreatureObject* player,
 			return 1;
 		}
 
-		for (int i = 0; i < changeBuffer->size() - 1; ++i) {
+		for (int i = 0; i < changeBuffer->size() - 1; ++i)
+		{
 			SpeedModChange* change = &changeBuffer->get(i);
 			//Time timeStamp = change->getTimeStamp();
 
 			float oldSpeedMod = change->getNewSpeed();
 			float allowed = allowedSpeedBase * oldSpeedMod * errorMultiplier;
 
-			if (allowed >= parsedSpeed) {
+			if (allowed >= parsedSpeed)
+			{
 				return 0; // no hack detected
 			}
 
@@ -3362,31 +3743,33 @@ int PlayerManagerImplementation::checkSpeedHackFirstTest(CreatureObject* player,
 	return 0;
 }
 
-int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject* player, float newX, float newZ, float newY, uint32 newStamp, SceneObject* newParent) {
+int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject *player, float newX, float newZ, float newY, uint32 newStamp, SceneObject *newParent)
+{
 	PlayerObject* ghost = player->getPlayerObject();
 
-	uint32 deltaTime = ghost->getServerMovementTimeDelta();//newStamp - stamp;
+	uint32 deltaTime = ghost->getServerMovementTimeDelta(); //newStamp - stamp;
 
-	if (deltaTime < 1000) {
+	if (deltaTime < 1000)
+	{
 		//info("time hasnt passed yet", true);
 		return 0;
 	}
 
 	uint32 stamp = ghost->getClientLastMovementStamp();
 
-	if (stamp > newStamp) {
+	if (stamp > newStamp)
+	{
 		//info("older stamp received", true);
 		return 1;
 	}
 
 	Vector3 newWorldPosition(newX, newY, newZ);
 
-	/*StringBuffer newWorldPosMsg;
-	newWorldPosMsg << "x:" << newWorldPosition.getX() << " z:" << newWorldPosition.getZ() << " y:" << newWorldPosition.getY();
-	player->info(newWorldPosMsg.toString(), true);*/
+	// player->debug() << "checkSpeedHackSecondTest newWorldPosition x:" << newWorldPosition.getX() << " z:" << newWorldPosition.getZ() << " y:" << newWorldPosition.getY();
 
-	if (newParent != NULL) {
-		ManagedReference<SceneObject*> root = newParent->getRootParent();
+	if (newParent != NULL)
+	{
+		ManagedReference<SceneObject *> root = newParent->getRootParent();
 
 		if (!root->isBuildingObject())
 			return 1;
@@ -3397,11 +3780,9 @@ int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject* player
 		newWorldPosition.set(root->getPositionX() + (sin(angle) * length), root->getPositionZ() + newZ, root->getPositionY() + (cos(angle) * length));
 	}
 
-	/*newWorldPosMsg.deleteAll();
-	newWorldPosMsg << "x:" << newWorldPosition.getX() << " z:" << newWorldPosition.getZ() << " y:" << newWorldPosition.getY();
-	player->info(newWorldPosMsg.toString(), true);*/
+	// player->debug() << "after parent transform newWorldPosition x:" << newWorldPosition.getX() << " z:" << newWorldPosition.getZ() << " y:" << newWorldPosition.getY();
 
-	ValidatedPosition* lastValidatedPosition = ghost->getLastValidatedPosition();
+	ValidatedPosition *lastValidatedPosition = ghost->getLastValidatedPosition();
 
 	Vector3 lastValidatedWorldPosition = lastValidatedPosition->getWorldPosition(server);
 
@@ -3414,12 +3795,13 @@ int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject* player
 
 	float dist = newWorldPosition.distanceTo(lastValidatedWorldPosition);
 
-	if (dist < 1) {
-		//info("distance too small", true);
+	if (dist < 1)
+	{
+		player->debug("speed hack distance too small");
 		return 0;
 	}
 
-	float speed = dist / (float) deltaTime * 1000;
+	float speed = dist / (float)deltaTime * 1000.f;
 
 	/*if (oldNewPosZ > oldValidZ) {
 		float heightDist = oldNewPosZ - oldValidZ;
@@ -3433,13 +3815,12 @@ int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject* player
 
 	//lastValidatedPosition->set(newWorldPosition.getX(), oldNewPosZ, newWorldPosition.getY());
 
-	/*StringBuffer msg;
-	msg << "distancia recorreguda " << dist << " a una velocitat " << speed;
-	info(msg, true);*/
+	// player->debug() << "distancia recorreguda " << dist << " a una velocitat " << speed;
 
 	int ret = checkSpeedHackFirstTest(player, speed, *lastValidatedPosition, 1.5f);
 
-	if (ret == 0) {
+	if (ret == 0)
+	{
 		lastValidatedPosition->setPosition(newX, newZ, newY);
 
 		if (newParent != NULL)
@@ -3451,27 +3832,29 @@ int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject* player
 
 		if (ghost->isOnLoadScreen())
 			ghost->setOnLoadScreen(false);
+		
+		// ghost->incrementSessionMovement(dist);
 	}
 
 	return ret;
-
-	//return 0;
 }
 
-void PlayerManagerImplementation::lootAll(CreatureObject* player, CreatureObject* ai) {
+void PlayerManagerImplementation::lootAll(CreatureObject *player, CreatureObject *ai)
+{
 	Locker locker(ai, player);
 
 	if (!ai->isDead() || player->isDead())
 		return;
 
-	SceneObject* creatureInventory = ai->getSlottedObject("inventory");
+	SceneObject *creatureInventory = ai->getSlottedObject("inventory");
 
 	if (creatureInventory == NULL)
 		return;
 
 	int cashCredits = ai->getCashCredits();
 
-	if (cashCredits > 0) {
+	if (cashCredits > 0)
+	{
 		int luck = player->getSkillMod("force_luck");
 
 		if (luck > 0)
@@ -3489,14 +3872,15 @@ void PlayerManagerImplementation::lootAll(CreatureObject* player, CreatureObject
 
 	ai->notifyObservers(ObserverEventType::LOOTCREATURE, player, 0);
 
-	SceneObject* playerInventory = player->getSlottedObject("inventory");
+	SceneObject *playerInventory = player->getSlottedObject("inventory");
 
 	if (playerInventory == NULL)
 		return;
 
 	int totalItems = creatureInventory->getContainerObjectsSize();
 
-	if (totalItems < 1) {
+	if (totalItems < 1)
+	{
 		rescheduleCorpseDestruction(player, ai);
 		return;
 	}
@@ -3506,29 +3890,34 @@ void PlayerManagerImplementation::lootAll(CreatureObject* player, CreatureObject
 
 	String stringArgs = args.toString();
 
-	for (int i = totalItems - 1; i >= 0; --i) {
-		SceneObject* object = creatureInventory->getContainerObject(i);
+	for (int i = totalItems - 1; i >= 0; --i)
+	{
+		SceneObject *object = creatureInventory->getContainerObject(i);
 
 		player->executeObjectControllerAction(STRING_HASHCODE("transferitemmisc"), object->getObjectID(), stringArgs);
 	}
 
-	if (creatureInventory->getContainerObjectsSize() <= 0) {
+	if (creatureInventory->getContainerObjectsSize() <= 0)
+	{
 		player->sendSystemMessage("@base_player:corpse_looted"); //You have completely looted the corpse of all items.
 
 		rescheduleCorpseDestruction(player, ai);
 	}
 }
 
-void PlayerManagerImplementation::sendStartingLocationsTo(CreatureObject* player) {
-	StartingLocationListMessage* slm = new StartingLocationListMessage(player);
+void PlayerManagerImplementation::sendStartingLocationsTo(CreatureObject *player)
+{
+	StartingLocationListMessage *slm = new StartingLocationListMessage(player);
 	startingLocationList.insertToMessage(slm);
 
 	player->sendMessage(slm);
 }
 
-StartingLocation* PlayerManagerImplementation::getStartingLocation(const String& city) {
-	for (int i = 0; i < startingLocationList.size(); ++i) {
-		StartingLocation* loc = &startingLocationList.get(i);
+StartingLocation *PlayerManagerImplementation::getStartingLocation(const String &city)
+{
+	for (int i = 0; i < startingLocationList.size(); ++i)
+	{
+		StartingLocation *loc = &startingLocationList.get(i);
 
 		if (loc == NULL)
 			continue;
@@ -3540,21 +3929,26 @@ StartingLocation* PlayerManagerImplementation::getStartingLocation(const String&
 	return NULL;
 }
 
-void PlayerManagerImplementation::addInsurableItemsRecursive(SceneObject* obj, SortedVector<ManagedReference<SceneObject*> >* items, bool onlyInsurable) {
-	for (int j = 0; j < obj->getContainerObjectsSize(); j++) {
-		SceneObject* object = obj->getContainerObject(j);
+void PlayerManagerImplementation::addInsurableItemsRecursive(SceneObject *obj, SortedVector<ManagedReference<SceneObject *>> *items, bool onlyInsurable)
+{
+	for (int j = 0; j < obj->getContainerObjectsSize(); j++)
+	{
+		SceneObject *object = obj->getContainerObject(j);
 
 		if (!object->isTangibleObject())
 			continue;
 
-		TangibleObject* item = cast<TangibleObject*>( object);
+		TangibleObject *item = cast<TangibleObject *>(object);
 
 		if (item == NULL || item->hasAntiDecayKit())
 			continue;
 
-		if (!(item->getOptionsBitmask() & OptionBitmask::INSURED) && (item->isArmorObject() || item->isWearableObject())) {
+		if (!(item->getOptionsBitmask() & OptionBitmask::INSURED) && (item->isArmorObject() || item->isWearableObject()))
+		{
 			items->put(item);
-		} else if ((item->getOptionsBitmask() & OptionBitmask::INSURED) && (item->isArmorObject() || item->isWearableObject()) && !onlyInsurable) {
+		}
+		else if ((item->getOptionsBitmask() & OptionBitmask::INSURED) && (item->isArmorObject() || item->isWearableObject()) && !onlyInsurable)
+		{
 			items->put(item);
 		}
 
@@ -3563,32 +3957,38 @@ void PlayerManagerImplementation::addInsurableItemsRecursive(SceneObject* obj, S
 	}
 }
 
-SortedVector<ManagedReference<SceneObject*> > PlayerManagerImplementation::getInsurableItems(CreatureObject* player, bool onlyInsurable) {
-	SortedVector<ManagedReference<SceneObject*> > insurableItems;
+SortedVector<ManagedReference<SceneObject *>> PlayerManagerImplementation::getInsurableItems(CreatureObject *player, bool onlyInsurable)
+{
+	SortedVector<ManagedReference<SceneObject *>> insurableItems;
 	insurableItems.setNoDuplicateInsertPlan();
 
 	if (player == NULL)
 		return insurableItems;
 
-	SceneObject* datapad = player->getSlottedObject("datapad");
-	SceneObject* defweapon = player->getSlottedObject("default_weapon");
-	SceneObject* bank = player->getSlottedObject("bank");
+	SceneObject *datapad = player->getSlottedObject("datapad");
+	SceneObject *defweapon = player->getSlottedObject("default_weapon");
+	SceneObject *bank = player->getSlottedObject("bank");
 
-	for (int i = 0; i < player->getSlottedObjectsSize(); ++i) {
-		SceneObject* container = player->getSlottedObject(i);
+	for (int i = 0; i < player->getSlottedObjectsSize(); ++i)
+	{
+		SceneObject *container = player->getSlottedObject(i);
 
 		if (container == datapad || container == NULL || container == bank || container == defweapon)
 			continue;
 
-		if (container->isTangibleObject()) {
-			TangibleObject* item = cast<TangibleObject*>( container);
+		if (container->isTangibleObject())
+		{
+			TangibleObject *item = cast<TangibleObject *>(container);
 
 			if (item == NULL || item->hasAntiDecayKit())
 				continue;
 
-			if (!(item->getOptionsBitmask() & OptionBitmask::INSURED) && (item->isArmorObject() || item->isWearableObject())) {
+			if (!(item->getOptionsBitmask() & OptionBitmask::INSURED) && (item->isArmorObject() || item->isWearableObject()))
+			{
 				insurableItems.put(item);
-			} else if ((item->getOptionsBitmask() & OptionBitmask::INSURED) && (item->isArmorObject() || item->isWearableObject()) && !onlyInsurable) {
+			}
+			else if ((item->getOptionsBitmask() & OptionBitmask::INSURED) && (item->isArmorObject() || item->isWearableObject()) && !onlyInsurable)
+			{
 				insurableItems.put(item);
 			}
 		}
@@ -3599,11 +3999,13 @@ SortedVector<ManagedReference<SceneObject*> > PlayerManagerImplementation::getIn
 	return insurableItems;
 }
 
-int PlayerManagerImplementation::calculatePlayerLevel(CreatureObject* player) {
+int PlayerManagerImplementation::calculatePlayerLevel(CreatureObject *player)
+{
 
-	ManagedReference<WeaponObject*> weapon = player->getWeapon();
+	ManagedReference<WeaponObject *> weapon = player->getWeapon();
 
-	if (weapon == NULL) {
+	if (weapon == NULL)
+	{
 		player->error("player with NULL weapon");
 
 		return 0;
@@ -3620,7 +4022,8 @@ int PlayerManagerImplementation::calculatePlayerLevel(CreatureObject* player) {
 	return level;
 }
 
-int PlayerManagerImplementation::calculatePlayerLevel(CreatureObject* player, String& xpType) {
+int PlayerManagerImplementation::calculatePlayerLevel(CreatureObject *player, String &xpType)
+{
 	if (xpType.isEmpty() || xpType == "jedi_general")
 		return calculatePlayerLevel(player);
 
@@ -3647,62 +4050,68 @@ int PlayerManagerImplementation::calculatePlayerLevel(CreatureObject* player, St
 	return level;
 }
 
-CraftingStation* PlayerManagerImplementation::getNearbyCraftingStation(CreatureObject* player, int type) {
+CraftingStation *PlayerManagerImplementation::getNearbyCraftingStation(CreatureObject *player, int type)
+{
 
-	ManagedReference<Zone*> zone = player->getZone();
+	ManagedReference<Zone *> zone = player->getZone();
 
 	if (zone == NULL)
 		return NULL;
 
-	ManagedReference<ZoneServer*> server = zone->getZoneServer();
+	ManagedReference<ZoneServer *> server = zone->getZoneServer();
 
 	if (server == NULL)
 		return NULL;
 
-	ManagedReference<CraftingStation*> station = NULL;
+	ManagedReference<CraftingStation *> station = NULL;
 
 	//Locker locker(zone);
 
-	CloseObjectsVector* vec = (CloseObjectsVector*) player->getCloseObjects();
-	SortedVector<QuadTreeEntry*> closeObjects(vec->size(), 10);
+	CloseObjectsVector *vec = (CloseObjectsVector *)player->getCloseObjects();
+	SortedVector<QuadTreeEntry *> closeObjects(vec->size(), 10);
 	vec->safeCopyTo(closeObjects);
 
-	for (int i = 0; i < closeObjects.size(); ++i) {
-		SceneObject* scno = static_cast<SceneObject*> (closeObjects.get(i));
-		if (scno->isCraftingStation() && (fabs(scno->getPositionZ() - player->getPositionZ()) < 7.0f) && player->isInRange(scno, 7.0f)) {
+	for (int i = 0; i < closeObjects.size(); ++i)
+	{
+		SceneObject *scno = static_cast<SceneObject *>(closeObjects.get(i));
+		if (scno->isCraftingStation() && (fabs(scno->getPositionZ() - player->getPositionZ()) < 7.0f) && player->isInRange(scno, 7.0f))
+		{
 
-			station = server->getObject(scno->getObjectID()).castTo<CraftingStation*>();
+			station = server->getObject(scno->getObjectID()).castTo<CraftingStation *>();
 
 			if (station == NULL)
 				continue;
 
-			ManagedReference<SceneObject*> parent = station->getParent().get();
+			ManagedReference<SceneObject *> parent = station->getParent().get();
 
 			if (parent != NULL && !parent->isCellObject())
 				continue;
 
-			if (type == station->getStationType() || (type
-					== CraftingTool::JEDI && station->getStationType()
-					== CraftingTool::WEAPON)) {
+			if (type == station->getStationType() || (type == CraftingTool::JEDI && station->getStationType() == CraftingTool::WEAPON))
+			{
 
 				return station;
 			}
 		}
 		// dont check Z axis here just check in range call. z axis check for some reason returns a huge number when checking a mob standing on you.
 		// in range should be sufficient
-		if (scno->isDroidObject() && player->isInRange(scno, 7.0f)) {
+		if (scno->isDroidObject() && player->isInRange(scno, 7.0f))
+		{
 			// check the droids around
-			DroidObject* droid = cast<DroidObject*>(scno);
-			if (droid == NULL) {
+			DroidObject *droid = cast<DroidObject *>(scno);
+			if (droid == NULL)
+			{
 				continue;
 			}
 			// only the player can benefit from their own droid
-			if (droid->getLinkedCreature() != player) {
+			if (droid->getLinkedCreature() != player)
+			{
 				continue;
 			}
 			// check the droid
 			station = droid->getCraftingStation(type);
-			if (station != NULL && droid->hasPower()) {
+			if (station != NULL && droid->hasPower())
+			{
 				return station;
 			}
 		}
@@ -3711,14 +4120,15 @@ CraftingStation* PlayerManagerImplementation::getNearbyCraftingStation(CreatureO
 	return NULL;
 }
 
-void PlayerManagerImplementation::finishHologrind(CreatureObject* player) {
+void PlayerManagerImplementation::finishHologrind(CreatureObject *player)
+{
 
-	ManagedReference<PlayerObject*> ghost = player->getPlayerObject();
+	ManagedReference<PlayerObject *> ghost = player->getPlayerObject();
 
 	if (ghost->hasSuiBoxWindowType(SuiWindowType::HOLOGRIND_UNLOCK))
 		return;
 
-	ManagedReference<SuiMessageBox*> box = new SuiMessageBox(player, SuiWindowType::NONE);
+	ManagedReference<SuiMessageBox *> box = new SuiMessageBox(player, SuiWindowType::NONE);
 	box->setPromptTitle("@quest/force_sensitive/intro:force_sensitive"); // You feel a tingle in the Force.
 	box->setPromptText("Perhaps you should meditate somewhere alone...");
 
@@ -3728,10 +4138,10 @@ void PlayerManagerImplementation::finishHologrind(CreatureObject* player) {
 	SkillManager::instance()->awardSkill("force_title_jedi_novice", player, true, false, true);
 
 	ghost->setJediState(1);
-
 }
 
-String PlayerManagerImplementation::banAccount(PlayerObject* admin, Account* account, uint32 seconds, const String& reason) {
+String PlayerManagerImplementation::banAccount(PlayerObject *admin, Account *account, uint32 seconds, const String &reason)
+{
 
 	if (admin == NULL || !admin->isPrivileged())
 		return "";
@@ -3742,51 +4152,72 @@ String PlayerManagerImplementation::banAccount(PlayerObject* admin, Account* acc
 	String escapedReason = reason;
 	Database::escapeString(escapedReason);
 
-	try {
+	try
+	{
 		StringBuffer query;
 		query << "INSERT INTO account_bans values (NULL, " << account->getAccountID() << ", " << admin->getAccountID() << ", now(), " << (uint64)time(0) + seconds << ", '" << escapedReason << "');";
 
 		ServerDatabase::instance()->executeStatement(query);
-	} catch(Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		return "Exception banning account: " + e.getMessage();
 	}
 
 	Locker locker(account);
 
 	account->setBanReason(reason);
-	account->setBanExpires(System::getMiliTime() + seconds*1000);
+	account->setBanExpires(System::getMiliTime() + seconds * 1000);
 	account->setBanAdmin(admin->getAccountID());
 
-	try {
+	StringBuffer banResult;
 
-		Reference<CharacterList*> characters = account->getCharacterList();
-		for (int i = 0; i < characters->size(); ++i) {
-			CharacterListEntry* entry = &characters->get(i);
-			if (entry->getGalaxyID() == server->getGalaxyID()) {
+	Time expireTime;
 
-				ManagedReference<CreatureObject*> player = getPlayer(entry->getFirstName());
-				if (player != NULL) {
+	expireTime.addMiliTime(seconds * 1000);
+
+	banResult << "Account \"" + account->getUsername() + "\" successfully banned until " << expireTime.getFormattedTime() + " server time";
+
+	try
+	{
+		Reference<const CharacterList *> characters = account->getCharacterList();
+
+		for (int i = 0; i < characters->size(); ++i)
+		{
+			const CharacterListEntry *entry = &characters->get(i);
+			if (entry->getGalaxyID() == server->getGalaxyID())
+			{
+				ManagedReference<CreatureObject *> player = getPlayer(entry->getFirstName());
+
+				if (player != nullptr)
+				{
 					clearOwnedStructuresPermissions(player);
 
-					if (player->isOnline()) {
+					if (player->isOnline())
+					{
 						player->sendMessage(new LogoutMessage());
 
-						Reference<ZoneClientSession*> session = player->getClient();
+						Reference<ZoneClientSession *> session = player->getClient();
 
-						if (session != NULL)
+						if (session != nullptr)
 							session->disconnect(true);
 					}
 				}
 			}
 		}
-	} catch(Exception& e) {
-		return "Account Successfully Banned, but error kicking characters. " + e.getMessage();
+	}
+	catch (Exception &e)
+	{
+		banResult << ", error kicking characters: " + e.getMessage();
 	}
 
-	return "Account Successfully Banned";
+	banResult << ".";
+
+	return banResult.toString();
 }
 
-String PlayerManagerImplementation::unbanAccount(PlayerObject* admin, Account* account, const String& reason) {
+String PlayerManagerImplementation::unbanAccount(PlayerObject *admin, Account *account, const String &reason)
+{
 
 	if (admin == NULL || !admin->isPrivileged())
 		return "";
@@ -3797,12 +4228,15 @@ String PlayerManagerImplementation::unbanAccount(PlayerObject* admin, Account* a
 	String escapedReason = reason;
 	Database::escapeString(escapedReason);
 
-	try {
+	try
+	{
 		StringBuffer query;
 		query << "UPDATE account_bans SET expires = UNIX_TIMESTAMP(), reason = '" << escapedReason << "'  WHERE account_id = " << account->getAccountID() << " and expires > UNIX_TIMESTAMP();";
 
 		ServerDatabase::instance()->executeStatement(query);
-	} catch(Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		return "Exception unbanning account: " + e.getMessage();
 	}
 
@@ -3813,7 +4247,8 @@ String PlayerManagerImplementation::unbanAccount(PlayerObject* admin, Account* a
 	return "Account Successfully Unbanned";
 }
 
-String PlayerManagerImplementation::banFromGalaxy(PlayerObject* admin, Account* account, const uint32 galaxy, uint32 seconds, const String& reason) {
+String PlayerManagerImplementation::banFromGalaxy(PlayerObject *admin, Account *account, const uint32 galaxy, uint32 seconds, const String &reason)
+{
 
 	if (admin == NULL || !admin->isPrivileged())
 		return "";
@@ -3824,12 +4259,15 @@ String PlayerManagerImplementation::banFromGalaxy(PlayerObject* admin, Account* 
 	String escapedReason = reason;
 	Database::escapeString(escapedReason);
 
-	try {
+	try
+	{
 		StringBuffer query;
 		query << "INSERT INTO galaxy_bans values (NULL, " << account->getAccountID() << ", " << admin->getAccountID() << "," << galaxy << ", now()," << (uint64)time(0) + seconds << ", '" << escapedReason << "');";
 
 		ServerDatabase::instance()->executeStatement(query);
-	} catch(Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		return "Exception banning from galaxy: " + e.getMessage();
 	}
 
@@ -3838,9 +4276,9 @@ String PlayerManagerImplementation::banFromGalaxy(PlayerObject* admin, Account* 
 	Time current;
 	Time expires;
 
-	expires.addMiliTime(seconds*10000);
+	expires.addMiliTime(seconds * 10000);
 
-	Reference<GalaxyBanEntry*> ban = new GalaxyBanEntry();
+	Reference<GalaxyBanEntry *> ban = new GalaxyBanEntry();
 
 	ban->setAccountID(account->getAccountID());
 	ban->setBanAdmin(admin->getAccountID());
@@ -3854,22 +4292,28 @@ String PlayerManagerImplementation::banFromGalaxy(PlayerObject* admin, Account* 
 
 	account->addGalaxyBan(ban, galaxy);
 
-	try {
+	try
+	{
 
-		if (server->getGalaxyID() == galaxy) {
-			Reference<CharacterList*> characters = account->getCharacterList();
-			for (int i = 0; i < characters->size(); ++i) {
-				CharacterListEntry* entry = &characters->get(i);
-				if (entry->getGalaxyID() == galaxy) {
+		if (server->getGalaxyID() == galaxy)
+		{
+			Reference<CharacterList *> characters = account->getCharacterList();
+			for (int i = 0; i < characters->size(); ++i)
+			{
+				CharacterListEntry *entry = &characters->get(i);
+				if (entry->getGalaxyID() == galaxy)
+				{
 
-					ManagedReference<CreatureObject*> player = getPlayer(entry->getFirstName());
-					if (player != NULL) {
+					ManagedReference<CreatureObject *> player = getPlayer(entry->getFirstName());
+					if (player != NULL)
+					{
 						clearOwnedStructuresPermissions(player);
 
-						if (player->isOnline()) {
+						if (player->isOnline())
+						{
 							player->sendMessage(new LogoutMessage());
 
-							ManagedReference<ZoneClientSession*> session = player->getClient();
+							ManagedReference<ZoneClientSession *> session = player->getClient();
 
 							if (session != NULL)
 								session->disconnect(true);
@@ -3877,17 +4321,22 @@ String PlayerManagerImplementation::banFromGalaxy(PlayerObject* admin, Account* 
 					}
 				}
 			}
-		} else {
+		}
+		else
+		{
 			return "Successfully Banned from Galaxy, but cannot kick characters because Galaxy is not your current galaxy.";
 		}
-	} catch(Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		return "Successfully Banned from Galaxy, but error kicking characters. " + e.getMessage();
 	}
 
 	return "Successfully Banned from Galaxy";
 }
 
-String PlayerManagerImplementation::unbanFromGalaxy(PlayerObject* admin, Account* account, const uint32 galaxy, const String& reason) {
+String PlayerManagerImplementation::unbanFromGalaxy(PlayerObject *admin, Account *account, const uint32 galaxy, const String &reason)
+{
 
 	if (admin == NULL || !admin->isPrivileged())
 		return "";
@@ -3898,13 +4347,16 @@ String PlayerManagerImplementation::unbanFromGalaxy(PlayerObject* admin, Account
 	String escapedReason = reason;
 	Database::escapeString(escapedReason);
 
-	try {
+	try
+	{
 		StringBuffer query;
 
-		query << "UPDATE galaxy_bans SET expires = UNIX_TIMESTAMP(), reason = '" << escapedReason << "' WHERE account_id = " <<  account->getAccountID() << " and galaxy_id = " << galaxy << " and expires > UNIX_TIMESTAMP();";
+		query << "UPDATE galaxy_bans SET expires = UNIX_TIMESTAMP(), reason = '" << escapedReason << "' WHERE account_id = " << account->getAccountID() << " and galaxy_id = " << galaxy << " and expires > UNIX_TIMESTAMP();";
 
 		ServerDatabase::instance()->executeStatement(query);
-	} catch(Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		return "Exception unbanning from galaxy: " + e.getMessage();
 	}
 
@@ -3914,7 +4366,8 @@ String PlayerManagerImplementation::unbanFromGalaxy(PlayerObject* admin, Account
 	return "Successfully Unbanned from Galaxy";
 }
 
-String PlayerManagerImplementation::banCharacter(PlayerObject* admin, Account* account, const String& name, const uint32 galaxyID, uint32 seconds, const String& reason) {
+String PlayerManagerImplementation::banCharacter(PlayerObject *admin, Account *account, const String &name, const uint32 galaxyID, uint32 seconds, const String &reason)
+{
 
 	if (admin == NULL || !admin->isPrivileged())
 		return "";
@@ -3928,25 +4381,31 @@ String PlayerManagerImplementation::banCharacter(PlayerObject* admin, Account* a
 	String escapedName = name;
 	Database::escapeString(escapedName);
 
-	try {
+	try
+	{
 		StringBuffer query;
-		query << "INSERT INTO character_bans values (NULL, " << account->getAccountID() << ", " << admin->getAccountID() << ", " << galaxyID << ", '" << escapedName << "', " <<  "now(), UNIX_TIMESTAMP() + " << seconds << ", '" << escapedReason << "');";
+		query << "INSERT INTO character_bans values (NULL, " << account->getAccountID() << ", " << admin->getAccountID() << ", " << galaxyID << ", '" << escapedName << "', "
+			  << "now(), UNIX_TIMESTAMP() + " << seconds << ", '" << escapedReason << "');";
 
 		ServerDatabase::instance()->executeStatement(query);
-	} catch(Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		return "Exception banning character: " + e.getMessage();
 	}
 
 	Locker locker(account);
 
-	Reference<CharacterList*> characters = account->getCharacterList();
+	Reference<CharacterList *> characters = account->getCharacterList();
 
-	for (int i = 0; i<characters->size(); i++) {
-		CharacterListEntry& entry = characters->get(i);
+	for (int i = 0; i < characters->size(); i++)
+	{
+		CharacterListEntry &entry = characters->get(i);
 
-		if (entry.getFirstName() == name && entry.getGalaxyID() == galaxyID) {
+		if (entry.getFirstName() == name && entry.getGalaxyID() == galaxyID)
+		{
 			Time expires;
-			expires.addMiliTime(seconds*1000);
+			expires.addMiliTime(seconds * 1000);
 
 			entry.setBanReason(reason);
 			entry.setBanAdmin(admin->getAccountID());
@@ -3956,32 +4415,41 @@ String PlayerManagerImplementation::banCharacter(PlayerObject* admin, Account* a
 
 	locker.release();
 
-	try {
-		if (server->getGalaxyID() == galaxyID) {
-			ManagedReference<CreatureObject*> player = getPlayer(name);
-			if (player != NULL) {
+	try
+	{
+		if (server->getGalaxyID() == galaxyID)
+		{
+			ManagedReference<CreatureObject *> player = getPlayer(name);
+			if (player != NULL)
+			{
 				clearOwnedStructuresPermissions(player);
 
-				if (player->isOnline()) {
+				if (player->isOnline())
+				{
 					player->sendMessage(new LogoutMessage());
 
-					ManagedReference<ZoneClientSession*> session = player->getClient();
+					ManagedReference<ZoneClientSession *> session = player->getClient();
 
 					if (session != NULL)
 						session->disconnect(true);
 				}
 			}
-		} else {
+		}
+		else
+		{
 			return "Character Successfully Banned, but cannot kick character because it's on a different galaxy.";
 		}
-	} catch(Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		return "Character Successfully Banned, but error kicking Character. " + e.getMessage();
 	}
 
 	return "Character Successfully Banned";
 }
 
-String PlayerManagerImplementation::unbanCharacter(PlayerObject* admin, Account* account, const String& name, const uint32 galaxyID, const String& reason) {
+String PlayerManagerImplementation::unbanCharacter(PlayerObject *admin, Account *account, const String &name, const uint32 galaxyID, const String &reason)
+{
 
 	if (admin == NULL || !admin->isPrivileged())
 		return "";
@@ -3995,19 +4463,23 @@ String PlayerManagerImplementation::unbanCharacter(PlayerObject* admin, Account*
 	String escapedName = name;
 	Database::escapeString(escapedName);
 
-	try {
+	try
+	{
 		StringBuffer query;
-		query << "UPDATE character_bans SET expires = UNIX_TIMESTAMP(), reason = '" << escapedReason << "' WHERE account_id = " <<  account->getAccountID() << " AND galaxy_id = " << galaxyID << " and name =  '" << escapedName << "' and expires > UNIX_TIMESTAMP();";
+		query << "UPDATE character_bans SET expires = UNIX_TIMESTAMP(), reason = '" << escapedReason << "' WHERE account_id = " << account->getAccountID() << " AND galaxy_id = " << galaxyID << " and name =  '" << escapedName << "' and expires > UNIX_TIMESTAMP();";
 
 		ServerDatabase::instance()->executeStatement(query);
-	} catch(Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		return "Exception banning character: " + e.getMessage();
 	}
 
 	Locker locker(account);
 	CharacterListEntry *entry = account->getCharacterBan(galaxyID, name);
 
-	if (entry != NULL) {
+	if (entry != NULL)
+	{
 		Time now;
 		entry->setBanExpiration(now);
 		entry->setBanReason(reason);
@@ -4016,19 +4488,23 @@ String PlayerManagerImplementation::unbanCharacter(PlayerObject* admin, Account*
 	return "Character Successfully Unbanned";
 }
 
-void PlayerManagerImplementation::clearOwnedStructuresPermissions(CreatureObject* player) {
-	PlayerObject* ghost = player->getPlayerObject();
+void PlayerManagerImplementation::clearOwnedStructuresPermissions(CreatureObject *player)
+{
+	PlayerObject *ghost = player->getPlayerObject();
 
-	if (ghost == NULL) {
+	if (ghost == NULL)
+	{
 		return;
 	}
 
-	for (int i = 0; i < ghost->getTotalOwnedStructureCount(); i++) {
+	for (int i = 0; i < ghost->getTotalOwnedStructureCount(); i++)
+	{
 		uint64 structureID = ghost->getOwnedStructure(i);
 
-		ManagedReference<StructureObject*> structure = server->getObject(structureID).castTo<StructureObject*>();
+		ManagedReference<StructureObject *> structure = server->getObject(structureID).castTo<StructureObject *>();
 
-		if (structure == NULL) {
+		if (structure == NULL)
+		{
 			continue;
 		}
 
@@ -4036,40 +4512,46 @@ void PlayerManagerImplementation::clearOwnedStructuresPermissions(CreatureObject
 	}
 }
 
-void PlayerManagerImplementation::fixHAM(CreatureObject* player) {
+void PlayerManagerImplementation::fixHAM(CreatureObject *player)
+{
 	Locker locker(player);
 
-	try {
-		BuffList* buffs = player->getBuffList();
+	try
+	{
+		BuffList *buffs = player->getBuffList();
 
 		VectorMap<byte, int> attributeValues;
 		attributeValues.setNullValue(0);
 		attributeValues.setAllowOverwriteInsertPlan();
 
-		ManagedReference<Buff*> powerBoost;
-		ManagedReference<Buff*> forceWeaken;
+		ManagedReference<Buff *> powerBoost;
+		ManagedReference<Buff *> forceWeaken;
 
 		//check buffs
-		for (int i = 0; i < buffs->getBuffListSize(); ++i) {
-			ManagedReference<Buff*> buff = buffs->getBuffByIndex(i);
+		for (int i = 0; i < buffs->getBuffListSize(); ++i)
+		{
+			ManagedReference<Buff *> buff = buffs->getBuffByIndex(i);
 
-			PowerBoostBuff* power = dynamic_cast<PowerBoostBuff*>(buff.get());
+			PowerBoostBuff *power = dynamic_cast<PowerBoostBuff *>(buff.get());
 
-			if (power != NULL) {
+			if (power != NULL)
+			{
 				powerBoost = power;
 				continue;
 			}
 
-			ForceWeakenDebuff* debuff = dynamic_cast<ForceWeakenDebuff*>(buff.get());
+			ForceWeakenDebuff *debuff = dynamic_cast<ForceWeakenDebuff *>(buff.get());
 
-			if (debuff != NULL) {
+			if (debuff != NULL)
+			{
 				forceWeaken = debuff;
 				continue;
 			}
 
-			VectorMap<byte, int>* attributeModifiers = buff->getAttributeModifiers();
+			VectorMap<byte, int> *attributeModifiers = buff->getAttributeModifiers();
 
-			for (int j = 0; j < attributeModifiers->size(); ++j) {
+			for (int j = 0; j < attributeModifiers->size(); ++j)
+			{
 				byte modifier = attributeModifiers->elementAt(j).getKey();
 				int val = attributeModifiers->elementAt(j).getValue();
 
@@ -4077,13 +4559,15 @@ void PlayerManagerImplementation::fixHAM(CreatureObject* player) {
 			}
 		}
 
-		if (powerBoost != NULL) {
+		if (powerBoost != NULL)
+		{
 			Locker buffLocker(powerBoost);
 
 			player->removeBuff(powerBoost);
 		}
 
-		if (forceWeaken != NULL) {
+		if (forceWeaken != NULL)
+		{
 			Locker buffLocker(forceWeaken);
 
 			player->removeBuff(forceWeaken);
@@ -4091,43 +4575,53 @@ void PlayerManagerImplementation::fixHAM(CreatureObject* player) {
 
 		int encumbranceType = -1;
 
-		for (int i = 0; i < 9; ++i) {
+		for (int i = 0; i < 9; ++i)
+		{
 			int maxModifier = attributeValues.get((byte)i);
 			int baseHam = player->getBaseHAM(i);
 			int max = player->getMaxHAM(i);
 
 			int calculated = baseHam + maxModifier;
 
-			if (i % 3 == 0) {
+			if (i % 3 == 0)
+			{
 				++encumbranceType;
-			} else {
+			}
+			else
+			{
 				calculated -= player->getEncumbrance(encumbranceType);
 			}
 
 			//info("attribute: " + CreatureAttribute::getName(i, true) + " max = " + String::valueOf(max) + " calculatedMax = " + String::valueOf(calculated), true);
 
-			if (calculated != max && calculated > 1) {
+			if (calculated != max && calculated > 1)
+			{
 				if (player->getHAM(i) > calculated)
 					player->setHAM(i, calculated, false);
 
 				player->setMaxHAM(i, calculated, false);
 			}
 		}
-	} catch (Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		error(e.getMessage());
 	}
 }
 
-void PlayerManagerImplementation::fixBuffSkillMods(CreatureObject* player) {
+void PlayerManagerImplementation::fixBuffSkillMods(CreatureObject *player)
+{
 	Locker locker(player);
 
-	try {
-		GroupObject* grp = player->getGroup();
+	try
+	{
+		GroupObject *grp = player->getGroup();
 		if (grp != NULL)
 			GroupManager::instance()->leaveGroup(grp, player);
 
-		Reference<Buff*> buff = player->getBuff(STRING_HASHCODE("squadleader"));
-		if (buff != NULL) {
+		Reference<Buff *> buff = player->getBuff(STRING_HASHCODE("squadleader"));
+		if (buff != NULL)
+		{
 			Locker locker(buff);
 			player->removeBuff(buff);
 		}
@@ -4137,15 +4631,16 @@ void PlayerManagerImplementation::fixBuffSkillMods(CreatureObject* player) {
 
 		Locker smodsGuard(player->getSkillModMutex());
 
-		SkillModGroup* smodGroup = player->getSkillModList()->getSkillModGroup(SkillModManager::BUFF);
+		SkillModGroup *smodGroup = player->getSkillModList()->getSkillModGroup(SkillModManager::BUFF);
 		smodGroup->removeAll();
 
 		smodsGuard.release();
 
-		BuffList* buffs = player->getBuffList();
+		BuffList *buffs = player->getBuffList();
 
-		for (int i = 0; i < buffs->getBuffListSize(); i++) {
-			ManagedReference<Buff*> buff = buffs->getBuffByIndex(i);
+		for (int i = 0; i < buffs->getBuffListSize(); i++)
+		{
+			ManagedReference<Buff *> buff = buffs->getBuffByIndex(i);
 
 			Locker clocker(buff, player);
 
@@ -4154,22 +4649,28 @@ void PlayerManagerImplementation::fixBuffSkillMods(CreatureObject* player) {
 			buff->applySkillModifiers();
 		}
 
-		if (grp != NULL && grp->getLeader() != NULL) {
+		if (grp != NULL && grp->getLeader() != NULL)
+		{
 			player->updateGroupInviterID(grp->getLeader()->getObjectID());
 			GroupManager::instance()->joinGroup(player);
 		}
-	} catch (Exception& e) {
+	}
+	catch (Exception &e)
+	{
 		error(e.getMessage());
 	}
 }
 
-bool PlayerManagerImplementation::promptTeachableSkills(CreatureObject* teacher, SceneObject* target) {
-	if (target == NULL || !target->isPlayerCreature()) {
+bool PlayerManagerImplementation::promptTeachableSkills(CreatureObject *teacher, SceneObject *target)
+{
+	if (target == NULL || !target->isPlayerCreature())
+	{
 		teacher->sendSystemMessage("@teaching:no_target"); //Whom do you want to teach?
 		return false;
 	}
 
-	if (target == teacher) {
+	if (target == teacher)
+	{
 		teacher->sendSystemMessage("@teaching:no_teach_self"); //You cannot teach yourself.
 		return false;
 	}
@@ -4177,31 +4678,35 @@ bool PlayerManagerImplementation::promptTeachableSkills(CreatureObject* teacher,
 	Locker _lock(target, teacher);
 
 	//We checked if they had the player object in slot with isPlayerCreature
-	CreatureObject* student = cast<CreatureObject*>(target);
+	CreatureObject *student = cast<CreatureObject *>(target);
 
-	if (teacher->getGroup() == NULL || student->getGroup() != teacher->getGroup()) {
+	if (teacher->getGroup() == NULL || student->getGroup() != teacher->getGroup())
+	{
 		StringIdChatParameter params("teaching", "not_in_same_group"); //You must be within the same group as %TT in order to teach.
 		params.setTT(student->getDisplayedName());
 		teacher->sendSystemMessage(params);
 		return false;
 	}
 
-	if (student->isDead()) {
+	if (student->isDead())
+	{
 		StringIdChatParameter params("teaching", "student_dead"); //%TT does not feel like being taught right now.
 		params.setTT(student->getDisplayedName());
 		teacher->sendSystemMessage(params);
 		return false;
 	}
 
-	if (!student->isInRange(teacher, 32.f)) {
+	if (!student->isInRange(teacher, 32.f))
+	{
 		teacher->sendSystemMessage("@teaching:student_too_far"); // Your student must be nearby in order to teach.
 		return false;
 	}
 
-	ManagedReference<PlayerObject*> studentGhost = student->getPlayerObject();
+	ManagedReference<PlayerObject *> studentGhost = student->getPlayerObject();
 
 	//Do they have an outstanding teaching offer?
-	if (studentGhost->hasSuiBoxWindowType(SuiWindowType::TEACH_OFFER)) {
+	if (studentGhost->hasSuiBoxWindowType(SuiWindowType::TEACH_OFFER))
+	{
 		StringIdChatParameter params("teaching", "student_has_offer_to_learn"); //%TT already has an offer to learn.
 		params.setTT(student->getDisplayedName());
 		teacher->sendSystemMessage(params);
@@ -4210,29 +4715,32 @@ bool PlayerManagerImplementation::promptTeachableSkills(CreatureObject* teacher,
 
 	SortedVector<String> skills = getTeachableSkills(teacher, student);
 
-	if (skills.size() <= 0) {
+	if (skills.size() <= 0)
+	{
 		StringIdChatParameter params("teaching", "no_skills_for_student"); //You have no skills that  %TT can currently learn."
 		params.setTT(student->getDisplayedName());
 		teacher->sendSystemMessage(params);
 		return false;
 	}
 
-	ManagedReference<SuiListBox*> listbox = new SuiListBox(teacher, SuiWindowType::TEACH_SKILL);
+	ManagedReference<SuiListBox *> listbox = new SuiListBox(teacher, SuiWindowType::TEACH_SKILL);
 	listbox->setUsingObject(student);
 	listbox->setForceCloseDistance(32.f);
 	listbox->setPromptTitle("SELECT SKILL");
 	listbox->setPromptText("Select a skill to teach.");
 	listbox->setCancelButton(true, "@cancel");
 
-	for (int i = 0; i < skills.size(); ++i) {
-		const String& skill = skills.get(i);
+	for (int i = 0; i < skills.size(); ++i)
+	{
+		const String &skill = skills.get(i);
 		listbox->addMenuItem("@skl_n:" + skill, skill.hashCode());
 	}
 
 	listbox->setCallback(new PlayerTeachSuiCallback(server));
 
-	if (teacher->isPlayerCreature()) {
-		ManagedReference<PlayerObject*> teacherGhost = teacher->getPlayerObject();
+	if (teacher->isPlayerCreature())
+	{
+		ManagedReference<PlayerObject *> teacherGhost = teacher->getPlayerObject();
 
 		teacherGhost->addSuiBox(listbox);
 	}
@@ -4242,31 +4750,33 @@ bool PlayerManagerImplementation::promptTeachableSkills(CreatureObject* teacher,
 	return true;
 }
 
-bool PlayerManagerImplementation::offerTeaching(CreatureObject* teacher, CreatureObject* student, Skill* skill) {
-	ManagedReference<PlayerObject*> studentGhost = student->getPlayerObject();
+bool PlayerManagerImplementation::offerTeaching(CreatureObject *teacher, CreatureObject *student, Skill *skill)
+{
+	ManagedReference<PlayerObject *> studentGhost = student->getPlayerObject();
 
 	//Do they have an outstanding teaching offer?
-	if (studentGhost->hasSuiBoxWindowType(SuiWindowType::TEACH_OFFER)) {
+	if (studentGhost->hasSuiBoxWindowType(SuiWindowType::TEACH_OFFER))
+	{
 		StringIdChatParameter params("teaching", "student_has_offer_to_learn"); //%TT already has an offer to learn.
 		params.setTT(student->getDisplayedName());
 		teacher->sendSystemMessage(params);
 		return false;
 	}
 
-	ManagedReference<SuiMessageBox*> suibox = new SuiMessageBox(teacher, SuiWindowType::TEACH_OFFER);
+	ManagedReference<SuiMessageBox *> suibox = new SuiMessageBox(teacher, SuiWindowType::TEACH_OFFER);
 	suibox->setUsingObject(teacher);
 	suibox->setForceCloseDistance(32.f);
 	suibox->setPromptTitle("@sui:swg"); //Star Wars Galaxies
 
-	StringIdManager* sidman = StringIdManager::instance();
+	StringIdManager *sidman = StringIdManager::instance();
 
 	String sklname = sidman->getStringId(String("@skl_n:" + skill->getSkillName()).hashCode()).toString();
 	String expname = sidman->getStringId(String("@exp_n:" + skill->getXpType()).hashCode()).toString();
 
 	StringBuffer prompt;
 	prompt << teacher->getDisplayedName()
-															<< " has offered to teach you " << sklname << " (" << skill->getXpCost()
-															<< " " << expname  << " experience cost).";
+		   << " has offered to teach you " << sklname << " (" << skill->getXpCost()
+		   << " " << expname << " experience cost).";
 
 	suibox->setPromptText(prompt.toString());
 	suibox->setCallback(new PlayerTeachConfirmSuiCallback(server, skill));
@@ -4285,8 +4795,10 @@ bool PlayerManagerImplementation::offerTeaching(CreatureObject* teacher, Creatur
 	return true;
 }
 
-bool PlayerManagerImplementation::acceptTeachingOffer(CreatureObject* teacher, CreatureObject* student, Skill* skill) {
-	if (teacher->getGroup() == NULL || student->getGroup() != teacher->getGroup()) {
+bool PlayerManagerImplementation::acceptTeachingOffer(CreatureObject *teacher, CreatureObject *student, Skill *skill)
+{
+	if (teacher->getGroup() == NULL || student->getGroup() != teacher->getGroup())
+	{
 		StringIdChatParameter params("teaching", "not_in_same_group"); //You must be within the same group as %TT in order to teach.
 		params.setTT(student->getDisplayedName());
 		teacher->sendSystemMessage(params);
@@ -4294,9 +4806,10 @@ bool PlayerManagerImplementation::acceptTeachingOffer(CreatureObject* teacher, C
 	}
 
 	//Check to see if the teacher still has the skill and the student can still learn the skill.
-	SkillManager* skillManager = SkillManager::instance();
+	SkillManager *skillManager = SkillManager::instance();
 
-	if (!student->isInRange(teacher, 32.f)) {
+	if (!student->isInRange(teacher, 32.f))
+	{
 		StringIdChatParameter params("teaching", "teacher_too_far_target"); //You are too far away from %TT to learn.
 		params.setTT(teacher->getDisplayedName());
 		student->sendSystemMessage(params);
@@ -4307,7 +4820,8 @@ bool PlayerManagerImplementation::acceptTeachingOffer(CreatureObject* teacher, C
 		return false;
 	}
 
-	if (teacher->hasSkill(skill->getSkillName()) && skillManager->awardSkill(skill->getSkillName(), student, true, false, false)) {
+	if (teacher->hasSkill(skill->getSkillName()) && skillManager->awardSkill(skill->getSkillName(), student, true, false, false))
+	{
 		StringIdChatParameter params("teaching", "student_skill_learned"); //You learn %TO from %TT.
 		params.setTO("@skl_n:" + skill->getSkillName());
 		params.setTT(teacher->getDisplayedName());
@@ -4317,7 +4831,8 @@ bool PlayerManagerImplementation::acceptTeachingOffer(CreatureObject* teacher, C
 		params.setTT(student->getDisplayedName());
 		teacher->sendSystemMessage(params);
 
-		if (skillManager->isApprenticeshipEnabled() && !skill->getSkillName().endsWith("novice")) {
+		if (skillManager->isApprenticeshipEnabled() && !skill->getSkillName().endsWith("novice"))
+		{
 			int exp = 10 + (skill->getTotalChildren() * 10);
 
 			StringIdChatParameter params("teaching", "experience_received"); //You have received %DI Apprenticeship experience.
@@ -4326,7 +4841,9 @@ bool PlayerManagerImplementation::acceptTeachingOffer(CreatureObject* teacher, C
 
 			awardExperience(teacher, "apprenticeship", exp, false);
 		}
-	} else {
+	}
+	else
+	{
 		student->sendSystemMessage("@teaching:learning_failed"); //Learning failed.
 		teacher->sendSystemMessage("@teaching:teaching_failed"); //Teaching failed.
 		return false;
@@ -4335,16 +4852,18 @@ bool PlayerManagerImplementation::acceptTeachingOffer(CreatureObject* teacher, C
 	return true;
 }
 
-SortedVector<String> PlayerManagerImplementation::getTeachableSkills(CreatureObject* teacher, CreatureObject* student) {
+SortedVector<String> PlayerManagerImplementation::getTeachableSkills(CreatureObject *teacher, CreatureObject *student)
+{
 	SortedVector<String> skills;
 	skills.setNoDuplicateInsertPlan();
 
-	SkillList* skillList = teacher->getSkillList();
+	SkillList *skillList = teacher->getSkillList();
 
-	SkillManager* skillManager = SkillManager::instance();
+	SkillManager *skillManager = SkillManager::instance();
 
-	for (int i = 0; i < skillList->size(); ++i) {
-		Skill* skill = skillList->get(i);
+	for (int i = 0; i < skillList->size(); ++i)
+	{
+		Skill *skill = skillList->get(i);
 
 		String skillName = skill->getSkillName();
 
@@ -4355,95 +4874,109 @@ SortedVector<String> PlayerManagerImplementation::getTeachableSkills(CreatureObj
 	return skills;
 }
 
-void PlayerManagerImplementation::decreaseOnlineCharCount(ZoneClientSession* client) {
+void PlayerManagerImplementation::decreaseOnlineCharCount(ZoneClientSession *client)
+{
 	Locker locker(&onlineMapMutex);
 
+	auto server = ServerCore::getZoneServer();
 	uint32 accountId = client->getAccountID();
 
 	if (!onlineZoneClientMap.containsKey(accountId))
+	{
+		error("decreaseOnlineCharCount missing account " + String::valueOf(accountId) + " in onlineZoneClientMap");
+		// onlineZoneClientMap.accountLoggedOut(client->getIPAddress(), accountId, server != nullptr ? server->getGalaxyID() : 0);
 		return;
+	}
 
-	auto session = client->getSession();
-
-	Vector<Reference<ZoneClientSession*> > clients = onlineZoneClientMap.get(accountId);
+	Vector<Reference<ZoneClientSession *>> clients = onlineZoneClientMap.get(accountId);
 
 	for (int i = 0; i < clients.size(); ++i)
-		if (clients.get(i) == client) {
+		if (clients.get(i) == client)
+		{
 			clients.remove(i);
 
 			break;
 		}
 
 	if (clients.size() == 0)
+	{
 		onlineZoneClientMap.remove(accountId);
+		// onlineZoneClientMap.accountLoggedOut(client->getIPAddress(), accountId, server != nullptr ? server->getGalaxyID() : 0);
+	}
 	else
 		onlineZoneClientMap.put(accountId, clients);
 
 	locker.release();
-
-	if (session != NULL) {
-		onlineZoneClientMap.accountLoggedOut(session->getIPAddress(), accountId);
-	}
 }
 
-void PlayerManagerImplementation::proposeUnity( CreatureObject* askingPlayer, CreatureObject* respondingPlayer, SceneObject* askingPlayerRing) {
-
-	if (!askingPlayer->isPlayerCreature()) {
+void PlayerManagerImplementation::proposeUnity(CreatureObject *askingPlayer, CreatureObject *respondingPlayer, SceneObject *askingPlayerRing)
+{
+	if (!askingPlayer->isPlayerCreature())
+	{
 		return;
 	}
 
 	// Check if target is self
-	if (askingPlayer == respondingPlayer) {
+	if (askingPlayer == respondingPlayer)
+	{
 		askingPlayer->sendSystemMessage("@unity:bad_target"); // "You must have a valid player target to Propose Unity."
 		return;
 	}
 
 	// Check if target is a player
-	if (!respondingPlayer->isPlayerCreature()) {
+	if (!respondingPlayer->isPlayerCreature())
+	{
 		askingPlayer->sendSystemMessage("@unity:bad_target"); // "You must have a valid player target to Propose Unity."
 		return;
 	}
 
-	Reference<PlayerObject*> askingGhost = askingPlayer->getPlayerObject();
-	Reference<PlayerObject*> respondingGhost = respondingPlayer->getPlayerObject();
-	if (askingGhost == NULL || respondingGhost == NULL) {
+	Reference<PlayerObject *> askingGhost = askingPlayer->getPlayerObject();
+	Reference<PlayerObject *> respondingGhost = respondingPlayer->getPlayerObject();
+	if (askingGhost == NULL || respondingGhost == NULL)
+	{
 		return;
 	}
 
 	// Check if askingPlayer is married
-	if (askingGhost->isMarried()) {
+	if (askingGhost->isMarried())
+	{
 		StringIdChatParameter errAskerMarried;
 		errAskerMarried.setStringId("unity", "prose_already_married"); // "You cannot propose unity. You are already united with %TO."
-		errAskerMarried.setTO( askingGhost->getSpouseName() );
-		askingPlayer->sendSystemMessage(errAskerMarried );
+		errAskerMarried.setTO(askingGhost->getSpouseName());
+		askingPlayer->sendSystemMessage(errAskerMarried);
 		return;
 	}
 
 	// Check if respondingPlayer is married
-	if (respondingGhost->isMarried()) {
+	if (respondingGhost->isMarried())
+	{
 		askingPlayer->sendSystemMessage("@unity:target_married"); // "You cannot propose unity to someone who is already united."
 		return;
 	}
 
 	// Check distance
-	if (!respondingPlayer->isInRange( askingPlayer, 15.0 )) {
+	if (!respondingPlayer->isInRange(askingPlayer, 15.0))
+	{
 		askingPlayer->sendSystemMessage("@unity:out_of_range"); // "Your target is too far away to properly propose!"
 		return;
 	}
 
-	if (!askingPlayer->isFacingObject(respondingPlayer)) {
+	if (!askingPlayer->isFacingObject(respondingPlayer))
+	{
 		askingPlayer->sendSystemMessage("@unity:bad_facing"); // "You must be facing your target to properly propose!"
 		return;
 	}
 
 	// Check if asking player has a proposal outstanding
-	if (askingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY) != NULL) {
+	if (askingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY) != NULL)
+	{
 		askingPlayer->sendSystemMessage("But you already have an outstanding unity proposal");
 		return;
 	}
 
 	// Check if responding player has a proposal outstanding
-	if (respondingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY) != NULL) {
+	if (respondingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY) != NULL)
+	{
 		askingPlayer->sendSystemMessage("@unity:target_proposed"); // "Your proposal target is already engaged in a unity proposal."
 		return;
 	}
@@ -4452,30 +4985,30 @@ void PlayerManagerImplementation::proposeUnity( CreatureObject* askingPlayer, Cr
 	// All checks passed
 	//
 
-	Locker rlocker( askingPlayer, respondingPlayer );
+	Locker rlocker(askingPlayer, respondingPlayer);
 
 	// Initialize session
-	ManagedReference<ProposeUnitySession*> askerUnitySession =
-			new ProposeUnitySession( askingPlayer->getObjectID(), respondingPlayer->getObjectID(), askingPlayerRing->getObjectID() );
+	ManagedReference<ProposeUnitySession *> askerUnitySession =
+		new ProposeUnitySession(askingPlayer->getObjectID(), respondingPlayer->getObjectID(), askingPlayerRing->getObjectID());
 	askingPlayer->addActiveSession(SessionFacadeType::PROPOSEUNITY, askerUnitySession);
 
-	ManagedReference<ProposeUnitySession*> responderUnitySession =
-			new ProposeUnitySession( askingPlayer->getObjectID(), respondingPlayer->getObjectID(), askingPlayerRing->getObjectID() );
+	ManagedReference<ProposeUnitySession *> responderUnitySession =
+		new ProposeUnitySession(askingPlayer->getObjectID(), respondingPlayer->getObjectID(), askingPlayerRing->getObjectID());
 	respondingPlayer->addActiveSession(SessionFacadeType::PROPOSEUNITY, responderUnitySession);
 
 	// Submit timeout task
-	Reference<Task*> askerExpiredTask = new ProposeUnityExpiredTask( askingPlayer );
+	Reference<Task *> askerExpiredTask = new ProposeUnityExpiredTask(askingPlayer);
 	askingPlayer->addPendingTask("propose_unity", askerExpiredTask, 60000); // 1 min
 
-	Reference<Task*> responderExpiredTask = new ProposeUnityExpiredTask( respondingPlayer );
+	Reference<Task *> responderExpiredTask = new ProposeUnityExpiredTask(respondingPlayer);
 	respondingPlayer->addPendingTask("propose_unity", responderExpiredTask, 60000); // 1 min
 
 	// Build and send proposal window
-	ManagedReference<SuiMessageBox*> suiBox = new SuiMessageBox(respondingPlayer, SuiWindowType::PROPOSE_UNITY);
+	ManagedReference<SuiMessageBox *> suiBox = new SuiMessageBox(respondingPlayer, SuiWindowType::PROPOSE_UNITY);
 	suiBox->setCallback(new ProposeUnitySuiCallback(server));
 	suiBox->setPromptTitle("@unity:accept_title"); // "Accept Unity Proposal?"
-	suiBox->setPromptText( askingPlayer->getCreatureName().toString() + " is proposing unity to you. Do you wish to accept?" );
-	suiBox->setUsingObject( askingPlayer );
+	suiBox->setPromptText(askingPlayer->getCreatureName().toString() + " is proposing unity to you. Do you wish to accept?");
+	suiBox->setUsingObject(askingPlayer);
 	suiBox->setCancelButton(true, "@no");
 	suiBox->setOkButton(true, "@yes");
 
@@ -4485,91 +5018,100 @@ void PlayerManagerImplementation::proposeUnity( CreatureObject* askingPlayer, Cr
 	// Send message to asking player
 	StringIdChatParameter proposalSent;
 	proposalSent.setStringId("unity", "prose_propose"); // "You propose unity to %TO."
-	proposalSent.setTO( respondingPlayer->getFirstName() );
-	askingPlayer->sendSystemMessage(proposalSent );
-
+	proposalSent.setTO(respondingPlayer->getFirstName());
+	askingPlayer->sendSystemMessage(proposalSent);
 }
 
-void PlayerManagerImplementation::denyUnity( CreatureObject* respondingPlayer) {
+void PlayerManagerImplementation::denyUnity(CreatureObject *respondingPlayer)
+{
 
-	if (respondingPlayer == NULL )
+	if (respondingPlayer == NULL)
 		return;
 
 	// Check session
-	ManagedReference<ProposeUnitySession*> proposeUnitySession = respondingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY).castTo<ProposeUnitySession*>();
-	if (proposeUnitySession == NULL) {
+	ManagedReference<ProposeUnitySession *> proposeUnitySession = respondingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY).castTo<ProposeUnitySession *>();
+	if (proposeUnitySession == NULL)
+	{
 		respondingPlayer->sendSystemMessage("@unity:expire_target"); // "The unity proposal extended to you has expired."
 		return;
 	}
 
 	// Pull asking player
 	uint64 targID = proposeUnitySession->getAskingPlayer();
-	ManagedReference<SceneObject*> obj = server->getObject(targID);
-	if (obj == NULL || !obj->isPlayerCreature()) {
+	ManagedReference<SceneObject *> obj = server->getObject(targID);
+	if (obj == NULL || !obj->isPlayerCreature())
+	{
 		respondingPlayer->sendSystemMessage("@unity:wed_error"); // "An error has occurred during the unity process."
 		return;
 	}
 
-	CreatureObject* askingPlayer = cast<CreatureObject*>( obj.get());
-	Locker alocker( askingPlayer, respondingPlayer );
-	askingPlayer->sendSystemMessage("@unity:declined"); // "Your unity proposal has been declined.")
+	CreatureObject *askingPlayer = cast<CreatureObject *>(obj.get());
+	Locker alocker(askingPlayer, respondingPlayer);
+	askingPlayer->sendSystemMessage("@unity:declined");	   // "Your unity proposal has been declined.")
 	respondingPlayer->sendSystemMessage("@unity:decline"); // "You decline the unity proposal.")
 
 	// Remove session
 	cancelProposeUnitySession(respondingPlayer, askingPlayer);
-
 }
 
-void PlayerManagerImplementation::acceptUnity( CreatureObject* respondingPlayer) {
+void PlayerManagerImplementation::acceptUnity(CreatureObject *respondingPlayer)
+{
 
-	if (respondingPlayer == NULL )
+	if (respondingPlayer == NULL)
 		return;
 
 	// Check session
-	ManagedReference<ProposeUnitySession*> proposeUnitySession = respondingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY).castTo<ProposeUnitySession*>();
-	if (proposeUnitySession == NULL) {
+	ManagedReference<ProposeUnitySession *> proposeUnitySession = respondingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY).castTo<ProposeUnitySession *>();
+	if (proposeUnitySession == NULL)
+	{
 		respondingPlayer->sendSystemMessage("@unity:expire_target"); // "The unity proposal extended to you has expired."
 		return;
 	}
 
 	// Pull asking player
 	uint64 targID = proposeUnitySession->getAskingPlayer();
-	ManagedReference<SceneObject*> obj = server->getObject(targID);
-	if (obj == NULL || !obj->isPlayerCreature()) {
+	ManagedReference<SceneObject *> obj = server->getObject(targID);
+	if (obj == NULL || !obj->isPlayerCreature())
+	{
 		respondingPlayer->sendSystemMessage("@unity:wed_error"); // "An error has occurred during the unity process."
 		return;
 	}
 
-	CreatureObject* askingPlayer = cast<CreatureObject*>( obj.get());
-	Locker alocker( askingPlayer, respondingPlayer );
+	CreatureObject *askingPlayer = cast<CreatureObject *>(obj.get());
+	Locker alocker(askingPlayer, respondingPlayer);
 
 	// Check distance
-	if (!respondingPlayer->isInRange( askingPlayer, 15.0 )) {
-		askingPlayer->sendSystemMessage("@unity:wed_oor"); // "You must remain within 15 meters during the unity process for it to complete."
+	if (!respondingPlayer->isInRange(askingPlayer, 15.0))
+	{
+		askingPlayer->sendSystemMessage("@unity:wed_oor");	   // "You must remain within 15 meters during the unity process for it to complete."
 		respondingPlayer->sendSystemMessage("@unity:wed_oor"); // "You must remain within 15 meters during the unity process for it to complete."
 		cancelProposeUnitySession(respondingPlayer, askingPlayer);
 		return;
 	}
 
 	// Check for a ring in player's inventory
-	ManagedReference<SceneObject*> inventory = respondingPlayer->getSlottedObject("inventory");
-	if (inventory == NULL) {
+	ManagedReference<SceneObject *> inventory = respondingPlayer->getSlottedObject("inventory");
+	if (inventory == NULL)
+	{
 		respondingPlayer->sendSystemMessage("@unity:wed_error"); // "An error has occurred during the unity process."
-		askingPlayer->sendSystemMessage("@unity:wed_error"); // "An error has occurred during the unity process."
+		askingPlayer->sendSystemMessage("@unity:wed_error");	 // "An error has occurred during the unity process."
 		cancelProposeUnitySession(respondingPlayer, askingPlayer);
 		return;
 	}
 
 	bool hasRing = false;
-	for (int i = 0; i < inventory->getContainerObjectsSize(); i++) {
-		ManagedReference<WearableObject*> wearable = cast<WearableObject*>(inventory->getContainerObject(i).get());
-		if (wearable != NULL && wearable->getGameObjectType() == SceneObjectType::RING && !wearable->isEquipped()) {
+	for (int i = 0; i < inventory->getContainerObjectsSize(); i++)
+	{
+		ManagedReference<WearableObject *> wearable = cast<WearableObject *>(inventory->getContainerObject(i).get());
+		if (wearable != NULL && wearable->getGameObjectType() == SceneObjectType::RING && !wearable->isEquipped())
+		{
 			hasRing = true;
 		}
 	}
 
 	// No ring found
-	if (!hasRing) {
+	if (!hasRing)
+	{
 		askingPlayer->sendSystemMessage("@unity:accept_fail"); // "Your proposal target has no ring to offer in return."
 		respondingPlayer->sendSystemMessage("@unity:no_ring"); // "You cannot accept a unity proposal without a ring to offer."
 		cancelProposeUnitySession(respondingPlayer, askingPlayer);
@@ -4577,16 +5119,18 @@ void PlayerManagerImplementation::acceptUnity( CreatureObject* respondingPlayer)
 	}
 
 	// Build and send list box for ring selection
-	ManagedReference<SuiListBox*> box = new SuiListBox(respondingPlayer, SuiWindowType::SELECT_UNITY_RING, SuiListBox::HANDLETWOBUTTON);
+	ManagedReference<SuiListBox *> box = new SuiListBox(respondingPlayer, SuiWindowType::SELECT_UNITY_RING, SuiListBox::HANDLETWOBUTTON);
 	box->setCallback(new SelectUnityRingSuiCallback(server));
 	box->setPromptText("@unity:ring_prompt"); // "Select the ring you would like to offer, in return, for your unity."
 	box->setPromptTitle("Select Unity Ring");
 	box->setOkButton(true, "@ok");
 	box->setCancelButton(true, "@cancel");
 
-	for (int i = 0; i < inventory->getContainerObjectsSize(); i++) {
-		ManagedReference<WearableObject*> wearable = cast<WearableObject*>(inventory->getContainerObject(i).get());
-		if (wearable != NULL && wearable->getGameObjectType() == SceneObjectType::RING && !wearable->isEquipped() && !wearable->isNoTrade()) {
+	for (int i = 0; i < inventory->getContainerObjectsSize(); i++)
+	{
+		ManagedReference<WearableObject *> wearable = cast<WearableObject *>(inventory->getContainerObject(i).get());
+		if (wearable != NULL && wearable->getGameObjectType() == SceneObjectType::RING && !wearable->isEquipped() && !wearable->isNoTrade())
+		{
 			String itemName = wearable->getDisplayedName();
 			box->addMenuItem(itemName, wearable->getObjectID());
 		}
@@ -4595,56 +5139,62 @@ void PlayerManagerImplementation::acceptUnity( CreatureObject* respondingPlayer)
 	box->setUsingObject(respondingPlayer);
 	respondingPlayer->getPlayerObject()->addSuiBox(box);
 	respondingPlayer->sendMessage(box->generateMessage());
-
 }
 
-void PlayerManagerImplementation::completeUnity( CreatureObject* respondingPlayer, unsigned long long respondingPlayerRingId) {
+void PlayerManagerImplementation::completeUnity(CreatureObject *respondingPlayer, unsigned long long respondingPlayerRingId)
+{
 
-	if (respondingPlayer == NULL )
+	if (respondingPlayer == NULL)
 		return;
 
 	// Check session
-	ManagedReference<ProposeUnitySession*> proposeUnitySession = respondingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY).castTo<ProposeUnitySession*>();
-	if (proposeUnitySession == NULL) {
+	ManagedReference<ProposeUnitySession *> proposeUnitySession = respondingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY).castTo<ProposeUnitySession *>();
+	if (proposeUnitySession == NULL)
+	{
 		respondingPlayer->sendSystemMessage("@unity:expire_target"); // "The unity proposal extended to you has expired."
 		return;
 	}
 
 	// Pull asking player
 	uint64 targID = proposeUnitySession->getAskingPlayer();
-	ManagedReference<SceneObject*> obj = server->getObject(targID);
-	if (obj == NULL || !obj->isPlayerCreature()) {
+	ManagedReference<SceneObject *> obj = server->getObject(targID);
+	if (obj == NULL || !obj->isPlayerCreature())
+	{
 		respondingPlayer->sendSystemMessage("@unity:wed_error"); // "An error has occurred during the unity process."
 		return;
 	}
 
-	CreatureObject* askingPlayer = cast<CreatureObject*>( obj.get());
-	Locker alocker( askingPlayer, respondingPlayer );
+	CreatureObject *askingPlayer = cast<CreatureObject *>(obj.get());
+	Locker alocker(askingPlayer, respondingPlayer);
 
 	// Check distance
-	if (!respondingPlayer->isInRange( askingPlayer, 15.0 )) {
-		askingPlayer->sendSystemMessage("@unity:wed_oor"); // "You must remain within 15 meters during the unity process for it to complete."
+	if (!respondingPlayer->isInRange(askingPlayer, 15.0))
+	{
+		askingPlayer->sendSystemMessage("@unity:wed_oor");	   // "You must remain within 15 meters during the unity process for it to complete."
 		respondingPlayer->sendSystemMessage("@unity:wed_oor"); // "You must remain within 15 meters during the unity process for it to complete."
 		cancelProposeUnitySession(respondingPlayer, askingPlayer);
 		return;
 	}
 
 	// Find selected ring
-	ManagedReference<SceneObject*> respondingPlayerInventory = respondingPlayer->getSlottedObject("inventory");
-	ManagedReference<SceneObject*> askingPlayerInventory = askingPlayer->getSlottedObject("inventory");
-	if (respondingPlayerInventory == NULL || askingPlayerInventory == NULL) {
+	ManagedReference<SceneObject *> respondingPlayerInventory = respondingPlayer->getSlottedObject("inventory");
+	ManagedReference<SceneObject *> askingPlayerInventory = askingPlayer->getSlottedObject("inventory");
+	if (respondingPlayerInventory == NULL || askingPlayerInventory == NULL)
+	{
 		respondingPlayer->sendSystemMessage("@unity:wed_error"); // "An error has occurred during the unity process."
-		askingPlayer->sendSystemMessage("@unity:wed_error"); // "An error has occurred during the unity process."
+		askingPlayer->sendSystemMessage("@unity:wed_error");	 // "An error has occurred during the unity process."
 		cancelProposeUnitySession(respondingPlayer, askingPlayer);
 		return;
 	}
 
 	// Find responder's ring
-	ManagedReference<WearableObject*> wearable = NULL;
-	ManagedReference<WearableObject*> respondingRing = NULL;
-	for (int i = 0; i < respondingPlayerInventory->getContainerObjectsSize(); i++) {
-		wearable = cast<WearableObject*>(respondingPlayerInventory->getContainerObject(i).get());
-		if (wearable != NULL && wearable->getObjectID() == respondingPlayerRingId && !wearable->isEquipped()) {
+	ManagedReference<WearableObject *> wearable = NULL;
+	ManagedReference<WearableObject *> respondingRing = NULL;
+	for (int i = 0; i < respondingPlayerInventory->getContainerObjectsSize(); i++)
+	{
+		wearable = cast<WearableObject *>(respondingPlayerInventory->getContainerObject(i).get());
+		if (wearable != NULL && wearable->getObjectID() == respondingPlayerRingId && !wearable->isEquipped())
+		{
 			respondingRing = wearable;
 			break;
 		}
@@ -4652,18 +5202,20 @@ void PlayerManagerImplementation::completeUnity( CreatureObject* respondingPlaye
 
 	// Find asker's ring
 	wearable = NULL;
-	ManagedReference<WearableObject*> askingRing = NULL;
-	for (int i = 0; i < askingPlayerInventory->getContainerObjectsSize(); i++) {
-		wearable = cast<WearableObject*>(askingPlayerInventory->getContainerObject(i).get());
-		if (wearable != NULL && wearable->getObjectID() == proposeUnitySession->getAskingPlayerRing() && !wearable->isEquipped()) {
+	ManagedReference<WearableObject *> askingRing = NULL;
+	for (int i = 0; i < askingPlayerInventory->getContainerObjectsSize(); i++)
+	{
+		wearable = cast<WearableObject *>(askingPlayerInventory->getContainerObject(i).get());
+		if (wearable != NULL && wearable->getObjectID() == proposeUnitySession->getAskingPlayerRing() && !wearable->isEquipped())
+		{
 			askingRing = wearable;
 			break;
 		}
 	}
 
-
 	// Rings not found
-	if (respondingRing == NULL || askingRing == NULL) {
+	if (respondingRing == NULL || askingRing == NULL)
+	{
 		askingPlayer->sendSystemMessage("@unity:accept_fail"); // "Your proposal target has no ring to offer in return."
 		respondingPlayer->sendSystemMessage("@unity:no_ring"); // "You cannot accept a unity proposal without a ring to offer."
 		cancelProposeUnitySession(respondingPlayer, askingPlayer);
@@ -4671,13 +5223,15 @@ void PlayerManagerImplementation::completeUnity( CreatureObject* respondingPlaye
 	}
 
 	// Exchange rings
-	ManagedReference<ObjectController*> objectController = server->getObjectController();
-	if (objectController->transferObject(askingRing, respondingPlayerInventory, -1, true, true)) { // Allow overflow
+	ManagedReference<ObjectController *> objectController = server->getObjectController();
+	if (objectController->transferObject(askingRing, respondingPlayerInventory, -1, true, true))
+	{ // Allow overflow
 		askingRing->sendDestroyTo(askingPlayer);
 		respondingPlayerInventory->broadcastObject(askingRing, true);
 	}
 
-	if (objectController->transferObject(respondingRing, askingPlayerInventory, -1, true, true)) { // Allow overflow
+	if (objectController->transferObject(respondingRing, askingPlayerInventory, -1, true, true))
+	{ // Allow overflow
 		respondingRing->sendDestroyTo(respondingPlayer);
 		askingPlayerInventory->broadcastObject(respondingRing, true);
 	}
@@ -4685,49 +5239,51 @@ void PlayerManagerImplementation::completeUnity( CreatureObject* respondingPlaye
 	// Set married
 	String respondingPlayerName = respondingPlayer->getFirstName();
 	String askingPlayerName = askingPlayer->getFirstName();
-	askingPlayer->getPlayerObject()->setSpouseName( respondingPlayerName );
-	respondingPlayer->getPlayerObject()->setSpouseName( askingPlayerName );
+	askingPlayer->getPlayerObject()->setSpouseName(respondingPlayerName);
+	respondingPlayer->getPlayerObject()->setSpouseName(askingPlayerName);
 
 	// Send obligatory congratulations
 	StringIdChatParameter congratsAsker;
 	congratsAsker.setStringId("unity", "prose_wed_complete"); //  "Your union with %TT is complete."
-	congratsAsker.setTT( respondingPlayer->getFirstName() );
-	askingPlayer->sendSystemMessage(congratsAsker );
+	congratsAsker.setTT(respondingPlayer->getFirstName());
+	askingPlayer->sendSystemMessage(congratsAsker);
 
 	StringIdChatParameter congratsResponder;
 	congratsResponder.setStringId("unity", "prose_wed_complete"); //  "Your union with %TT is complete."
-	congratsResponder.setTT( askingPlayer->getFirstName() );
-	respondingPlayer->sendSystemMessage(congratsResponder );
+	congratsResponder.setTT(askingPlayer->getFirstName());
+	respondingPlayer->sendSystemMessage(congratsResponder);
 
 	// Remove session
 	cancelProposeUnitySession(respondingPlayer, askingPlayer);
-
 }
 
-void PlayerManagerImplementation::cancelProposeUnitySession(CreatureObject* respondingPlayer, CreatureObject* askingPlayer) {
+void PlayerManagerImplementation::cancelProposeUnitySession(CreatureObject *respondingPlayer, CreatureObject *askingPlayer)
+{
 	askingPlayer->dropActiveSession(SessionFacadeType::PROPOSEUNITY);
 	respondingPlayer->dropActiveSession(SessionFacadeType::PROPOSEUNITY);
-	askingPlayer->removePendingTask( "propose_unity" );
-	respondingPlayer->removePendingTask( "propose_unity" );
+	askingPlayer->removePendingTask("propose_unity");
+	respondingPlayer->removePendingTask("propose_unity");
 }
 
-void PlayerManagerImplementation::promptDivorce(CreatureObject* player) {
+void PlayerManagerImplementation::promptDivorce(CreatureObject *player)
+{
 	if (player == NULL || !player->isPlayerCreature())
 		return;
 
 	// Check if player is married
-	PlayerObject* playerGhost = player->getPlayerObject();
+	PlayerObject *playerGhost = player->getPlayerObject();
 
 	if (playerGhost == NULL)
 		return;
 
-	if (!playerGhost->isMarried()) {
+	if (!playerGhost->isMarried())
+	{
 		player->sendSystemMessage("You are not united with anyone!");
 		return;
 	}
 
 	// Build and confirmation window
-	ManagedReference<SuiMessageBox*> suiBox = new SuiMessageBox(player, SuiWindowType::CONFIRM_DIVORCE);
+	ManagedReference<SuiMessageBox *> suiBox = new SuiMessageBox(player, SuiWindowType::CONFIRM_DIVORCE);
 	suiBox->setCallback(new ConfirmDivorceSuiCallback(server));
 	suiBox->setPromptTitle("Confirm Divorce?");
 	suiBox->setPromptText("Do you wish to nullify your unity with " + playerGhost->getSpouseName() + "?");
@@ -4738,27 +5294,29 @@ void PlayerManagerImplementation::promptDivorce(CreatureObject* player) {
 	player->sendMessage(suiBox->generateMessage());
 }
 
-void PlayerManagerImplementation::grantDivorce(CreatureObject* player) {
+void PlayerManagerImplementation::grantDivorce(CreatureObject *player)
+{
 	if (player == NULL || !player->isPlayerCreature())
 		return;
 
 	// Check if player is married
-	PlayerObject* playerGhost = player->getPlayerObject();
+	PlayerObject *playerGhost = player->getPlayerObject();
 
 	if (playerGhost == NULL || !playerGhost->isMarried())
 		return;
 
 	// Find spouse
-	CreatureObject* spouse = getPlayer(playerGhost->getSpouseName());
+	CreatureObject *spouse = getPlayer(playerGhost->getSpouseName());
 
 	StringIdChatParameter msg;
 	msg.setStringId("unity", "prose_end_unity"); // "Your union with %TO has ended."
 
 	// Remove spouse name from both players
-	if (spouse != NULL && spouse->isPlayerCreature()) {
+	if (spouse != NULL && spouse->isPlayerCreature())
+	{
 		Locker slocker(spouse, player);
 
-		PlayerObject* spouseGhost = spouse->getPlayerObject();
+		PlayerObject *spouseGhost = spouse->getPlayerObject();
 
 		if (spouseGhost != NULL)
 			spouseGhost->removeSpouse();
@@ -4770,8 +5328,9 @@ void PlayerManagerImplementation::grantDivorce(CreatureObject* player) {
 
 		msg.setTO(spouse->getFirstName());
 		player->sendSystemMessage(msg);
-
-	} else {
+	}
+	else
+	{
 		// If spouse player is null (perhaps it's been deleted), we can still remove the spouse from the current player
 		msg.setTO(playerGhost->getSpouseName());
 		player->sendSystemMessage(msg);
@@ -4780,66 +5339,75 @@ void PlayerManagerImplementation::grantDivorce(CreatureObject* player) {
 	}
 }
 
-void PlayerManagerImplementation::claimVeteranRewards(CreatureObject* player) {
+void PlayerManagerImplementation::claimVeteranRewards(CreatureObject *player)
+{
 
-	if (player == NULL || !player->isPlayerCreature() )
+	if (player == NULL || !player->isPlayerCreature())
 		return;
 
-	PlayerObject* playerGhost = player->getPlayerObject();
+	PlayerObject *playerGhost = player->getPlayerObject();
 
 	// Get account
-	ManagedReference<Account*> account = playerGhost->getAccount();
-	if (account == NULL )
+	ManagedReference<Account *> account = playerGhost->getAccount();
+	if (account == NULL)
 		return;
 
 	// Send message with current account age
 	StringIdChatParameter timeActiveMsg;
 	timeActiveMsg.setStringId("veteran", "self_time_active"); // You have %DI days logged for veteran rewards.
-	timeActiveMsg.setDI( account->getAgeInDays() );
-	player->sendSystemMessage(timeActiveMsg );
+	timeActiveMsg.setDI(account->getAgeInDays());
+	player->sendSystemMessage(timeActiveMsg);
 
 	// Verify player is eligible for a reward
-	int milestone = getEligibleMilestone( playerGhost, account );
-	if (milestone < 0) {
+	int milestone = getEligibleMilestone(playerGhost, account);
+	if (milestone < 0)
+	{
 		player->sendSystemMessage("@veteran:not_eligible"); // You are not currently eligible for a veteran reward.
 		return;
 	}
 
 	// Verify player is not already choosing a reward
-	if (player->getActiveSession(SessionFacadeType::VETERANREWARD) != NULL) {
-		player->sendSystemMessage("You are already attempting to claim a veteran reward." );
+	if (player->getActiveSession(SessionFacadeType::VETERANREWARD) != NULL)
+	{
+		player->sendSystemMessage("You are already attempting to claim a veteran reward.");
 		return;
 	}
 
 	// Create session
-	ManagedReference<VeteranRewardSession*> rewardSession =	new VeteranRewardSession( milestone );
+	ManagedReference<VeteranRewardSession *> rewardSession = new VeteranRewardSession(milestone);
 	player->addActiveSession(SessionFacadeType::VETERANREWARD, rewardSession);
 
 	// Build and SUI list box of rewards
-	ManagedReference<SuiListBox*> box = new SuiListBox(player, SuiWindowType::SELECT_VETERAN_REWARD, SuiListBox::HANDLETWOBUTTON);
+	ManagedReference<SuiListBox *> box = new SuiListBox(player, SuiWindowType::SELECT_VETERAN_REWARD, SuiListBox::HANDLETWOBUTTON);
 	box->setCallback(new SelectVeteranRewardSuiCallback(server));
-	box->setPromptText("@veteran_new:choice_description" ); // You may choose one of the items listed below. This item will be placed in your inventory.
+	box->setPromptText("@veteran_new:choice_description");	  // You may choose one of the items listed below. This item will be placed in your inventory.
 	box->setPromptTitle("@veteran_new:item_grant_box_title"); // Reward
 	box->setOkButton(true, "@ok");
 	box->setCancelButton(true, "@cancel");
 
-	for ( int i = 0; i < veteranRewards.size(); i++) {
+	for (int i = 0; i < veteranRewards.size(); i++)
+	{
 
 		// Any rewards at or below current milestone are eligible
 		VeteranReward reward = veteranRewards.get(i);
-		if (reward.getMilestone() <= milestone) {
+		if (reward.getMilestone() <= milestone)
+		{
 
 			// Filter out one-time rewards already claimed
-			if (reward.isOneTime() && playerGhost->hasChosenVeteranReward(reward.getTemplateFile())) {
+			if (reward.isOneTime() && playerGhost->hasChosenVeteranReward(reward.getTemplateFile()))
+			{
 				continue;
 			}
 
-			SharedObjectTemplate* rewardTemplate = TemplateManager::instance()->getTemplate(reward.getTemplateFile().hashCode());
-			if (rewardTemplate != NULL) {
-				if (reward.getDescription().isEmpty()) {
+			SharedObjectTemplate *rewardTemplate = TemplateManager::instance()->getTemplate(reward.getTemplateFile().hashCode());
+			if (rewardTemplate != NULL)
+			{
+				if (reward.getDescription().isEmpty())
+				{
 					box->addMenuItem(rewardTemplate->getDetailedDescription(), i);
 				}
-				else{
+				else
+				{
 					box->addMenuItem(reward.getDescription(), i);
 				}
 			}
@@ -4849,44 +5417,50 @@ void PlayerManagerImplementation::claimVeteranRewards(CreatureObject* player) {
 	box->setUsingObject(NULL);
 	playerGhost->addSuiBox(box);
 	player->sendMessage(box->generateMessage());
-
 }
 
-void PlayerManagerImplementation::cancelVeteranRewardSession(CreatureObject* player) {
+void PlayerManagerImplementation::cancelVeteranRewardSession(CreatureObject *player)
+{
 	player->dropActiveSession(SessionFacadeType::VETERANREWARD);
 }
 
-void PlayerManagerImplementation::confirmVeteranReward(CreatureObject* player, int itemIndex) {
+void PlayerManagerImplementation::confirmVeteranReward(CreatureObject *player, int itemIndex)
+{
 
-	if (player == NULL || !player->isPlayerCreature()) {
+	if (player == NULL || !player->isPlayerCreature())
+	{
 		return;
 	}
 
-	if (itemIndex < 0 || itemIndex >= veteranRewards.size()) {
+	if (itemIndex < 0 || itemIndex >= veteranRewards.size())
+	{
 		player->sendSystemMessage("@veteran:reward_error"); //	The reward could not be granted.
 		cancelVeteranRewardSession(player);
 		return;
 	}
 
 	// Get account
-	PlayerObject* playerGhost = player->getPlayerObject();
-	ManagedReference<Account*> account = playerGhost->getAccount();
-	if (account == NULL) {
+	PlayerObject *playerGhost = player->getPlayerObject();
+	ManagedReference<Account *> account = playerGhost->getAccount();
+	if (account == NULL)
+	{
 		player->sendSystemMessage("@veteran:reward_error"); //	The reward could not be granted.
 		cancelVeteranRewardSession(player);
 		return;
 	}
 
 	// Check session
-	ManagedReference<VeteranRewardSession*> rewardSession = player->getActiveSession(SessionFacadeType::VETERANREWARD).castTo<VeteranRewardSession*>();
-	if (rewardSession == NULL) {
+	ManagedReference<VeteranRewardSession *> rewardSession = player->getActiveSession(SessionFacadeType::VETERANREWARD).castTo<VeteranRewardSession *>();
+	if (rewardSession == NULL)
+	{
 		player->sendSystemMessage("@veteran:reward_error"); //	The reward could not be granted.
 		return;
 	}
 
 	VeteranReward reward = veteranRewards.get(itemIndex);
 
-	if (reward.isOneTime() && playerGhost->hasChosenVeteranReward(reward.getTemplateFile())) {
+	if (reward.isOneTime() && playerGhost->hasChosenVeteranReward(reward.getTemplateFile()))
+	{
 		player->sendSystemMessage("@veteran:reward_error"); //	The reward could not be granted.
 		cancelVeteranRewardSession(player);
 		return;
@@ -4895,39 +5469,45 @@ void PlayerManagerImplementation::confirmVeteranReward(CreatureObject* player, i
 	rewardSession->setSelectedRewardIndex(itemIndex);
 
 	// Generate confirmation dialog if item is one-time.  Otherwise, just generate it.
-	if (reward.isOneTime()) {
-		ManagedReference<SuiMessageBox*> suibox = new SuiMessageBox(player, SuiWindowType::CONFIRM_VETERAN_REWARD);
+	if (reward.isOneTime())
+	{
+		ManagedReference<SuiMessageBox *> suibox = new SuiMessageBox(player, SuiWindowType::CONFIRM_VETERAN_REWARD);
 		suibox->setPromptTitle("@veteran_new:unique_are_you_sure_box_title"); // Reward
-		suibox->setPromptText( "@veteran_new:item_unique_are_you_sure"); // The item you are selecting can only be selected as a reward item once for the the lifetime of your account. Are you sure you wish to continue selecting this item?
+		suibox->setPromptText("@veteran_new:item_unique_are_you_sure");		  // The item you are selecting can only be selected as a reward item once for the the lifetime of your account. Are you sure you wish to continue selecting this item?
 		suibox->setCallback(new ConfirmVeteranRewardSuiCallback(server));
 		suibox->setOkButton(true, "@yes");
 		suibox->setCancelButton(true, "@no");
 
 		playerGhost->addSuiBox(suibox);
 		player->sendMessage(suibox->generateMessage());
-	} else {
+	}
+	else
+	{
 		generateVeteranReward(player);
 	}
-
 }
 
-void PlayerManagerImplementation::generateVeteranReward(CreatureObject* player) {
-	if (player == NULL || !player->isPlayerCreature()) {
+void PlayerManagerImplementation::generateVeteranReward(CreatureObject *player)
+{
+	if (player == NULL || !player->isPlayerCreature())
+	{
 		return;
 	}
 
 	// Get account
-	PlayerObject* playerGhost = player->getPlayerObject();
-	ManagedReference<Account*> account = playerGhost->getAccount();
-	if (account == NULL) {
+	PlayerObject *playerGhost = player->getPlayerObject();
+	ManagedReference<Account *> account = playerGhost->getAccount();
+	if (account == NULL)
+	{
 		player->sendSystemMessage("@veteran:reward_error"); //	The reward could not be granted.
 		cancelVeteranRewardSession(player);
 		return;
 	}
 
 	// Check session
-	ManagedReference<VeteranRewardSession*> rewardSession = player->getActiveSession(SessionFacadeType::VETERANREWARD).castTo<VeteranRewardSession*>();
-	if (rewardSession == NULL) {
+	ManagedReference<VeteranRewardSession *> rewardSession = player->getActiveSession(SessionFacadeType::VETERANREWARD).castTo<VeteranRewardSession *>();
+	if (rewardSession == NULL)
+	{
 		player->sendSystemMessage("@veteran:reward_error"); //	The reward could not be granted.
 		return;
 	}
@@ -4935,35 +5515,38 @@ void PlayerManagerImplementation::generateVeteranReward(CreatureObject* player) 
 	// Final check to see if milestone has already been claimed on any of the player's characters
 	// (prevent claiming while multi-logged)
 
-
 	bool milestoneClaimed = false;
-	if (!playerGhost->getChosenVeteranReward(rewardSession->getMilestone() ).isEmpty() )
+	if (!playerGhost->getChosenVeteranReward(rewardSession->getMilestone()).isEmpty())
 		milestoneClaimed = true;
 
-	if (milestoneClaimed) {
+	if (milestoneClaimed)
+	{
 		player->sendSystemMessage("@veteran:reward_error"); //	The reward could not be granted.
 		cancelVeteranRewardSession(player);
 		return;
 	}
 
 	// Generate item
-	SceneObject* inventory = player->getSlottedObject("inventory");
-	if (inventory == NULL) {
+	SceneObject *inventory = player->getSlottedObject("inventory");
+	if (inventory == NULL)
+	{
 		player->sendSystemMessage("@veteran:reward_error"); //	The reward could not be granted.
 		cancelVeteranRewardSession(player);
 		return;
 	}
 
 	VeteranReward reward = veteranRewards.get(rewardSession->getSelectedRewardIndex());
-	Reference<SceneObject*> rewardSceno = server->createObject(reward.getTemplateFile().hashCode(), 1);
-	if (rewardSceno == NULL) {
+	Reference<SceneObject *> rewardSceno = server->createObject(reward.getTemplateFile().hashCode(), 1);
+	if (rewardSceno == NULL)
+	{
 		player->sendSystemMessage("@veteran:reward_error"); //	The reward could not be granted.
 		cancelVeteranRewardSession(player);
 		return;
 	}
 
 	// Transfer to player
-	if (!inventory->transferObject(rewardSceno, -1, false, true)) { // Allow overflow
+	if (!inventory->transferObject(rewardSceno, -1, false, true))
+	{														// Allow overflow
 		player->sendSystemMessage("@veteran:reward_error"); //	The reward could not be granted.
 		rewardSceno->destroyObjectFromDatabase(true);
 		cancelVeteranRewardSession(player);
@@ -4971,39 +5554,43 @@ void PlayerManagerImplementation::generateVeteranReward(CreatureObject* player) 
 	}
 
 	inventory->broadcastObject(rewardSceno, true);
-	player->sendSystemMessage("@veteran:reward_given");  // Your reward has been placed in your inventory.
+	player->sendSystemMessage("@veteran:reward_given"); // Your reward has been placed in your inventory.
 
 	// Record reward in all characters registered to the account
-	GalaxyAccountInfo* accountInfo = account->getGalaxyAccountInfo(player->getZoneServer()->getGalaxyName());
+	GalaxyAccountInfo *accountInfo = account->getGalaxyAccountInfo(player->getZoneServer()->getGalaxyName());
 
 	accountInfo->addChosenVeteranReward(rewardSession->getMilestone(), reward.getTemplateFile());
-
 
 	cancelVeteranRewardSession(player);
 
 	// If player is eligible for another reward, kick off selection
-	if (getEligibleMilestone(playerGhost, account ) >= 0) {
+	if (getEligibleMilestone(playerGhost, account) >= 0)
+	{
 		player->enqueueCommand(STRING_HASHCODE("claimveteranreward"), 0, 0, "");
 	}
 }
 
-int PlayerManagerImplementation::getEligibleMilestone(PlayerObject *playerGhost, Account* account) {
+int PlayerManagerImplementation::getEligibleMilestone(PlayerObject *playerGhost, Account *account)
+{
 
-	if (account == NULL || playerGhost == NULL )
+	if (account == NULL || playerGhost == NULL)
 		return -1;
 
 	int accountAge = account->getAgeInDays();
 	int milestone = -1;
 
 	// Return -1 if account age is less than the first milestone
-	if (accountAge < veteranRewardMilestones.get(0)) {
+	if (accountAge < veteranRewardMilestones.get(0))
+	{
 		return -1;
 	}
 
 	// Return the first milestone for which the player is eligible and has not already claimed
-	for (int i = 0; i < veteranRewardMilestones.size(); i++) {
+	for (int i = 0; i < veteranRewardMilestones.size(); i++)
+	{
 		milestone = veteranRewardMilestones.get(i);
-		if (accountAge >= milestone && playerGhost->getChosenVeteranReward(milestone).isEmpty()) {
+		if (accountAge >= milestone && playerGhost->getChosenVeteranReward(milestone).isEmpty())
+		{
 			return milestone;
 		}
 	}
@@ -5011,8 +5598,10 @@ int PlayerManagerImplementation::getEligibleMilestone(PlayerObject *playerGhost,
 	// They've claimed all of the established milestones, see if they're eligible for an additional one
 	milestone += veteranRewardAdditionalMilestones;
 
-	while (accountAge >= milestone) {
-		if (playerGhost->getChosenVeteranReward(milestone).isEmpty()) {
+	while (accountAge >= milestone)
+	{
+		if (playerGhost->getChosenVeteranReward(milestone).isEmpty())
+		{
 			return milestone;
 		}
 
@@ -5023,45 +5612,53 @@ int PlayerManagerImplementation::getEligibleMilestone(PlayerObject *playerGhost,
 	return -1;
 }
 
-int PlayerManagerImplementation::getFirstIneligibleMilestone(PlayerObject *playerGhost, Account* account) {
+int PlayerManagerImplementation::getFirstIneligibleMilestone(PlayerObject *playerGhost, Account *account)
+{
 
-	if (account == NULL || playerGhost == NULL )
+	if (account == NULL || playerGhost == NULL)
 		return -1;
 
 	int accountAge = account->getAgeInDays();
 	int milestone = -1;
 
 	// Return the first milestone the player has not already claimed
-	for (int i = 0; i < veteranRewardMilestones.size(); i++) {
+	for (int i = 0; i < veteranRewardMilestones.size(); i++)
+	{
 		milestone = veteranRewardMilestones.get(i);
-		if (accountAge < milestone) {
+		if (accountAge < milestone)
+		{
 			return milestone;
 		}
 	}
 
 	// Check additional milestones if all established ones have been claimed
-	while (accountAge >= milestone) {
+	while (accountAge >= milestone)
+	{
 		milestone += veteranRewardAdditionalMilestones;
 	}
 
 	return milestone;
 }
 
-bool PlayerManagerImplementation::increaseOnlineCharCountIfPossible(ZoneClientSession* client) {
+bool PlayerManagerImplementation::increaseOnlineCharCountIfPossible(ZoneClientSession *client)
+{
 	Locker locker(&onlineMapMutex);
 
+	auto server = ServerCore::getZoneServer();
 	uint32 accountId = client->getAccountID();
 
 	auto session = client->getSession();
 
-	if (!onlineZoneClientMap.containsKey(accountId)) {
-		Vector<Reference<ZoneClientSession*> > clients;
+	if (!onlineZoneClientMap.containsKey(accountId))
+	{
+		Vector<Reference<ZoneClientSession *>> clients;
 		clients.add(client);
 
 		onlineZoneClientMap.put(accountId, clients);
 
 		locker.release();
 
+		// onlineZoneClientMap.accountLoggedIn(client->getIPAddress(), accountId, server != nullptr ? server->getGalaxyID() : 0);
 		if (session != NULL) {
 			String ip = session->getIPAddress();
 
@@ -5071,17 +5668,22 @@ bool PlayerManagerImplementation::increaseOnlineCharCountIfPossible(ZoneClientSe
 		return true;
 	}
 
-	Vector<Reference<ZoneClientSession*> > clients = onlineZoneClientMap.get(accountId);
+	Vector<Reference<ZoneClientSession *>> clients = onlineZoneClientMap.get(accountId);
 
 	int onlineCount = 0;
 
-	for (int i = 0; i < clients.size(); ++i) {
-		ZoneClientSession* session = clients.get(i);
+	for (int i = 0; i < clients.size(); ++i)
+	{
+		ZoneClientSession *session = clients.get(i);
 
-		ManagedReference<CreatureObject*> player = session->getPlayer();
+		if (session == nullptr)
+			continue;
+		
+		ManagedReference<CreatureObject *> player = session->getPlayer();
 
-		if (player != NULL) {
-			Reference<PlayerObject*> ghost = player->getPlayerObject();
+		if (player != NULL)
+		{
+			Reference<PlayerObject *> ghost = player->getPlayerObject();
 
 			if (ghost != NULL && ghost->getAdminLevel() > 0)
 				continue;
@@ -5099,12 +5701,6 @@ bool PlayerManagerImplementation::increaseOnlineCharCountIfPossible(ZoneClientSe
 
 	locker.release();
 
-	if (session != NULL) {
-		String ip = session->getIPAddress();
-
-		onlineZoneClientMap.addAccount(ip, accountId);
-	}
-
 	return true;
 }
 
@@ -5115,24 +5711,30 @@ int PlayerManagerImplementation::getOnlineCharCount(unsigned int accountId) {
 }
  */
 
-void PlayerManagerImplementation::disconnectAllPlayers() {
+void PlayerManagerImplementation::disconnectAllPlayers()
+{
 	Locker locker(&onlineMapMutex);
 
-	HashTableIterator<uint32, Vector<Reference<ZoneClientSession*> > > iter = onlineZoneClientMap.iterator();
+	HashTableIterator<uint32, Vector<Reference<ZoneClientSession *>>> iter = onlineZoneClientMap.iterator();
 
-	while (iter.hasNext()) {
-		Vector<Reference<ZoneClientSession*> > clients = iter.next();
+	while (iter.hasNext())
+	{
+		Vector<Reference<ZoneClientSession *>> clients = iter.next();
 
-		for (int i = 0; i < clients.size(); i++) {
-			ZoneClientSession* session = clients.get(i);
+		for (int i = 0; i < clients.size(); i++)
+		{
+			ZoneClientSession *session = clients.get(i);
 
-			if (session != NULL) {
-				CreatureObject* player = session->getPlayer();
+			if (session != NULL)
+			{
+				CreatureObject *player = session->getPlayer();
 
-				if (player != NULL) {
-					PlayerObject* ghost = player->getPlayerObject();
+				if (player != NULL)
+				{
+					PlayerObject *ghost = player->getPlayerObject();
 
-					if (ghost != NULL) {
+					if (ghost != NULL)
+					{
 						Locker plocker(player);
 						ghost->setLinkDead(true);
 						ghost->disconnect(true, true);
@@ -5143,49 +5745,59 @@ void PlayerManagerImplementation::disconnectAllPlayers() {
 	}
 }
 
-bool PlayerManagerImplementation::shouldRescheduleCorpseDestruction(CreatureObject* player, CreatureObject* ai) {
+bool PlayerManagerImplementation::shouldRescheduleCorpseDestruction(CreatureObject *player, CreatureObject *ai)
+{
 
 	if (player == NULL || ai == NULL)
 		return false;
 
-	if (!player->isPlayerCreature()) {
+	if (!player->isPlayerCreature())
+	{
 		return true;
 	}
 
-	if (ai->isNonPlayerCreatureObject()) {
-		NonPlayerCreatureObject *npc = dynamic_cast<NonPlayerCreatureObject*>(ai);
+	Locker locker(player, ai);
 
-		if (!npc->hasLoot() && npc->getCashCredits() < 1 && npc->getBankCredits() < 1) {
+	if (ai->isNonPlayerCreatureObject())
+	{
+		NonPlayerCreatureObject *npc = dynamic_cast<NonPlayerCreatureObject *>(ai);
+
+		if (!npc->hasLoot() && npc->getCashCredits() < 1 && npc->getBankCredits() < 1)
+		{
 			return true;
 		}
-	} else if (ai->isCreature()) {
-		Creature * creature = dynamic_cast<Creature*>(ai);
+	}
+	else if (ai->isCreature())
+	{
+		Creature *creature = dynamic_cast<Creature *>(ai);
 
 		if (creature->hasLoot() || creature->getCashCredits() > 0 || creature->getBankCredits() > 0)
 			return false;
 
 		return !(creature->hasSkillToHarvestMe(player) || canGroupMemberHarvestCorpse(player, creature));
-
 	}
 
 	return false;
 }
 
-bool PlayerManagerImplementation::canGroupMemberHarvestCorpse(CreatureObject* player, Creature* creature) {
+bool PlayerManagerImplementation::canGroupMemberHarvestCorpse(CreatureObject *player, Creature *creature)
+{
 
 	if (!player->isGrouped())
 		return false;
 
-	ManagedReference<GroupObject*> group = player->getGroup();
+	ManagedReference<GroupObject *> group = player->getGroup();
 	int groupSize = group->getGroupSize();
 
-	for (int i = 0; i < groupSize; i++) {
-		ManagedReference<CreatureObject*> groupMember = group->getGroupMember(i);
+	for (int i = 0; i < groupSize; i++)
+	{
+		ManagedReference<CreatureObject *> groupMember = group->getGroupMember(i);
 
 		if (player->getObjectID() == groupMember->getObjectID())
 			continue;
 
-		if (creature->isInRange(groupMember, 256.0f) && creature->hasSkillToHarvestMe(groupMember)) {
+		if (creature->isInRange(groupMember, 256.0f) && creature->hasSkillToHarvestMe(groupMember))
+		{
 			return true;
 		}
 	}
@@ -5193,24 +5805,26 @@ bool PlayerManagerImplementation::canGroupMemberHarvestCorpse(CreatureObject* pl
 	return false;
 }
 
-void PlayerManagerImplementation::rescheduleCorpseDestruction(CreatureObject* player, CreatureObject* ai) {
+void PlayerManagerImplementation::rescheduleCorpseDestruction(CreatureObject *player, CreatureObject *ai)
+{
 
 	//If the looting player or no group members in the area can harvest then despawn immediately
-	if (shouldRescheduleCorpseDestruction(player, ai)) {
-		Reference<DespawnCreatureTask*> despawn = ai->getPendingTask("despawn").castTo<DespawnCreatureTask*>();
-		if (despawn != NULL) {
+	if (shouldRescheduleCorpseDestruction(player, ai))
+	{
+		Reference<DespawnCreatureTask *> despawn = ai->getPendingTask("despawn").castTo<DespawnCreatureTask *>();
+		if (despawn != NULL)
+		{
 			despawn->cancel();
 			despawn->reschedule(1000);
 		}
-
 	}
 }
 
+void PlayerManagerImplementation::getCleanupCharacterCount()
+{
+	info("**** GETTING CHARACTER CLEANUP INFORMATION ***", true);
 
-void PlayerManagerImplementation::getCleanupCharacterCount() {
-	info("**** GETTING CHARACTER CLEANUP INFORMATION ***",true);
-
-	ObjectDatabase* thisDatabase = ObjectDatabaseManager::instance()->loadObjectDatabase("sceneobjects", true, 0xFFFF, false);
+	ObjectDatabase *thisDatabase = ObjectDatabaseManager::instance()->loadObjectDatabase("sceneobjects", true, 0xFFFF, false);
 
 	if (thisDatabase == NULL)
 		return;
@@ -5224,41 +5838,47 @@ void PlayerManagerImplementation::getCleanupCharacterCount() {
 	uint64 deletedCount = 0;
 	uint64 playerCount = 0;
 
-	ZoneServer* server = ServerCore::getZoneServer();
+	ZoneServer *server = ServerCore::getZoneServer();
 
-	if (server == NULL) {
+	if (server == NULL)
+	{
 		error("NULL ZoneServer in character cleanup");
 		return;
 	}
 
 	int galaxyID = server->getGalaxyID();
 
-	while(iterator.getNextKeyAndValue(objectID, &objectData)) {
-		if (Serializable::getVariable<String>(STRING_HASHCODE("_className"), &className, &objectData)) {
-			if (className == "CreatureObject") {
+	while (iterator.getNextKeyAndValue(objectID, &objectData))
+	{
+		if (Serializable::getVariable<String>(STRING_HASHCODE("_className"), &className, &objectData))
+		{
+			if (className == "CreatureObject")
+			{
 				playerCount++;
 
-				if (shouldDeleteCharacter(objectID, galaxyID)) {
+				if (shouldDeleteCharacter(objectID, galaxyID))
+				{
 					deletedCount++;
-					info("DELETE CHARACTER " + String::valueOf(objectID),true);
+					info("DELETE CHARACTER " + String::valueOf(objectID), true);
 				}
-
 			}
 		}
 		objectData.reset();
 	}
 
 	StringBuffer deletedMessage;
-	deletedMessage << "TOTAL CHARACTERS " << " TO BE DELETED " << String::valueOf(deletedCount);
-	info("TOTAL CHARACTERS IN OBJECT DB: " + String::valueOf(playerCount),true);
-	info(deletedMessage.toString(),true);
+	deletedMessage << "TOTAL CHARACTERS "
+				   << " TO BE DELETED " << String::valueOf(deletedCount);
+	info("TOTAL CHARACTERS IN OBJECT DB: " + String::valueOf(playerCount), true);
+	info(deletedMessage.toString(), true);
 }
 
-void PlayerManagerImplementation::cleanupCharacters() {
+void PlayerManagerImplementation::cleanupCharacters()
+{
 
-	info("**** PERFORMING CHARACTER CLEANUP ***",true);
+	info("**** PERFORMING CHARACTER CLEANUP ***", true);
 
-	ObjectDatabase* thisDatabase = ObjectDatabaseManager::instance()->loadObjectDatabase("sceneobjects", true, 0xFFFF, false);
+	ObjectDatabase *thisDatabase = ObjectDatabaseManager::instance()->loadObjectDatabase("sceneobjects", true, 0xFFFF, false);
 
 	if (thisDatabase == NULL)
 		return;
@@ -5272,46 +5892,50 @@ void PlayerManagerImplementation::cleanupCharacters() {
 	uint64 deletedCount = 0;
 	uint64 playerCount = 0;
 
-	ZoneServer* server = ServerCore::getZoneServer();
+	ZoneServer *server = ServerCore::getZoneServer();
 
-	if (server == NULL) {
+	if (server == NULL)
+	{
 		error("NULL ZoneServer in character cleanup");
 		return;
 	}
 
 	int galaxyID = server->getGalaxyID();
 
-	while(iterator.getNextKeyAndValue(objectID, &objectData) && deletedCount < 400) {
-		if (Serializable::getVariable<String>(STRING_HASHCODE("_className"), &className, &objectData)) {
-			if (className == "CreatureObject") {
+	while (iterator.getNextKeyAndValue(objectID, &objectData) && deletedCount < 400)
+	{
+		if (Serializable::getVariable<String>(STRING_HASHCODE("_className"), &className, &objectData))
+		{
+			if (className == "CreatureObject")
+			{
 				playerCount++;
 
-				if (shouldDeleteCharacter(objectID, galaxyID)) {
+				if (shouldDeleteCharacter(objectID, galaxyID))
+				{
 
-					ManagedReference<CreatureObject*> object = Core::getObjectBroker()->lookUp(objectID).castTo<CreatureObject*>();
+					ManagedReference<CreatureObject *> object = Core::getObjectBroker()->lookUp(objectID).castTo<CreatureObject *>();
 
-					if (object == NULL) {
-						info("OBJECT NULL when getting object " + String::valueOf(objectID),true);
-					}else if (object->isPlayerCreature()) {
+					if (object == NULL)
+					{
+						info("OBJECT NULL when getting object " + String::valueOf(objectID), true);
+					}
+					else if (object->isPlayerCreature())
+					{
 
 						deletedCount++;
-						info("DELETING CHARACTER: " + String::valueOf(objectID)+ " NAME: " +  object->getFirstName() + " " + object->getLastName() ,true);
+						info("DELETING CHARACTER: " + String::valueOf(objectID) + " NAME: " + object->getFirstName() + " " + object->getLastName(), true);
 						Locker _lock(object);
 
-						ManagedReference<ZoneClientSession*> client = object->getClient();
+						ManagedReference<ZoneClientSession *> client = object->getClient();
 
 						if (client != NULL)
 							client->disconnect();
 
 						object->destroyObjectFromWorld(false); //Don't need to send destroy to the player - they are being disconnected.
 						object->destroyPlayerCreatureFromDatabase(true);
-
 					}
-
 				}
-
 			}
-
 		}
 
 		objectData.reset();
@@ -5320,46 +5944,54 @@ void PlayerManagerImplementation::cleanupCharacters() {
 	StringBuffer deletedMessage;
 	deletedMessage << "TOTAL CHARACTERS";
 	deletedMessage << " DELETED FROM OBJECTDB: " << String::valueOf(deletedCount);
-	info(deletedMessage.toString(),true);
-
+	info(deletedMessage.toString(), true);
 }
 
-bool PlayerManagerImplementation::shouldDeleteCharacter(uint64 characterID, int galaxyID) {
-	String query = "SELECT * FROM characters WHERE character_oid = " + String::valueOf(characterID) + " AND galaxy_id = " + String::valueOf(galaxyID);
+bool PlayerManagerImplementation::shouldDeleteCharacter(uint64 characterID, int galaxyID)
+{
+	const String query = "SELECT * FROM characters WHERE character_oid = " + String::valueOf(characterID) + " AND galaxy_id = " + String::valueOf(galaxyID);
 
-	try {
-		Reference<ResultSet*> result = ServerDatabase::instance()->executeQuery(query);
+	try
+	{
+		UniqueReference<ResultSet *> result(ServerDatabase::instance()->executeQuery(query));
 
-		if (result == NULL) {
+		if (result == nullptr)
+		{
 			error("ERROR WHILE LOOKING UP CHARACTER IN SQL TABLE");
-		} else if (result.get()->getRowsAffected() > 1) {
+		}
+		else if (result->getRowsAffected() > 1)
+		{
 
 			error("More than one character with oid = " + String::valueOf(characterID) + " in galaxy " + String::valueOf(galaxyID));
 			return false;
-
-		} else if (result.get()->getRowsAffected() == 0) {
+		}
+		else if (result->getRowsAffected() == 0)
+		{
 			return true;
 		}
 
 		return false;
-
-	} catch ( DatabaseException &err) {
+	}
+	catch (const DatabaseException &err)
+	{
 		info("database error " + err.getMessage(),true);
 		return false;
 	}
-
 }
 
-bool PlayerManagerImplementation::doBurstRun(CreatureObject* player, float hamModifier, float cooldownModifier) {
+bool PlayerManagerImplementation::doBurstRun(CreatureObject *player, float hamModifier, float cooldownModifier)
+{
 	if (player == NULL)
 		return false;
 
-	if (player->isRidingMount()) {
+	if (player->isRidingMount())
+	{
 		player->sendSystemMessage("@cbt_spam:no_burst"); // You cannot burst-run while mounted on a creature or vehicle.
 		return false;
 	}
 
-	if (player->hasBuff(STRING_HASHCODE("gallop")) || player->hasBuff(STRING_HASHCODE("burstrun")) || player->hasBuff(STRING_HASHCODE("retreat"))) {
+	if (player->hasBuff(STRING_HASHCODE("gallop")) || player->hasBuff(STRING_HASHCODE("burstrun")) || player->hasBuff(STRING_HASHCODE("retreat")))
+	{
 		player->sendSystemMessage("@combat_effects:burst_run_no"); // You cannot burst run right now.
 		return false;
 	}
@@ -5368,23 +6000,27 @@ bool PlayerManagerImplementation::doBurstRun(CreatureObject* player, float hamMo
 	uint32 forceRun2CRC = BuffCRC::JEDI_FORCE_RUN_2;
 	uint32 forceRun3CRC = BuffCRC::JEDI_FORCE_RUN_3;
 
-	if (player->hasBuff(forceRun1CRC) || player->hasBuff(forceRun2CRC) || player->hasBuff(forceRun3CRC)) {
+	if (player->hasBuff(forceRun1CRC) || player->hasBuff(forceRun2CRC) || player->hasBuff(forceRun3CRC))
+	{
 		player->sendSystemMessage("@combat_effects:burst_run_no"); // You cannot burst run right now.
 		return false;
 	}
 
-	Zone* zone = player->getZone();
+	Zone *zone = player->getZone();
 
-	if (zone == NULL) {
+	if (zone == NULL)
+	{
 		return false;
 	}
 
-	if (zone->getZoneName() == "dungeon1") {
+	if (zone->getZoneName() == "dungeon1")
+	{
 		player->sendSystemMessage("@combat_effects:burst_run_space_dungeon"); // The artificial gravity makes burst running impossible here.
 		return false;
 	}
 
-	if (!player->checkCooldownRecovery("burstrun")) {
+	if (!player->checkCooldownRecovery("burstrun"))
+	{
 		player->sendSystemMessage("@combat_effects:burst_run_wait"); //You are too tired to Burst Run.
 		return false;
 	}
@@ -5394,20 +6030,22 @@ bool PlayerManagerImplementation::doBurstRun(CreatureObject* player, float hamMo
 	float duration = 30;
 	float cooldown = 300;
 
-	float burstRunMod = (float) player->getSkillMod("burst_run");
+	float burstRunMod = (float)player->getSkillMod("burst_run");
 	hamModifier += (burstRunMod / 100.f);
 
-	if (hamModifier > 1.0f) {
+	if (hamModifier > 1.0f)
+	{
 		hamModifier = 1.0f;
 	}
 
 	float hamReduction = 1.f - hamModifier;
 
-	int healthCost = (int) (player->calculateCostAdjustment(CreatureAttribute::STRENGTH, hamCost) * hamReduction);
-	int actionCost = (int) (player->calculateCostAdjustment(CreatureAttribute::QUICKNESS, hamCost) * hamReduction);
-	int mindCost = (int) (player->calculateCostAdjustment(CreatureAttribute::FOCUS, hamCost) * hamReduction);
+	int healthCost = (int)(player->calculateCostAdjustment(CreatureAttribute::STRENGTH, hamCost) * hamReduction);
+	int actionCost = (int)(player->calculateCostAdjustment(CreatureAttribute::QUICKNESS, hamCost) * hamReduction);
+	int mindCost = (int)(player->calculateCostAdjustment(CreatureAttribute::FOCUS, hamCost) * hamReduction);
 
-	if (player->getHAM(CreatureAttribute::HEALTH) <= healthCost || player->getHAM(CreatureAttribute::ACTION) <= actionCost || player->getHAM(CreatureAttribute::MIND) <= mindCost) {
+	if (player->getHAM(CreatureAttribute::HEALTH) <= healthCost || player->getHAM(CreatureAttribute::ACTION) <= actionCost || player->getHAM(CreatureAttribute::MIND) <= mindCost)
+	{
 		player->sendSystemMessage("@combat_effects:burst_run_wait"); // You are too tired to Burst Run.
 		return false;
 	}
@@ -5416,19 +6054,20 @@ bool PlayerManagerImplementation::doBurstRun(CreatureObject* player, float hamMo
 	player->inflictDamage(player, CreatureAttribute::ACTION, actionCost, true);
 	player->inflictDamage(player, CreatureAttribute::MIND, mindCost, true);
 
-	if (cooldownModifier > 1.0f) {
+	if (cooldownModifier > 1.0f)
+	{
 		cooldownModifier = 1.0f;
 	}
 
 	float coodownReduction = 1.f - cooldownModifier;
 	cooldown *= coodownReduction;
-	int newCooldown = (int) cooldown;
+	int newCooldown = (int)cooldown;
 
 	StringIdChatParameter startStringId("cbt_spam", "burstrun_start_single");
 	StringIdChatParameter modifiedStartStringId("combat_effects", "instant_burst_run");
 	StringIdChatParameter endStringId("cbt_spam", "burstrun_stop_single");
 
-	ManagedReference<Buff*> buff = new Buff(player, crc, duration, BuffType::SKILL);
+	ManagedReference<Buff *> buff = new Buff(player, crc, duration, BuffType::SKILL);
 
 	Locker locker(buff);
 
@@ -5452,20 +6091,21 @@ bool PlayerManagerImplementation::doBurstRun(CreatureObject* player, float hamMo
 
 	player->updateCooldownTimer("burstrun", (newCooldown + duration) * 1000);
 
-	Reference<BurstRunNotifyAvailableEvent*> task = new BurstRunNotifyAvailableEvent(player);
+	Reference<BurstRunNotifyAvailableEvent *> task = new BurstRunNotifyAvailableEvent(player);
 	player->addPendingTask("burst_run_notify", task, (newCooldown + duration) * 1000);
 
 	return true;
 }
 
-bool PlayerManagerImplementation::doEnhanceCharacter(uint32 crc, CreatureObject* player, int amount, int duration, int buffType, uint8 attribute) {
+bool PlayerManagerImplementation::doEnhanceCharacter(uint32 crc, CreatureObject *player, int amount, int duration, int buffType, uint8 attribute)
+{
 	if (player == NULL)
 		return false;
 
 	if (player->hasBuff(crc))
 		return false;
 
-	ManagedReference<Buff*> buff = new Buff(player, crc, duration, buffType);
+	ManagedReference<Buff *> buff = new Buff(player, crc, duration, buffType);
 
 	Locker locker(buff);
 
@@ -5475,7 +6115,8 @@ bool PlayerManagerImplementation::doEnhanceCharacter(uint32 crc, CreatureObject*
 	return true;
 }
 
-void PlayerManagerImplementation::enhanceCharacter(CreatureObject* player) {
+void PlayerManagerImplementation::enhanceCharacter(CreatureObject *player)
+{
 	if (player == NULL)
 		return;
 
@@ -5496,8 +6137,9 @@ void PlayerManagerImplementation::enhanceCharacter(CreatureObject* player) {
 		player->sendSystemMessage("An unknown force strengthens you for battles yet to come.");
 }
 
-void PlayerManagerImplementation::sendAdminJediList(CreatureObject* player) {
-	Reference<ObjectManager*> objectManager = player->getZoneServer()->getObjectManager();
+void PlayerManagerImplementation::sendAdminJediList(CreatureObject *player)
+{
+	Reference<ObjectManager *> objectManager = player->getZoneServer()->getObjectManager();
 
 	HashTable<String, uint64> names = nameMap->getNames();
 	HashTableIterator<String, uint64> iter = names.iterator();
@@ -5507,34 +6149,38 @@ void PlayerManagerImplementation::sendAdminJediList(CreatureObject* player) {
 	uint32 b = STRING_HASHCODE("SceneObject.customName");
 	uint32 c = STRING_HASHCODE("PlayerObject.jediState");
 
-	while (iter.hasNext()) {
+	while (iter.hasNext())
+	{
 		uint64 creoId = iter.next();
 		VectorMap<String, uint64> slottedObjects;
 		UnicodeString playerName;
 		int state = -1;
 
-		objectManager->getPersistentObjectsSerializedVariable<VectorMap<String, uint64> >(a, &slottedObjects, creoId);
+		objectManager->getPersistentObjectsSerializedVariable<VectorMap<String, uint64>>(a, &slottedObjects, creoId);
 		objectManager->getPersistentObjectsSerializedVariable<UnicodeString>(b, &playerName, creoId);
 
 		uint64 ghostId = slottedObjects.get("ghost");
 
-		if (ghostId == 0) {
+		if (ghostId == 0)
+		{
 			continue;
 		}
 
 		objectManager->getPersistentObjectsSerializedVariable<int>(c, &state, ghostId);
 
-		if (state > 1) {
+		if (state > 1)
+		{
 			players.put(playerName, state);
 		}
 	}
 
-	ManagedReference<SuiListBox*> listBox = new SuiListBox(player, SuiWindowType::ADMIN_JEDILIST);
+	ManagedReference<SuiListBox *> listBox = new SuiListBox(player, SuiWindowType::ADMIN_JEDILIST);
 	listBox->setPromptTitle("Jedi List");
 	listBox->setPromptText("This is a list of all characters with a jedi state of 2 or greater (Name - State).");
 	listBox->setCancelButton(true, "@cancel");
 
-	for (int i = 0; i < players.size(); i++) {
+	for (int i = 0; i < players.size(); i++)
+	{
 		listBox->addMenuItem(players.elementAt(i).getKey().toString() + " - " + String::valueOf(players.get(i)));
 	}
 
@@ -5547,8 +6193,9 @@ void PlayerManagerImplementation::sendAdminJediList(CreatureObject* player) {
 }
 
 // FRS List
-void PlayerManagerImplementation::sendAdminFRSList(CreatureObject* player) {
-	Reference<ObjectManager*> objectManager = player->getZoneServer()->getObjectManager();
+void PlayerManagerImplementation::sendAdminFRSList(CreatureObject *player)
+{
+	Reference<ObjectManager *> objectManager = player->getZoneServer()->getObjectManager();
 
 	HashTable<String, uint64> names = nameMap->getNames();
 	HashTableIterator<String, uint64> iter = names.iterator();
@@ -5558,34 +6205,38 @@ void PlayerManagerImplementation::sendAdminFRSList(CreatureObject* player) {
 	uint32 b = STRING_HASHCODE("SceneObject.customName");
 	uint32 c = STRING_HASHCODE("PlayerObject.jediState");
 
-	while (iter.hasNext()) {
+	while (iter.hasNext())
+	{
 		uint64 creoId = iter.next();
 		VectorMap<String, uint64> slottedObjects;
 		UnicodeString playerName;
 		int state = -1;
 
-		objectManager->getPersistentObjectsSerializedVariable<VectorMap<String, uint64> >(a, &slottedObjects, creoId);
+		objectManager->getPersistentObjectsSerializedVariable<VectorMap<String, uint64>>(a, &slottedObjects, creoId);
 		objectManager->getPersistentObjectsSerializedVariable<UnicodeString>(b, &playerName, creoId);
 
 		uint64 ghostId = slottedObjects.get("ghost");
 
-		if (ghostId == 0) {
+		if (ghostId == 0)
+		{
 			continue;
 		}
 
 		objectManager->getPersistentObjectsSerializedVariable<int>(c, &state, ghostId);
 
-		if (state >= 4) {
+		if (state >= 4)
+		{
 			players.put(playerName, state);
 		}
 	}
 
-	ManagedReference<SuiListBox*> listBox = new SuiListBox(player, SuiWindowType::ADMIN_FRSLIST);
+	ManagedReference<SuiListBox *> listBox = new SuiListBox(player, SuiWindowType::ADMIN_FRSLIST);
 	listBox->setPromptTitle("Force Ranking System List");
 	listBox->setPromptText("This is a list of all characters within the Force Ranking System (Name - State).");
 	listBox->setCancelButton(true, "@cancel");
 
-	for (int i = 0; i < players.size(); i++) {
+	for (int i = 0; i < players.size(); i++)
+	{
 		listBox->addMenuItem(players.elementAt(i).getKey().toString() + " - " + String::valueOf(players.get(i)));
 	}
 
@@ -5597,7 +6248,8 @@ void PlayerManagerImplementation::sendAdminFRSList(CreatureObject* player) {
 	player->sendMessage(listBox->generateMessage());
 }
 
-VectorMap<String, int> PlayerManagerImplementation::generateAdminList() {
+VectorMap<String, int> PlayerManagerImplementation::generateAdminList()
+{
 	static Mutex guard; //only one thread cann run this
 
 	Locker locker(&guard);
@@ -5620,9 +6272,10 @@ VectorMap<String, int> PlayerManagerImplementation::generateAdminList() {
 	Vector<VectorMapEntry<String, uint64>> currentObjects;
 
 	int count = 0;
-	static TaskQueue* customQueue = [taskManager] () { return taskManager->initializeCustomQueue("AdminListThreads", 10); } (); //only once
+	static TaskQueue *customQueue = [taskManager]() { return taskManager->initializeCustomQueue("AdminListThreads", 10); }(); //only once
 
-	while (iter.hasNext()) {
+	while (iter.hasNext())
+	{
 		uint64 oid;
 		String playerName;
 		iter.getNextKeyAndValue(playerName, oid);
@@ -5630,35 +6283,42 @@ VectorMap<String, int> PlayerManagerImplementation::generateAdminList() {
 
 		currentObjects.emplace(std::move(playerName), std::move(oid));
 
-		if (currentObjects.size() >= objectsPerTask || count >= names.size()) {
+		if (currentObjects.size() >= objectsPerTask || count >= names.size())
+		{
 			taskManager->executeTask([currentObjects, objectManager]() {
-				for (const auto& obj : currentObjects) {
-					try {
+				for (const auto &obj : currentObjects)
+				{
+					try
+					{
 						VectorMap<String, uint64> slottedObjects;
 						int state = 0;
 
-						objectManager->getPersistentObjectsSerializedVariable<VectorMap<String, uint64> >(STRING_HASHCODE("SceneObject.slottedObjects"), &slottedObjects, obj.getValue());
+						objectManager->getPersistentObjectsSerializedVariable<VectorMap<String, uint64>>(STRING_HASHCODE("SceneObject.slottedObjects"), &slottedObjects, obj.getValue());
 
 						uint64 ghostId = slottedObjects.get("ghost");
 
-						if (ghostId == 0) {
+						if (ghostId == 0)
+						{
 							totalObjects.decrement();
 							continue;
 						}
 
 						objectManager->getPersistentObjectsSerializedVariable<int>(STRING_HASHCODE("PlayerObject.adminLevel"), &state, ghostId);
 
-						if (state != 0) {
+						if (state != 0)
+						{
 							sharedMap.put(obj.getKey(), state);
 						}
-					} catch (...) {
+					}
+					catch (...)
+					{
 						Logger::console.error("unreported exception caught in GetAdminPlayerObjectTask");
 					}
 
 					totalObjects.decrement();
 				}
-
-			}, "GetAdminPlayerObjectTask", "AdminListThreads");
+			},
+									 "GetAdminPlayerObjectTask", "AdminListThreads");
 
 			currentObjects.removeAll(objectsPerTask, 50);
 		}
@@ -5674,15 +6334,17 @@ VectorMap<String, int> PlayerManagerImplementation::generateAdminList() {
 	return players;
 }
 
-void PlayerManagerImplementation::sendAdminList(CreatureObject* player) {
+void PlayerManagerImplementation::sendAdminList(CreatureObject *player)
+{
 	VectorMap<String, int> players = generateAdminList();
 
-	ManagedReference<SuiListBox*> listBox = new SuiListBox(player, SuiWindowType::ADMIN_LIST);
+	ManagedReference<SuiListBox *> listBox = new SuiListBox(player, SuiWindowType::ADMIN_LIST);
 	listBox->setPromptTitle("Admin List");
 	listBox->setPromptText("This is a list of all characters with a admin level of 1 or greater (Name - State).");
 	listBox->setCancelButton(true, "@cancel");
 
-	for (int i = 0; i < players.size(); i++) {
+	for (int i = 0; i < players.size(); i++)
+	{
 		listBox->addMenuItem(players.elementAt(i).getKey() + " - " + String::valueOf(players.get(i)));
 	}
 
@@ -5694,8 +6356,9 @@ void PlayerManagerImplementation::sendAdminList(CreatureObject* player) {
 	player->sendMessage(listBox->generateMessage());
 }
 
-void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject* player, ThreatMap* threatMap) {
-	PlayerObject* ghost = player->getPlayerObject();
+void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject *player, ThreatMap *threatMap)
+{
+	PlayerObject *ghost = player->getPlayerObject();
 
 	if (ghost == NULL)
 		return;
@@ -5707,20 +6370,21 @@ void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject* player,
 
 	int defenderPvpRating = ghost->getPvpRating();
 	int victimRatingTotalDelta = 0;
-	ManagedReference<CreatureObject*> highDamageAttacker = NULL;
+	ManagedReference<CreatureObject *> highDamageAttacker = NULL;
 	uint32 highDamageAmount = 0;
-	FrsManager* frsManager = server->getFrsManager();
+	FrsManager *frsManager = server->getFrsManager();
 	int frsXpAdjustment = 0;
 	bool throttleOnly = true;
 
-	for (int i = 0; i < threatMap->size(); ++i) {
-		ThreatMapEntry* entry = &threatMap->elementAt(i).getValue();
-		CreatureObject* attacker = threatMap->elementAt(i).getKey();
+	for (int i = 0; i < threatMap->size(); ++i)
+	{
+		ThreatMapEntry *entry = &threatMap->elementAt(i).getValue();
+		CreatureObject *attacker = threatMap->elementAt(i).getKey();
 
 		if (entry == NULL || attacker == NULL || attacker == player || !attacker->isPlayerCreature())
 			continue;
 
-		PlayerObject* attackerGhost = attacker->getPlayerObject();
+		PlayerObject *attackerGhost = attacker->getPlayerObject();
 
 		if (attackerGhost == NULL)
 			continue;
@@ -5738,12 +6402,14 @@ void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject* player,
 
 		int curAttackerRating = attackerGhost->getPvpRating();
 
-		if (highDamageAmount == 0 || entry->getTotalDamage() > highDamageAmount) {
+		if (highDamageAmount == 0 || entry->getTotalDamage() > highDamageAmount)
+		{
 			highDamageAmount = entry->getTotalDamage();
 			highDamageAttacker = attacker;
 		}
 
-		if (attackerGhost->hasOnVictimList(player->getObjectID())) {
+		if (attackerGhost->hasOnVictimList(player->getObjectID()))
+		{
 			String stringFile;
 
 			if (attacker->getSpecies() == CreatureObject::TRANDOSHAN)
@@ -5761,7 +6427,8 @@ void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject* player,
 			continue;
 		}
 
-		if (defenderPvpRating <= PlayerObject::PVP_RATING_FLOOR) {
+		if (defenderPvpRating <= PlayerObject::PVP_RATING_FLOOR)
+		{
 			String stringFile;
 			if (attacker->getSpecies() == CreatureObject::TRANDOSHAN)
 				stringFile = "rating_floor_trandoshan_winner";
@@ -5776,27 +6443,31 @@ void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject* player,
 			attacker->sendSystemMessage(toAttacker);
 		}
 
-		float damageContribution = (float) entry->getTotalDamage() / totalDamage;
+		float damageContribution = (float)entry->getTotalDamage() / totalDamage;
 
-		if (frsManager != NULL && frsManager->isFrsEnabled() && frsManager->isValidFrsBattle(attacker, player)) {
+		if (frsManager != NULL && frsManager->isFrsEnabled() && frsManager->isValidFrsBattle(attacker, player))
+		{
 			int attackerFrsXp = frsManager->calculatePvpExperienceChange(attacker, player, damageContribution, false);
 			int victimFrsXp = frsManager->calculatePvpExperienceChange(attacker, player, damageContribution, true);
 			frsXpAdjustment += victimFrsXp;
 
-			ManagedReference<CreatureObject*> attackerRef = attacker;
-			if (attackerFrsXp > 0) {
-				Core::getTaskManager()->executeTask([attackerRef, frsManager, attackerFrsXp] () {
+			ManagedReference<CreatureObject *> attackerRef = attacker;
+			if (attackerFrsXp > 0)
+			{
+				Core::getTaskManager()->executeTask([attackerRef, frsManager, attackerFrsXp]() {
 					Locker locker(attackerRef);
 					Locker clocker(frsManager, attackerRef);
 					frsManager->adjustFrsExperience(attackerRef, attackerFrsXp);
-				}, "FrsExperienceAdjustLambda");
+				},
+													"FrsExperienceAdjustLambda");
 			}
 		}
 
 		attackerGhost->addToVictimList(player->getObjectID());
 		throttleOnly = false;
 
-		if (defenderPvpRating > PlayerObject::PVP_RATING_FLOOR) {
+		if (defenderPvpRating > PlayerObject::PVP_RATING_FLOOR)
+		{
 			int attackerRatingDelta = 20 + ((defenderPvpRating - curAttackerRating) / 25);
 			int victimRatingDelta = -20 + ((curAttackerRating - defenderPvpRating) / 25);
 
@@ -5840,13 +6511,15 @@ void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject* player,
 	if (highDamageAttacker == NULL)
 		return;
 
-	if (frsManager != NULL && frsManager->isFrsEnabled() && frsXpAdjustment < 0) {
+	if (frsManager != NULL && frsManager->isFrsEnabled() && frsXpAdjustment < 0)
+	{
 		Locker crossLock(frsManager, player);
 
 		frsManager->adjustFrsExperience(player, frsXpAdjustment);
 	}
 
-	if (defenderPvpRating <= PlayerObject::PVP_RATING_FLOOR) {
+	if (defenderPvpRating <= PlayerObject::PVP_RATING_FLOOR)
+	{
 		String stringFile;
 		if (player->getSpecies() == CreatureObject::TRANDOSHAN)
 			stringFile = "rating_floor_trandoshan_loser";
@@ -5859,7 +6532,9 @@ void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject* player,
 		toVictim.setDI(defenderPvpRating);
 
 		player->sendSystemMessage(toVictim);
-	} else if (victimRatingTotalDelta != 0) {
+	}
+	else if (victimRatingTotalDelta != 0)
+	{
 		int newDefenderRating = defenderPvpRating + victimRatingTotalDelta;
 
 		if (newDefenderRating < PlayerObject::PVP_RATING_FLOOR)
@@ -5881,7 +6556,9 @@ void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject* player,
 		toVictim.setDI(newDefenderRating);
 
 		player->sendSystemMessage(toVictim);
-	} else if (throttleOnly) {
+	}
+	else if (throttleOnly)
+	{
 		String stringFile;
 
 		if (player->getSpecies() == CreatureObject::TRANDOSHAN)
@@ -5898,7 +6575,8 @@ void PlayerManagerImplementation::doPvpDeathRatingUpdate(CreatureObject* player,
 	}
 }
 
-float PlayerManagerImplementation::getSpeciesXpModifier(const String& species, const String& xpType) {
+float PlayerManagerImplementation::getSpeciesXpModifier(const String &species, const String &xpType)
+{
 	int bonus = xpBonusList.get(species).get(xpType);
 
 	if (bonus == -1)
@@ -5910,44 +6588,47 @@ float PlayerManagerImplementation::getSpeciesXpModifier(const String& species, c
 	return (100.f + bonus) / 100.f;
 }
 
-void PlayerManagerImplementation::unlockFRSForTesting(CreatureObject* player, int councilType) {
-	PlayerObject* ghost = player->getPlayerObject();
+void PlayerManagerImplementation::unlockFRSForTesting(CreatureObject *player, int councilType)
+{
+	PlayerObject *ghost = player->getPlayerObject();
 
 	if (ghost == nullptr)
 		return;
 
-	if (player->hasSkill("force_rank_light_novice") || player->hasSkill("force_rank_dark_novice")) {
+	if (player->hasSkill("force_rank_light_novice") || player->hasSkill("force_rank_dark_novice"))
+	{
 		player->sendSystemMessage("You already have FRS skills. You must drop them before using this feature again.");
 		return;
 	}
 
-	SkillManager* skillManager = SkillManager::instance();
+	SkillManager *skillManager = SkillManager::instance();
 
-	int glowyBadgeIds[] = { 12, 14, 15, 16, 17, 19, 20, 21, 23, 30, 38, 39, 71, 105, 106, 107 };
+	int glowyBadgeIds[] = {12, 14, 15, 16, 17, 19, 20, 21, 23, 30, 38, 39, 71, 105, 106, 107};
 
-	for (int i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++)
+	{
 		ghost->awardBadge(glowyBadgeIds[i]);
 	}
 
 	SkillManager::instance()->surrenderAllSkills(player, true, false);
 
-	Lua* lua = DirectorManager::instance()->getLuaInstance();
+	Lua *lua = DirectorManager::instance()->getLuaInstance();
 
-	Reference<LuaFunction*> luaFrsTesting = lua->createFunction("FsIntro", "completeVillageIntroFrog", 0);
+	Reference<LuaFunction *> luaFrsTesting = lua->createFunction("FsIntro", "completeVillageIntroFrog", 0);
 	*luaFrsTesting << player;
 
 	luaFrsTesting->callFunction();
 
 	String branches[] = {
-			"force_sensitive_combat_prowess_ranged_accuracy",
-			"force_sensitive_combat_prowess_ranged_speed",
-			"force_sensitive_combat_prowess_melee_accuracy",
-			"force_sensitive_combat_prowess_melee_speed",
-			"force_sensitive_enhanced_reflexes_ranged_defense",
-			"force_sensitive_enhanced_reflexes_melee_defense"
-		};
+		"force_sensitive_combat_prowess_ranged_accuracy",
+		"force_sensitive_combat_prowess_ranged_speed",
+		"force_sensitive_combat_prowess_melee_accuracy",
+		"force_sensitive_combat_prowess_melee_speed",
+		"force_sensitive_enhanced_reflexes_ranged_defense",
+		"force_sensitive_enhanced_reflexes_melee_defense"};
 
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < 6; i++)
+	{
 		String branch = branches[i];
 		player->setScreenPlayState("VillageUnlockScreenPlay:" + branch, 2);
 		skillManager->awardSkill(branch + "_04", player, true, true, true);
@@ -5975,23 +6656,28 @@ void PlayerManagerImplementation::unlockFRSForTesting(CreatureObject* player, in
 	luaFrsTesting->callFunction();
 }
 
-Vector<uint64> PlayerManagerImplementation::getOnlinePlayerList() {
+Vector<uint64> PlayerManagerImplementation::getOnlinePlayerList()
+{
 	Vector<uint64> playerList;
 
 	Locker locker(&onlineMapMutex);
 
-	HashTableIterator<uint32, Vector<Reference<ZoneClientSession*> > > iter = onlineZoneClientMap.iterator();
+	HashTableIterator<uint32, Vector<Reference<ZoneClientSession *>>> iter = onlineZoneClientMap.iterator();
 
-	while (iter.hasNext()) {
-		Vector<Reference<ZoneClientSession*> > clients = iter.next();
+	while (iter.hasNext())
+	{
+		Vector<Reference<ZoneClientSession *>> clients = iter.next();
 
-		for (int i = 0; i < clients.size(); i++) {
-			ZoneClientSession* session = clients.get(i);
+		for (int i = 0; i < clients.size(); i++)
+		{
+			ZoneClientSession *session = clients.get(i);
 
-			if (session != NULL) {
-				CreatureObject* player = session->getPlayer();
+			if (session != NULL)
+			{
+				CreatureObject *player = session->getPlayer();
 
-				if (player != NULL) {
+				if (player != NULL)
+				{
 					playerList.add(player->getObjectID());
 				}
 			}
@@ -6000,3 +6686,250 @@ Vector<uint64> PlayerManagerImplementation::getOnlinePlayerList() {
 
 	return playerList;
 }
+
+// void PlayerManagerImplementation::logOnlinePlayers(bool onlyWho)
+// {
+// 	int countOnline = 0;
+// 	int countAccounts = 0;
+// 	int countPlayers = 0;
+// 	int countnullptrClient = 0;
+// 	int countnullptrCreature = 0;
+// 	int countnullptrGhost = 0;
+
+// 	JSONSerializationType logClients;
+
+// 	Locker locker(&onlineMapMutex);
+
+// 	int countDistinctIPs = onlineZoneClientMap.getDistinctIps();
+
+// 	auto iter = onlineZoneClientMap.iterator();
+
+// 	while (iter.hasNext())
+// 	{
+// 		countAccounts++;
+
+// 		auto clients = iter.next();
+
+// 		for (int i = 0; i < clients.size(); i++)
+// 		{
+// 			auto client = clients.get(i);
+
+// 			if (client == nullptr)
+// 			{
+// 				countnullptrClient++;
+// 				continue;
+// 			}
+
+// 			JSONSerializationType logClient;
+
+// 			logClient["accountID"] = client->getAccountID();
+// 			logClient["ip"] = client->getIPAddress();
+
+// 			Reference<CreatureObject *> creature = client->getPlayer();
+
+// 			if (creature != nullptr)
+// 			{
+// 				countPlayers++;
+
+// 				logClient["oid"] = creature->getObjectID();
+// 				logClient["firstName"] = creature->getFirstName();
+
+// 				if (creature->isInvisible())
+// 					logClient["invisible"] = true;
+
+// 				Reference<PlayerObject *> ghost = creature->getPlayerObject();
+
+// 				if (ghost != nullptr)
+// 				{
+// 					Locker lock(ghost);
+
+// 					logClient["playedSeconds"] = (int)(ghost->getPlayedMiliSecs() / 1000);
+// 					logClient["sessionSeconds"] = (int)(ghost->getSessionMiliSecs() / 1000);
+// 					logClient["totalMovement"] = ghost->getSessionTotalMovement();
+
+// 					auto admin_level = ghost->getAdminLevel();
+
+// 					if (admin_level > 0 && ghost->hasAbility("admin"))
+// 						logClient["admin_level"] = admin_level;
+
+// 					if (ghost->isOnline())
+// 					{
+// 						countOnline++;
+
+// 						auto zone = creature->getZone();
+
+// 						if (zone != nullptr)
+// 						{
+// 							auto worldPosition = creature->getWorldPosition();
+
+// 							logClient["worldPositionX"] = (int)worldPosition.getX();
+// 							logClient["worldPositionZ"] = (int)worldPosition.getZ();
+// 							logClient["worldPositionY"] = (int)worldPosition.getY();
+// 							logClient["zone"] = zone->getZoneName();
+// 						}
+// 					}
+// 					else
+// 					{
+// 						logClient["isOnline"] = false;
+// 					}
+
+// 					if (ghost->isAFK())
+// 						logClient["isAFK"] = true;
+// 				}
+// 				else
+// 				{
+// 					countnullptrGhost++;
+// 				}
+// 			}
+// 			else
+// 			{
+// 				countnullptrCreature++;
+// 				logClient["isNullCreature"] = true;
+// 				logClient["isNullSession"] = client->getSession() == nullptr;
+// 				// TODO - Periodic cleanup of these?
+// 			}
+
+// 			logClients.push_back(logClient);
+// 		}
+// 	}
+
+// 	locker.release();
+
+// 	JSONSerializationType logEntry;
+// 	Time now;
+
+// 	logEntry["@timestamp"] = now.getFormattedTimeFull().toCharArray();
+// 	logEntry["timeMSecs"] = now.getMiliTime();
+// 	logEntry["clients"] = logClients.size() > 0 ? logClients : nlohmann::json::array();
+// 	logEntry["uptime_secs"] = Logger::getElapsedTime();
+
+// 	auto server = ServerCore::getZoneServer();
+
+// 	if (server != nullptr)
+// 	{
+// 		logEntry["uptime"] = (int)(server->getStartTimestamp()->miliDifference(now) / 1000);
+
+// 		if (server->isServerLocked())
+// 			logEntry["isServerLocked"] = true;
+
+// 		if (server->isServerLoading())
+// 			logEntry["isServerLoading"] = true;
+
+// 		if (server->isServerShuttingDown())
+// 			logEntry["isServerShuttingDown"] = true;
+// 	}
+
+// 	logEntry["countAccounts"] = countAccounts;
+// 	logEntry["countPlayers"] = countPlayers;
+// 	logEntry["countDistinctIPs"] = countDistinctIPs;
+
+// 	if (countOnline != countPlayers)
+// 		logEntry["countOnline"] = countOnline;
+
+// 	if (countnullptrClient > 0)
+// 		logEntry["countnullptrClient"] = countnullptrClient;
+
+// 	if (countnullptrCreature > 0)
+// 		logEntry["countnullptrCreature"] = countnullptrCreature;
+
+// 	if (countnullptrGhost > 0)
+// 		logEntry["countnullptrGhost"] = countnullptrGhost;
+
+// 	StringBuffer logLine;
+
+// 	logLine << logEntry.dump().c_str() << "\n";
+
+// 	// Write who file
+// 	try
+// 	{
+// 		// Write a new "current status" file
+// 		File file("log/who.json.next");
+// 		FileWriter logFile(&file, false);
+
+// 		logFile << logLine;
+
+// 		logFile.close();
+
+// 		// Update current status file
+// #ifdef PLATFORM_WIN
+// 		std::remove("log/who.json");
+// #endif
+// 		int err = std::rename("log/who.json.next", "log/who.json");
+
+// 		if (err != 0)
+// 		{
+// 			error() << "Failed to rename log/who.json.next to log/who.json err = " << err;
+// 		}
+// 	}
+// 	catch (const Exception &e)
+// 	{
+// 		error() << "logOnlinePlayers failed to write log/who.json: " << e.getMessage();
+// 	}
+
+// 	if (onlyWho)
+// 		return;
+
+// 	Locker logfileLock(&onlinePlayerLogMutext);
+
+// 	String fileName = "log/online-players.log";
+
+// 	struct stat st_log;
+
+// 	// Check for rollover
+// 	if (stat(fileName.toCharArray(), &st_log) == 0)
+// 	{
+// 		if (st_log.st_size >= ConfigManager::instance()->getOnlineLogSize())
+// 		{
+// 			StringBuffer archiveFilename;
+// 			archiveFilename << "log/online-players-" << now.getMiliTime() << ".log";
+
+// 			// If the rename failed its ok because we open with append below
+// 			int err = std::rename(fileName.toCharArray(), archiveFilename.toString().toCharArray());
+
+// 			if (err != 0)
+// 				error() << "Failed to archive online-players to " << archiveFilename.toString() << " err = " << err;
+// 		}
+// 	}
+
+// 	try
+// 	{
+// 		// Append log file with this entry
+// 		File file(fileName);
+// 		FileWriter logFile(&file, true);
+
+// 		logFile << logLine;
+
+// 		logFile.close();
+
+// 		logfileLock.release();
+
+// 		int LogSum = countOnline + countAccounts + countPlayers + countnullptrClient + countnullptrCreature + countnullptrGhost + countDistinctIPs;
+
+// 		// Throttle to no more often than once per 5s and only if something to report
+// 		if (lastOnlinePlayerLogMsg.miliDifference() >= 5000 && LogSum != onlinePlayerLogSum)
+// 		{
+// 			StringBuffer logMsg;
+
+// 			logMsg << "Logged " << countOnline << " players (" << countAccounts << " accounts, " << countDistinctIPs << " distinct IPs) to " << fileName;
+
+// 			if (countnullptrClient > 0)
+// 				logMsg << "; " << countnullptrClient << " null clients";
+
+// 			if (countnullptrCreature > 0)
+// 				logMsg << "; " << countnullptrCreature << " clients without a creature";
+
+// 			if (countnullptrGhost > 0)
+// 				logMsg << "; " << countnullptrGhost << " creatures without a player object";
+
+// 			logMsg << ".";
+
+// 			info(logMsg.toString(), true);
+// 			lastOnlinePlayerLogMsg.updateToCurrentTime();
+// 			onlinePlayerLogSum = LogSum;
+// 		}
+// 	}
+// 	catch (const Exception &e)
+// 	{
+// 		error() << "logOnlinePlayers failed to write " << fileName << ": " << e.getMessage();
+// 	}
+// }
