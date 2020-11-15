@@ -67,7 +67,7 @@ object_draft_schematic_clothing_clothing_armor_composite_bicep_r = object_draft_
    ingredientSlotType = {0, 0},
    resourceTypes = {"hide", "metal"},
    resourceQuantities = {150, 150},
-   contribution = {100, 100},,
+   contribution = {100, 100},
 
 
    targetTemplate = "object/tangible/wearables/armor/composite/armor_composite_bicep_r.iff",
