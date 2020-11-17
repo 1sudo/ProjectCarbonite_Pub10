@@ -80,7 +80,7 @@ void ArmorObjectImplementation::fillAttributeList(AttributeListMessage *alm, Cre
 	CombatManager *combatManager = CombatManager::instance();
 
 	// Implement our checks for isChestOnly so we can flag ArmorFillAttributes appropriately.
-	if ((combatManager->isChestOnly && hitLocation == 1) || !combatManager->isChestOnly)
+	if ((combatManager->isChestOnly && (hitLocation == 1 || hitLocation == 11)) || !combatManager->isChestOnly)
 	{
 		//Armor Rating
 		if (rating == LIGHT)
@@ -98,14 +98,14 @@ void ArmorObjectImplementation::fillAttributeList(AttributeListMessage *alm, Cre
 			StringBuffer txt;
 			txt << Math::getPrecision(getKinetic(), 1) << "%";
 			alm->insertAttribute("cat_armor_special_protection.armor_eff_kinetic",
-								txt.toString());
+								 txt.toString());
 		}
 		if ((isSpecial(SharedWeaponObjectTemplate::ENERGY) || isVulnerable(SharedWeaponObjectTemplate::ENERGY)) && getEnergy() >= 0.5)
 		{
 			StringBuffer txt;
 			txt << Math::getPrecision(getEnergy(), 1) << "%";
 			alm->insertAttribute("cat_armor_special_protection.armor_eff_energy",
-								txt.toString());
+								 txt.toString());
 		}
 		if ((isSpecial(SharedWeaponObjectTemplate::ELECTRICITY) || isVulnerable(SharedWeaponObjectTemplate::ELECTRICITY)) && getElectricity() >= 0.5)
 		{
@@ -120,14 +120,14 @@ void ArmorObjectImplementation::fillAttributeList(AttributeListMessage *alm, Cre
 			StringBuffer txt;
 			txt << Math::getPrecision(getStun(), 1) << "%";
 			alm->insertAttribute("cat_armor_special_protection.armor_eff_stun",
-								txt.toString());
+								 txt.toString());
 		}
 		if ((isSpecial(SharedWeaponObjectTemplate::BLAST) || isVulnerable(SharedWeaponObjectTemplate::BLAST)) && getBlast() >= 0.5)
 		{
 			StringBuffer txt;
 			txt << Math::getPrecision(getBlast(), 1) << "%";
 			alm->insertAttribute("cat_armor_special_protection.armor_eff_blast",
-								txt.toString());
+								 txt.toString());
 		}
 		if ((isSpecial(SharedWeaponObjectTemplate::HEAT) || isVulnerable(SharedWeaponObjectTemplate::HEAT)) && getHeat() >= 0.5)
 		{
@@ -167,14 +167,14 @@ void ArmorObjectImplementation::fillAttributeList(AttributeListMessage *alm, Cre
 			StringBuffer txt;
 			txt << Math::getPrecision(getKinetic(), 1) << "%";
 			alm->insertAttribute("cat_armor_effectiveness.armor_eff_kinetic",
-								txt.toString());
+								 txt.toString());
 		}
 		if (!isSpecial(SharedWeaponObjectTemplate::ENERGY) && !isVulnerable(SharedWeaponObjectTemplate::ENERGY) && getEnergy() >= 0.5)
 		{
 			StringBuffer txt;
 			txt << Math::getPrecision(getEnergy(), 1) << "%";
 			alm->insertAttribute("cat_armor_effectiveness.armor_eff_energy",
-								txt.toString());
+								 txt.toString());
 		}
 		if (!isSpecial(SharedWeaponObjectTemplate::ELECTRICITY) && !isVulnerable(SharedWeaponObjectTemplate::ELECTRICITY) && getElectricity() >= 0.5)
 		{
@@ -189,14 +189,14 @@ void ArmorObjectImplementation::fillAttributeList(AttributeListMessage *alm, Cre
 			StringBuffer txt;
 			txt << Math::getPrecision(getStun(), 1) << "%";
 			alm->insertAttribute("cat_armor_effectiveness.armor_eff_stun",
-								txt.toString());
+								 txt.toString());
 		}
 		if (!isSpecial(SharedWeaponObjectTemplate::BLAST) && !isVulnerable(SharedWeaponObjectTemplate::BLAST) && getBlast() >= 0.5)
 		{
 			StringBuffer txt;
 			txt << Math::getPrecision(getBlast(), 1) << "%";
 			alm->insertAttribute("cat_armor_effectiveness.armor_eff_blast",
-								txt.toString());
+								 txt.toString());
 		}
 		if (!isSpecial(SharedWeaponObjectTemplate::HEAT) && !isVulnerable(SharedWeaponObjectTemplate::HEAT) && getHeat() >= 0.5)
 		{
@@ -227,7 +227,7 @@ void ArmorObjectImplementation::fillAttributeList(AttributeListMessage *alm, Cre
 			StringBuffer txt;
 			txt << Math::getPrecision(getLightSaber(), 1) << "%";
 			alm->insertAttribute("cat_armor_effectiveness.armor_eff_restraint",
-								txt.toString());
+								 txt.toString());
 		}
 
 		//Vulnerabilities

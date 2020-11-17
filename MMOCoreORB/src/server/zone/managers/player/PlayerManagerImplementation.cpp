@@ -1981,7 +1981,7 @@ void PlayerManagerImplementation::applyEncumbrancies(CreatureObject *player, Arm
 	int mindEncumb = Math::max(0, armor->getMindEncumbrance());
 
 	// Applying the flag for isChestOnly so we can only care about chest armor encumberance!
-	if ((combatManager->isChestOnly && armor->getHitLocation() == 1) || !combatManager->isChestOnly)
+	if ((combatManager->isChestOnly && (armor->getHitLocation() == 1 || armor->getHitLocation() == 11)) || !combatManager->isChestOnly)
 	{
 		player->addEncumbrance(CreatureEncumbrance::HEALTH, healthEncumb, true);
 		player->addEncumbrance(CreatureEncumbrance::ACTION, actionEncumb, true);
@@ -2014,7 +2014,7 @@ void PlayerManagerImplementation::removeEncumbrancies(CreatureObject *player, Ar
 	int actionEncumb = Math::max(0, armor->getActionEncumbrance());
 	int mindEncumb = Math::max(0, armor->getMindEncumbrance());
 
-	if ((combatManager->isChestOnly && armor->getHitLocation() == 1) || !combatManager->isChestOnly)
+	if ((combatManager->isChestOnly && (armor->getHitLocation() == 1 || armor->getHitLocation() == 11)) || !combatManager->isChestOnly)
 	{
 		player->addEncumbrance(CreatureEncumbrance::HEALTH, -healthEncumb, true);
 		player->addEncumbrance(CreatureEncumbrance::ACTION, -actionEncumb, true);
@@ -3713,7 +3713,7 @@ int PlayerManagerImplementation::checkSpeedHackFirstTest(CreatureObject *player,
 
 		for (int i = 0; i < changeBuffer->size() - 1; ++i)
 		{
-			SpeedModChange* change = &changeBuffer->get(i);
+			SpeedModChange *change = &changeBuffer->get(i);
 			//Time timeStamp = change->getTimeStamp();
 
 			float oldSpeedMod = change->getNewSpeed();
@@ -3745,7 +3745,7 @@ int PlayerManagerImplementation::checkSpeedHackFirstTest(CreatureObject *player,
 
 int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject *player, float newX, float newZ, float newY, uint32 newStamp, SceneObject *newParent)
 {
-	PlayerObject* ghost = player->getPlayerObject();
+	PlayerObject *ghost = player->getPlayerObject();
 
 	uint32 deltaTime = ghost->getServerMovementTimeDelta(); //newStamp - stamp;
 
@@ -3832,7 +3832,7 @@ int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject *player
 
 		if (ghost->isOnLoadScreen())
 			ghost->setOnLoadScreen(false);
-		
+
 		// ghost->incrementSessionMovement(dist);
 	}
 
@@ -5659,7 +5659,8 @@ bool PlayerManagerImplementation::increaseOnlineCharCountIfPossible(ZoneClientSe
 		locker.release();
 
 		// onlineZoneClientMap.accountLoggedIn(client->getIPAddress(), accountId, server != nullptr ? server->getGalaxyID() : 0);
-		if (session != NULL) {
+		if (session != NULL)
+		{
 			String ip = session->getIPAddress();
 
 			onlineZoneClientMap.addAccount(ip, accountId);
@@ -5678,7 +5679,7 @@ bool PlayerManagerImplementation::increaseOnlineCharCountIfPossible(ZoneClientSe
 
 		if (session == nullptr)
 			continue;
-		
+
 		ManagedReference<CreatureObject *> player = session->getPlayer();
 
 		if (player != NULL)
@@ -5974,7 +5975,7 @@ bool PlayerManagerImplementation::shouldDeleteCharacter(uint64 characterID, int 
 	}
 	catch (const DatabaseException &err)
 	{
-		info("database error " + err.getMessage(),true);
+		info("database error " + err.getMessage(), true);
 		return false;
 	}
 }
