@@ -20,6 +20,17 @@
 
 int CitySpecializationSessionImplementation::initializeSession() {
 	PlayerObject* ghost = creatureObject->getPlayerObject();
+	CitySpecializationMap citySpecializations;
+
+	// Use the lua as our reference file, like it should!
+	Lua* lua = new Lua();
+	lua->init();
+	lua->runFile("scripts/managers/city_manager.lua");
+	LuaObject luaObject = lua->getGlobalObject("CitySpecializations");
+	citySpecializations.readObject(&luaObject);
+	luaObject.pop();
+
+	CityManager* cityManager = creatureObject->getZoneServer()->getCityManager();
 
 	if (ghost == NULL)
 		return cancelSession();
@@ -55,8 +66,11 @@ int CitySpecializationSessionImplementation::initializeSession() {
 			Reference<Ability*> ability = abilityList->getSafe(i);
 			String abilityName = ability->getAbilityName();
 
-			if (abilityName.beginsWith("city_spec"))
-				sui->addMenuItem("@city/city:" + abilityName);
+			if (abilityName.beginsWith("city_spec")){
+				if (citySpecializations.containsKey("@city/city:" + abilityName)){
+					sui->addMenuItem("@city/city:" + abilityName);
+				}
+			}
 		}
 	}
 
