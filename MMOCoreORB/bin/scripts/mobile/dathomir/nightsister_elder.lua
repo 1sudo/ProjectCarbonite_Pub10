@@ -12,6 +12,8 @@ nightsister_elder = Creature:new {
 	baseHAM = 321000,
 	baseHAMmax = 392000,
 	armor = 3,
+	-- Put this here to help anyone who needs to know what they're changing on some mob somewhere!
+	-- {Kinetic, Energy, Blast, Heat, Cold, Elec, Acid, Stun, LS}
 	resists = {200,25,25,200,200,200,200,200,-1},
 	meatType = "",
 	meatAmount = 0,

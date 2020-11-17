@@ -156,15 +156,60 @@ void CreatureTemplate::readObject(LuaObject* templateData) {
 
 	LuaObject res = templateData->getObjectField("resists");
 	if (res.getTableSize() == 9) {
-		kinetic = res.getFloatAt(1);
-		energy = res.getFloatAt(2);
-		blast = res.getFloatAt(3);
-		heat = res.getFloatAt(4);
-		cold = res.getFloatAt(5);
-		electricity = res.getFloatAt(6);
-		acid = res.getFloatAt(7);
-		stun = res.getFloatAt(8);
-		lightSaber = res.getFloatAt(9);
+		// Kinetic
+		if (res.getFloatAt(1) > 85) {
+			kinetic = 85;
+		}else {
+			kinetic = res.getFloatAt(1);
+		}
+		// Energy
+		if (res.getFloatAt(2) > 85) {
+			energy = 85;
+		}else {
+			energy = res.getFloatAt(2);
+		}
+		// Blast
+		if (res.getFloatAt(3) > 85) {
+			blast = 85;
+		}else {
+			blast = res.getFloatAt(3);
+		}
+		// Heat
+		if (res.getFloatAt(4) > 85) {
+			heat = 85;
+		}else {
+			heat = res.getFloatAt(4);
+		}
+		// Cold
+		if (res.getFloatAt(5) > 85) {
+			cold = 85;
+		}else {
+			cold = res.getFloatAt(5);
+		}
+		// Electricity
+		if (res.getFloatAt(6) > 85) {
+			electricity = 85;
+		}else {
+			electricity = res.getFloatAt(6);
+		}
+		// Acid
+		if (res.getFloatAt(7) > 85) {
+			acid = 85;
+		}else {
+			acid = res.getFloatAt(7);
+		}
+		// Stun
+		if (res.getFloatAt(8) > 85) {
+			stun = 85;
+		}else {
+			stun = res.getFloatAt(8);
+		}
+		// Lighstaber
+		if (res.getFloatAt(9) > 85) {
+			lightSaber = 85;
+		}else {
+			lightSaber = res.getFloatAt(9);
+		}
 	}
 
 	res.pop();
