@@ -1404,8 +1404,9 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 			chestOnlyReduction = 0.25;
 		}
 
-		defender->sendSystemMessage("Incoming damage to armor would have been: " + String::valueOf(damage * 0.2));
-		defender->sendSystemMessage("Incoming damage to armor actually is: " + String::valueOf((damage * 0.2) * chestOnlyReduction));
+		// Debug messages for ChestPiece-only mode
+		// defender->sendSystemMessage("Incoming damage to armor would have been: " + String::valueOf(damage * 0.2));
+		// defender->sendSystemMessage("Incoming damage to armor actually is: " + String::valueOf((damage * 0.2) * chestOnlyReduction));
 
 		armor->inflictDamage(armor, 0, (damage * 0.2) * chestOnlyReduction, true, true);
 	}
