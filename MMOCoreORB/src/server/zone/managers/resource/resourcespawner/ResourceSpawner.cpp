@@ -373,7 +373,9 @@ void ResourceSpawner::shiftResources() {
 	manualPool->update();
 
 	dumpResources();
-	ghDumpAll();
+	
+	// Create an Admin command to call this whenever we want while the server runs!
+	//ghDumpAll();
 }
 
 ResourceSpawn* ResourceSpawner::createRecycledResourceSpawn(ResourceTreeEntry* entry) {
