@@ -1699,7 +1699,7 @@ void PlayerObjectImplementation::doRecovery(int latency) {
 		Time currentTime;
 
 		int timeDelta = currentTime.getMiliTime() - lastDigestion.getMiliTime();
-		int timeToReduce = 6000; // from 30minutes -> 10minutes for filling to be digested from 100% 
+		int timeToReduce = 9000; // from 30minutes -> 15minutes for filling to be digested from 100% 
 		int fillingReduction = timeDelta / timeToReduce;
 
 		doDigest(fillingReduction);
