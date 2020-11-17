@@ -2692,11 +2692,12 @@ void PlayerObjectImplementation::doFieldFactionChange(int newStatus) {
 	inputbox->setPromptTitle("@gcw:gcw_status_change"); // GCW STATUS CHANGE CONFIRMATION
 	inputbox->setUsingObject(_this.getReferenceUnsafeStaticCast());
 	inputbox->setCancelButton(true, "@cancel");
+	String overtMsg = "You are changing your GCW Status to 'Special Forces'. This transition will take 30 seconds. It will allow you to attack and be attacked by hostile players and NPC's. Type YES in this box to confirm the change.";
 
 	if (newStatus == FactionStatus::COVERT) {
 		inputbox->setPromptText("@gcw:gcw_status_change_covert"); // You are changing your GCW Status to 'Combatant'. This transition will take 30 seconds. It will allow you to attack and be attacked by enemy NPC's. Type YES in this box to confirm the change.
 	} else if (newStatus == FactionStatus::OVERT) {
-		inputbox->setPromptText("@gcw:gcw_status_change_overt"); // You are changing your GCW Status to 'Special Forces'. This transition will take 5 minutes. It will allow you to attack and be attacked by hostile players and NPC's.Type YES in this box to confirm the change.
+		inputbox->setPromptText(overtMsg); // You are changing your GCW Status to 'Special Forces'. This transition will take 5 minutes. It will allow you to attack and be attacked by hostile players and NPC's.Type YES in this box to confirm the change.
 	}
 
 	addSuiBox(inputbox);
