@@ -373,7 +373,7 @@ void ResourceSpawner::shiftResources() {
 	manualPool->update();
 
 	dumpResources();
-	
+
 	// Create an Admin command to call this whenever we want while the server runs!
 	//ghDumpAll();
 }
@@ -1339,6 +1339,13 @@ bool ResourceSpawner::ghDumpAll() {
 			if(String::valueOf(inPhase) == "1") {
 				for(int j = 0; j < planets->size(); ++j){
 					ZoneResourceMap* zoneMap = resourceMap->getZoneResourceList(planets->get(j));
+
+					// Making this code a lot less brittle, and allowing planets to be disabled or errors to exist in the planets array
+					if (zoneMap == nullptr){
+						// warning("ZoneMap is NULL for " + planets->get(j) + "!!!");
+						continue; // skip this planet's zonemap as it's empty or not declared!
+					}
+
 					ManagedReference<ResourceSpawn*> resourceSpawn;
 					/*ghwriter->writeLine("<resource>");*/
 					for (int b = 0; b< zoneMap->size(); ++b) {
