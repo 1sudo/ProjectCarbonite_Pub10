@@ -1699,12 +1699,13 @@ void PlayerObjectImplementation::doRecovery(int latency) {
 		Time currentTime;
 
 		int timeDelta = currentTime.getMiliTime() - lastDigestion.getMiliTime();
-		int fillingReduction = timeDelta / 18000;
+		int timeToReduce = 6000; // from 30minutes -> 10minutes for filling to be digested from 100% 
+		int fillingReduction = timeDelta / timeToReduce;
 
 		doDigest(fillingReduction);
 
 		lastDigestion.updateToCurrentTime();
-		cooldownTimerMap->updateToCurrentAndAddMili("digestEvent", 18000);
+		cooldownTimerMap->updateToCurrentAndAddMili("digestEvent", timeToReduce);
 	}
 
 	if (isOnline()) {
