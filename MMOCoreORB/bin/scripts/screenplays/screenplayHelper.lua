@@ -13,19 +13,19 @@ end
 ---- build function
 function screenplayHelper:spawnHorizontalSceneObjects(planet, startX, startY, iffName, count, stepDiff)
 	for i = 0 , count - 1 , 1 do
-		spawnSceneObject(planet, iffName, startX - (i*stepDiff), 0, startY, 0, 0, 0, 0, 0)
+		spawnSceneObject(planet, iffName, startX - (i*stepDiff), 9999, startY, 0, 0, 0, 0, 0)
 	end
 end
 
 function screenplayHelper:spawnVerticalSceneObjects(planet, startX, startY, iffName, count, stepDiff)
 	for i = 0 , count - 1 , 1 do
-		spawnSceneObject(planet, iffName, startX , 0, startY - (i*stepDiff), 0, 0.707, 0, -0.707, 0)
+		spawnSceneObject(planet, iffName, startX , 9999, startY - (i*stepDiff), 0, 0.707, 0, -0.707, 0)
 	end
 end
 
 function screenplayHelper:spawnDiagonalSceneObjects(planet, startX, startY, iffName, count, stepDiff, invert, dxr, dyr)
 	for i = 0 , count - 1 , 1 do
-		spawnSceneObject(planet, iffName, startX - (i*stepDiff*0.707*invert) , 0, startY - (i*stepDiff*0.707*invert), 0, dxr, 0, dyr, 0)
+		spawnSceneObject(planet, iffName, startX - (i*stepDiff*0.707*invert) , 9999, startY - (i*stepDiff*0.707*invert), 0, dxr, 0, dyr, 0)
 	end
 end
 
@@ -91,7 +91,7 @@ function screenplayHelper:spawnSceneObjectlineToDirection(planet, iff, x, y, dir
 			dw = 0.9238
 			dz = 0.3826
 		end
-		spawnSceneObject(planet,iff, xpos, z, ypos, 0, dw, 0, dz, 0)
+		spawnSceneObject(planet,iff, xpos, 9999, ypos, 0, dw, 0, dz, 0)
 	end
 end
  
@@ -139,10 +139,10 @@ function screenplayHelper:destroy(objectID, deleteFromDB)
 	if (sObj ~= nil) then
 		local oObj = LuaSceneObject(sObj)
 		if (oObj ~= nil) then
-			oObj:destroyObjectFromWorld()
 			if (deleteFromDB == true) then
-				oObj:destroyObjectFromDatabase()
+				--oObj:destroyObjectFromDatabase()
 			end
+			oObj:destroyObjectFromWorld()
 		end
 	end
 end
@@ -219,6 +219,12 @@ local itemCounter = 0
 		itemCounter = screenplayHelper:searchContainerForObject(pInventory, ObjectName, deleteFlag, pPlayer)
 	end)
 return itemCounter
+end
+
+function screenplayHelper:despawnCreature(pMobile)
+    ObjectManager.withCreatureObject(pMobile, function(mobile)
+        self:destroy(mobile:getObjectID(),true)
+    end)
 end
 
 return screenplayHelper

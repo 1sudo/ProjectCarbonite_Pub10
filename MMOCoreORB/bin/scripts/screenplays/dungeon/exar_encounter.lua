@@ -1,3 +1,4 @@
+
 exar_encounter = ScreenPlay:new {
 	numberOfActs = 1,
 
@@ -35,7 +36,7 @@ function exar_encounter:spawnMobiles()
 end
 
 function exar_encounter:notifyTriggerDead(pTrigger, pPlayer)
-        local pBoss = spawnMobile("yavin4", "exarkun", 0, 5079, 73, 5538, 90, 0) print("spawned Exar Kun")
+	local pBoss = spawnMobile("yavin4", "exarkun", 0, 5079, 73, 5538, 90, 0) print("spawned Exar Kun")
 	ObjectManager.withCreatureObject(pBoss, function(oBoss)
 		writeData("exar_encounter:spawnState", 1)
 		writeData("exar_encounter", oBoss:getObjectID())
@@ -67,6 +68,7 @@ function exar_encounter:boss_damage(pBoss, pPlayer)
 	local player = LuaCreatureObject(pPlayer)
 	local boss = LuaCreatureObject(pBoss)
 	if (boss ~= nil) then
+		local heal = 2000000
 		local bossHealth = boss:getHAM(0)
 		local bossAction = boss:getHAM(3)
 		local bossMind = boss:getHAM(6)
@@ -74,8 +76,8 @@ function exar_encounter:boss_damage(pBoss, pPlayer)
 		local bossMaxAction = boss:getMaxHAM(3)
 		local bossMaxMind = boss:getMaxHAM(6)
 
-		local x1 = 5079
-		local y1 = 5538
+		local x1 = 5094
+		local y1 = 5536
 		local x2 = boss:getPositionX()
 		local y2 = boss:getPositionY()
 
@@ -87,6 +89,9 @@ function exar_encounter:boss_damage(pBoss, pPlayer)
 			forcePeace(pBoss)
 			forcePeace(pBoss)
 			forcePeace(pBoss)
+			CreatureObject(pBoss):healDamage(heal, 0)
+      		CreatureObject(pBoss):healDamage(heal, 3)
+      		CreatureObject(pBoss):healDamage(heal, 6)
 			createEvent(3500, "exar_encounter", "resetScreenplayStatus", pPlayer,"")
 			exar_encounter:despawnBoss(pBoss)
 
@@ -148,9 +153,10 @@ function exar_encounter:boss_damage(pBoss, pPlayer)
 			spatialChat(pAddSeven, "Moving in")
 		end		
 		
-		if (((bossHealth <= (bossMaxHealth * 0.05)) or (bossAction <= (bossMaxAction * 0.05)) or (bossMind <= (bossMaxMind * 0.05))) and readData("exar_encounter:spawnState") == 4) then
+		if (((bossHealth <= (bossMaxHealth * 0.01)) or (bossAction <= (bossMaxAction * 0.01)) or (bossMind <= (bossMaxMind * 0.01))) and readData("exar_encounter:spawnState") == 4) then
 			writeData("exar_encounter:spawnState", 5)		
 			spatialChat(pBoss, "The Sith will never die!! My spirit is bound to this place forever I shall return")
+			CreatureObject(pBoss):broadcastToServer("\\#7CFC00 Exar Kun has been defeated and has been laid to rest!")
 		end
 	end
 	return 0
