@@ -726,7 +726,7 @@ void BountyMissionObjectiveImplementation::handlePlayerKilled(ManagedObject *arg
 						message.setDI(xpLoss * -1);
 						message.setTO("exp_n", "jedi_general");
 						target->sendSystemMessage(message);
-						String victimName = target->getFirstName();
+						String victimName = "Skull of " + target->getFirstName();
 						lootManager->createNamedLoot(inventory, "bh_trophy", victimName, 300);//, victimName);
 					}
 				}
