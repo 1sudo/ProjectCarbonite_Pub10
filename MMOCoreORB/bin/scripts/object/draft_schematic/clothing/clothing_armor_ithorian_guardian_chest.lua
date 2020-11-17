@@ -66,7 +66,7 @@ object_draft_schematic_clothing_clothing_armor_ithorian_guardian_chest = object_
    ingredientTitleNames = {"auxilary_coverage", "body", "liner", "hardware_and_attachments", "binding_and_reinforcement", "padding", "armor", "load_bearing_harness", "reinforcement"},
    ingredientSlotType = {0, 0, 0, 0, 0, 0, 1, 1, 1},
    resourceTypes = {"bone", "hide_leathery", "hide_scaley", "metal_ferrous", "petrochem_inert_polymer", "hide_wooly", "object/tangible/component/armor/shared_armor_segment_composite.iff", "object/tangible/component/clothing/shared_synthetic_cloth.iff", "object/tangible/component/clothing/shared_reinforced_fiber_panels.iff"},
-   resourceQuantities = {400, 400, 200, 240, 200, 160, 16, 4, 4},
+   resourceQuantities = {400, 400, 200, 240, 200, 160, 10, 4, 4},
    contribution = {100, 100, 100, 100, 100, 100, 100, 100, 100},
 
    -- ingredientTemplateNames = {"craft_clothing_ingredients_n", "craft_clothing_ingredients_n", "craft_clothing_ingredients_n", "craft_clothing_ingredients_n", "craft_clothing_ingredients_n", "craft_clothing_ingredients_n", "craft_clothing_ingredients_n", "craft_clothing_ingredients_n", "craft_clothing_ingredients_n"},
