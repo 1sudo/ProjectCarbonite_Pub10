@@ -56,7 +56,7 @@ includeFile("outfits/serverobjects.lua")
 includeFile("../custom_scripts/mobile/serverobjects.lua")
 
 -- MTG
-includeFile("custom_content/serverobjects.lua")
+-- includeFile("custom_content/serverobjects.lua")
 
 -- TestServer NPCs
 includeFile("TEST_NPCS/serverobjects.lua")

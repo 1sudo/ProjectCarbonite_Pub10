@@ -296,4 +296,4 @@ includeFile("conversations/junk_dealer/junk_dealer_sheani_conv.lua")
 includeFile("conversations/junk_dealer/junk_dealer_sneg_conv.lua")
 
 -- MTG
-includeFile("custom_content/conversations.lua")
+-- includeFile("custom_content/conversations.lua")

@@ -85,4 +85,4 @@ includeFile("fs_village_area.lua")
 includeFile("../custom_scripts/object/serverobjects.lua")
 
 -- MTG
-includeFile("custom_content/serverobjects.lua")
+-- includeFile("custom_content/serverobjects.lua")
