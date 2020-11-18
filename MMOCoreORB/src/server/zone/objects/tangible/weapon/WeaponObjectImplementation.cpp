@@ -19,25 +19,29 @@
 #include "server/zone/packets/object/WeaponRanges.h"
 #include "server/zone/ZoneProcessServer.h"
 
-
-void WeaponObjectImplementation::initializeTransientMembers() {
+void WeaponObjectImplementation::initializeTransientMembers()
+{
 	TangibleObjectImplementation::initializeTransientMembers();
 
-	weaponTemplate = dynamic_cast<SharedWeaponObjectTemplate*>(TemplateManager::instance()->getTemplate(serverObjectCRC));
+	weaponTemplate = dynamic_cast<SharedWeaponObjectTemplate *>(TemplateManager::instance()->getTemplate(serverObjectCRC));
 
 	setLoggingName("WeaponObject");
 
-	if(damageSlice > 1.5 || damageSlice < 1) {
+	if (damageSlice > 1.5 || damageSlice < 1)
+	{
 		damageSlice = 1;
 	}
 
-	if(speedSlice > 1.0 || speedSlice < .5) {
+	if (speedSlice > 1.0 || speedSlice < .5)
+	{
 		speedSlice = 1;
 	}
 }
 
-void WeaponObjectImplementation::notifyLoadFromDatabase() {
-	if (forceCost != 0) {
+void WeaponObjectImplementation::notifyLoadFromDatabase()
+{
+	if (forceCost != 0)
+	{
 		saberForceCost = forceCost;
 		forceCost = 0;
 	}
@@ -45,15 +49,16 @@ void WeaponObjectImplementation::notifyLoadFromDatabase() {
 	TangibleObjectImplementation::notifyLoadFromDatabase();
 }
 
-void WeaponObjectImplementation::loadTemplateData(SharedObjectTemplate* templateData) {
+void WeaponObjectImplementation::loadTemplateData(SharedObjectTemplate *templateData)
+{
 	TangibleObjectImplementation::loadTemplateData(templateData);
 
-	weaponTemplate = dynamic_cast<SharedWeaponObjectTemplate*>(templateData);
+	weaponTemplate = dynamic_cast<SharedWeaponObjectTemplate *>(templateData);
 
 	certified = false;
 
 	attackType = weaponTemplate->getAttackType();
-	weaponEffect =  weaponTemplate->getWeaponEffect();
+	weaponEffect = weaponTemplate->getWeaponEffect();
 	weaponEffectIndex = weaponTemplate->getWeaponEffectIndex();
 
 	damageType = weaponTemplate->getDamageType();
@@ -73,7 +78,7 @@ void WeaponObjectImplementation::loadTemplateData(SharedObjectTemplate* template
 
 	int templateMaxRange = weaponTemplate->getMaxRange();
 
-	if (templateMaxRange > 5 )
+	if (templateMaxRange > 5)
 		maxRange = templateMaxRange;
 
 	maxRangeAccuracy = weaponTemplate->getMaxRangeAccuracy();
@@ -90,86 +95,97 @@ void WeaponObjectImplementation::loadTemplateData(SharedObjectTemplate* template
 	if (templateAttackSpeed > 1)
 		attackSpeed = templateAttackSpeed;
 
-	if (!isJediWeapon()) {
+	if (!isJediWeapon())
+	{
 		setSliceable(true);
-	} else if (isJediWeapon()) {
+	}
+	else if (isJediWeapon())
+	{
 		setSliceable(false);
 	}
 }
 
-void WeaponObjectImplementation::sendContainerTo(CreatureObject* player) {
+void WeaponObjectImplementation::sendContainerTo(CreatureObject *player)
+{
 
-	if (isJediWeapon()) {
+	if (isJediWeapon())
+	{
 
-		ManagedReference<SceneObject*> saberInv = getSlottedObject("saber_inv");
+		ManagedReference<SceneObject *> saberInv = getSlottedObject("saber_inv");
 
-		if (saberInv != NULL) {
+		if (saberInv != NULL)
+		{
 			saberInv->sendDestroyTo(player);
 			//saberInv->closeContainerTo(player, true);
 
 			saberInv->sendWithoutContainerObjectsTo(player);
 			saberInv->openContainerTo(player);
 		}
-
 	}
 }
 
-void WeaponObjectImplementation::createChildObjects() {
+void WeaponObjectImplementation::createChildObjects()
+{
 	// Create any child objects in a weapon.
 
-	ZoneServer* zoneServer = server->getZoneServer();
+	ZoneServer *zoneServer = server->getZoneServer();
 
-		for (int i = 0; i < templateObject->getChildObjectsSize(); ++i) {
-			ChildObject* child = templateObject->getChildObject(i);
+	for (int i = 0; i < templateObject->getChildObjectsSize(); ++i)
+	{
+		ChildObject *child = templateObject->getChildObject(i);
 
-			if (child == NULL)
-				continue;
+		if (child == NULL)
+			continue;
 
-			ManagedReference<SceneObject*> obj = zoneServer->createObject(
-					child->getTemplateFile().hashCode(), getPersistenceLevel());
+		ManagedReference<SceneObject *> obj = zoneServer->createObject(
+			child->getTemplateFile().hashCode(), getPersistenceLevel());
 
-			if (obj == NULL)
-				continue;
+		if (obj == NULL)
+			continue;
 
-			ContainerPermissions* permissions = obj->getContainerPermissions();
-			permissions->setOwner(getObjectID());
-			permissions->setInheritPermissionsFromParent(true);
-			permissions->setDefaultDenyPermission(ContainerPermissions::MOVECONTAINER);
-			permissions->setDenyPermission("owner", ContainerPermissions::MOVECONTAINER);
+		ContainerPermissions *permissions = obj->getContainerPermissions();
+		permissions->setOwner(getObjectID());
+		permissions->setInheritPermissionsFromParent(true);
+		permissions->setDefaultDenyPermission(ContainerPermissions::MOVECONTAINER);
+		permissions->setDenyPermission("owner", ContainerPermissions::MOVECONTAINER);
 
-			if (!transferObject(obj, child->getContainmentType())) {
-				obj->destroyObjectFromDatabase(true);
-				continue;
-			}
-
-			childObjects.put(obj);
-
-			obj->initializeChildObject(_this.getReferenceUnsafeStaticCast());
+		if (!transferObject(obj, child->getContainmentType()))
+		{
+			obj->destroyObjectFromDatabase(true);
+			continue;
 		}
 
+		childObjects.put(obj);
+
+		obj->initializeChildObject(_this.getReferenceUnsafeStaticCast());
+	}
 }
 
-void WeaponObjectImplementation::sendBaselinesTo(SceneObject* player) {
+void WeaponObjectImplementation::sendBaselinesTo(SceneObject *player)
+{
 	debug("sending weapon object baselines");
 
-	BaseMessage* weao3 = new WeaponObjectMessage3(_this.getReferenceUnsafeStaticCast());
+	BaseMessage *weao3 = new WeaponObjectMessage3(_this.getReferenceUnsafeStaticCast());
 	player->sendMessage(weao3);
 
-	BaseMessage* weao6 = new WeaponObjectMessage6(_this.getReferenceUnsafeStaticCast());
+	BaseMessage *weao6 = new WeaponObjectMessage6(_this.getReferenceUnsafeStaticCast());
 	player->sendMessage(weao6);
 
-	if (player->isCreatureObject()) {
-		BaseMessage* ranges = new WeaponRanges(cast<CreatureObject*>(player), _this.getReferenceUnsafeStaticCast());
+	if (player->isCreatureObject())
+	{
+		BaseMessage *ranges = new WeaponRanges(cast<CreatureObject *>(player), _this.getReferenceUnsafeStaticCast());
 		player->sendMessage(ranges);
 	}
 }
 
-String WeaponObjectImplementation::getWeaponType() {
+String WeaponObjectImplementation::getWeaponType()
+{
 	int weaponObjectType = getGameObjectType();
 
 	String weaponType;
 
-	switch (weaponObjectType) {
+	switch (weaponObjectType)
+	{
 	case SceneObjectType::ONEHANDMELEEWEAPON:
 		weaponType = "onehandmelee";
 		break;
@@ -205,29 +221,37 @@ String WeaponObjectImplementation::getWeaponType() {
 		break;
 	}
 
-	if (isJediOneHandedWeapon()) weaponType = "onehandlightsaber";
-	if (isJediTwoHandedWeapon()) weaponType = "twohandlightsaber";
-	if (isJediPolearmWeapon()) weaponType = "polearmlightsaber";
+	if (isJediOneHandedWeapon())
+		weaponType = "onehandlightsaber";
+	if (isJediTwoHandedWeapon())
+		weaponType = "twohandlightsaber";
+	if (isJediPolearmWeapon())
+		weaponType = "polearmlightsaber";
 
 	return weaponType;
 }
 
-void WeaponObjectImplementation::fillAttributeList(AttributeListMessage* alm, CreatureObject* object) {
+void WeaponObjectImplementation::fillAttributeList(AttributeListMessage *alm, CreatureObject *object)
+{
 	TangibleObjectImplementation::fillAttributeList(alm, object);
 
 	bool res = isCertifiedFor(object);
 
-	if (res) {
+	if (res)
+	{
 		alm->insertAttribute("weapon_cert_status", "Yes");
-	} else {
+	}
+	else
+	{
 		alm->insertAttribute("weapon_cert_status", "No");
 	}
 
 	/*if (usesRemaining > 0)
 		alm->insertAttribute("count", usesRemaining);*/
 
-	for(int i = 0; i < wearableSkillMods.size(); ++i) {
-		const String& key = wearableSkillMods.elementAt(i).getKey();
+	for (int i = 0; i < wearableSkillMods.size(); ++i)
+	{
+		const String &key = wearableSkillMods.elementAt(i).getKey();
 		String statname = "cat_skill_mod_bonus.@stat_n:" + key;
 		int value = wearableSkillMods.get(key);
 
@@ -237,7 +261,8 @@ void WeaponObjectImplementation::fillAttributeList(AttributeListMessage* alm, Cr
 
 	String ap;
 
-	switch (armorPiercing) {
+	switch (armorPiercing)
+	{
 	case SharedWeaponObjectTemplate::NONE:
 		ap = "None";
 		break;
@@ -265,7 +290,8 @@ void WeaponObjectImplementation::fillAttributeList(AttributeListMessage* alm, Cr
 	//Damage Information
 	StringBuffer dmgtxt;
 
-	switch (damageType) {
+	switch (damageType)
+	{
 	case SharedWeaponObjectTemplate::KINETIC:
 		dmgtxt << "Kinetic";
 		break;
@@ -345,184 +371,200 @@ void WeaponObjectImplementation::fillAttributeList(AttributeListMessage* alm, Cr
 	alm->insertAttribute("cat_wpn_attack_cost.mind", getMindAttackCost());
 
 	//Anti Decay Kit
-	if(hasAntiDecayKit()){
+	if (hasAntiDecayKit())
+	{
 		alm->insertAttribute("@veteran_new:antidecay_examine_title", "@veteran_new:antidecay_examine_text");
 	}
 
 	// Force Cost
-	if (getForceCost() > 0)
-		alm->insertAttribute("forcecost", (int)getForceCost());
+	if (isJediWeapon())
+	{
+		float roundedForceCost = floor((float)getForceCost() * 100 + 0.5) / 100;
+		if (roundedForceCost < 5){
+			roundedForceCost = 5; // 5 Minimum force cost on sabers
+		}
+		alm->insertAttribute("forcecost", roundedForceCost);
+	}
 
-	for (int i = 0; i < getNumberOfDots(); i++) {
+	for (int i = 0; i < getNumberOfDots(); i++)
+	{
 
-			String dt;
+		String dt;
 
-			switch (getDotType(i)) {
-			case 1:
-				dt = "Poison";
-				break;
-			case 2:
-				dt = "Disease";
-				break;
-			case 3:
-				dt = "Fire";
-				break;
-			case 4:
-				dt = "Bleeding";
-				break;
-			default:
-				dt = "Unknown";
-				break;
-			}
-
-			StringBuffer type;
-			type << "cat_wpn_dot_0" << i << ".wpn_dot_type";
-			alm->insertAttribute(type.toString(), dt);
-
-			String da;
-
-			switch (getDotAttribute(i)) {
-			case 0:
-				da = "Health";
-				break;
-			case 1:
-				da = "Strength";
-				break;
-			case 2:
-				da = "Constitution";
-				break;
-			case 3:
-				da = "Action";
-				break;
-			case 4:
-				da = "Quickness";
-				break;
-			case 5:
-				da = "Stamina";
-				break;
-			case 6:
-				da = "Mind";
-				break;
-			case 7:
-				da = "Focus";
-				break;
-			case 8:
-				da = "Willpower";
-				break;
-			default:
-				da = "Unknown";
-				break;
-			}
-
-			StringBuffer attrib;
-			attrib << "cat_wpn_dot_0" << i << ".wpn_dot_attrib";
-			alm->insertAttribute(attrib.toString(), da);
-
-			StringBuffer str;
-			str << "cat_wpn_dot_0" << i << ".wpn_dot_strength";
-			alm->insertAttribute(str.toString(), getDotStrength(i));
-
-			StringBuffer dotDur;
-			dotDur << getDotDuration(i) << "s";
-			StringBuffer dur;
-			dur << "cat_wpn_dot_0" << i << ".wpn_dot_duration";
-			alm->insertAttribute(dur.toString(), dotDur);
-
-			StringBuffer dotPot;
-			dotPot << getDotPotency(i) << "%";
-			StringBuffer pot;
-			pot << "cat_wpn_dot_0" << i << ".wpn_dot_potency";
-			alm->insertAttribute(pot.toString(), dotPot);
-
-			StringBuffer use;
-			use << "cat_wpn_dot_0" << i << ".wpn_dot_uses";
-			alm->insertAttribute(use.toString(), getDotUses(i));
+		switch (getDotType(i))
+		{
+		case 1:
+			dt = "Poison";
+			break;
+		case 2:
+			dt = "Disease";
+			break;
+		case 3:
+			dt = "Fire";
+			break;
+		case 4:
+			dt = "Bleeding";
+			break;
+		default:
+			dt = "Unknown";
+			break;
 		}
 
-	if(hasPowerup())
+		StringBuffer type;
+		type << "cat_wpn_dot_0" << i << ".wpn_dot_type";
+		alm->insertAttribute(type.toString(), dt);
+
+		String da;
+
+		switch (getDotAttribute(i))
+		{
+		case 0:
+			da = "Health";
+			break;
+		case 1:
+			da = "Strength";
+			break;
+		case 2:
+			da = "Constitution";
+			break;
+		case 3:
+			da = "Action";
+			break;
+		case 4:
+			da = "Quickness";
+			break;
+		case 5:
+			da = "Stamina";
+			break;
+		case 6:
+			da = "Mind";
+			break;
+		case 7:
+			da = "Focus";
+			break;
+		case 8:
+			da = "Willpower";
+			break;
+		default:
+			da = "Unknown";
+			break;
+		}
+
+		StringBuffer attrib;
+		attrib << "cat_wpn_dot_0" << i << ".wpn_dot_attrib";
+		alm->insertAttribute(attrib.toString(), da);
+
+		StringBuffer str;
+		str << "cat_wpn_dot_0" << i << ".wpn_dot_strength";
+		alm->insertAttribute(str.toString(), getDotStrength(i));
+
+		StringBuffer dotDur;
+		dotDur << getDotDuration(i) << "s";
+		StringBuffer dur;
+		dur << "cat_wpn_dot_0" << i << ".wpn_dot_duration";
+		alm->insertAttribute(dur.toString(), dotDur);
+
+		StringBuffer dotPot;
+		dotPot << getDotPotency(i) << "%";
+		StringBuffer pot;
+		pot << "cat_wpn_dot_0" << i << ".wpn_dot_potency";
+		alm->insertAttribute(pot.toString(), dotPot);
+
+		StringBuffer use;
+		use << "cat_wpn_dot_0" << i << ".wpn_dot_uses";
+		alm->insertAttribute(use.toString(), getDotUses(i));
+	}
+
+	if (hasPowerup())
 		powerupObject->fillWeaponAttributeList(alm, _this.getReferenceUnsafeStaticCast());
 
 	if (sliced == 1)
 		alm->insertAttribute("wpn_attr", "@obj_attr_n:hacked1");
-
 }
 
-int WeaponObjectImplementation::getPointBlankAccuracy(bool withPup) {
+int WeaponObjectImplementation::getPointBlankAccuracy(bool withPup)
+{
 
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return pointBlankAccuracy + (abs(pointBlankAccuracy) * powerupObject->getPowerupStat("pointBlankAccuracy"));
 
 	return pointBlankAccuracy;
 }
 
-int WeaponObjectImplementation::getPointBlankRange(bool withPup) {
+int WeaponObjectImplementation::getPointBlankRange(bool withPup)
+{
 
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return pointBlankRange + (abs(pointBlankRange) * powerupObject->getPowerupStat("pointBlankRange"));
 
 	return pointBlankRange;
 }
 
-int WeaponObjectImplementation::getIdealRange(bool withPup) {
+int WeaponObjectImplementation::getIdealRange(bool withPup)
+{
 
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return idealRange + (abs(idealRange) * powerupObject->getPowerupStat("idealRange"));
 
 	return idealRange;
 }
 
-int WeaponObjectImplementation::getMaxRange(bool withPup) {
+int WeaponObjectImplementation::getMaxRange(bool withPup)
+{
 
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return maxRange + (abs(maxRange) * powerupObject->getPowerupStat("maxRange"));
 
 	return maxRange;
 }
 
-int WeaponObjectImplementation::getIdealAccuracy(bool withPup) {
+int WeaponObjectImplementation::getIdealAccuracy(bool withPup)
+{
 
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return idealAccuracy + (abs(idealAccuracy) * powerupObject->getPowerupStat("idealAccuracy"));
 
 	return idealAccuracy;
 }
 
+int WeaponObjectImplementation::getMaxRangeAccuracy(bool withPup)
+{
 
-int WeaponObjectImplementation::getMaxRangeAccuracy(bool withPup) {
-
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return maxRangeAccuracy + (abs(maxRangeAccuracy) * powerupObject->getPowerupStat("maxRangeAccuracy"));
 
 	return maxRangeAccuracy;
 }
 
-float WeaponObjectImplementation::getAttackSpeed(bool withPup) {
+float WeaponObjectImplementation::getAttackSpeed(bool withPup)
+{
 
 	float speed = attackSpeed;
 
-	if(sliced)
+	if (sliced)
 		speed *= speedSlice;
 
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		speed -= (speed * powerupObject->getPowerupStat("attackSpeed"));
 
 	float calcSpeed = speed + getConditionReduction(speed);
 
-	if(calcSpeed < 0.1)
+	if (calcSpeed < 0.1)
 		calcSpeed = 0.1;
 
 	return calcSpeed;
 }
 
-
-float WeaponObjectImplementation::getMaxDamage(bool withPup) {
+float WeaponObjectImplementation::getMaxDamage(bool withPup)
+{
 
 	float damage = maxDamage;
 
-	if(sliced)
+	if (sliced)
 		damage *= damageSlice;
 
-	if(powerupObject != NULL && withPup) {
+	if (powerupObject != NULL && withPup)
+	{
 		damage += (damage * powerupObject->getPowerupStat("maxDamage"));
 		return damage - getConditionReduction(damage);
 	}
@@ -530,14 +572,16 @@ float WeaponObjectImplementation::getMaxDamage(bool withPup) {
 	return damage - getConditionReduction(damage);
 }
 
-float WeaponObjectImplementation::getMinDamage(bool withPup) {
+float WeaponObjectImplementation::getMinDamage(bool withPup)
+{
 
 	float damage = minDamage;
 
-	if(sliced)
+	if (sliced)
 		damage *= damageSlice;
 
-	if(powerupObject != NULL && withPup) {
+	if (powerupObject != NULL && withPup)
+	{
 		damage += (damage * powerupObject->getPowerupStat("minDamage"));
 		return damage - getConditionReduction(damage);
 	}
@@ -545,48 +589,53 @@ float WeaponObjectImplementation::getMinDamage(bool withPup) {
 	return damage - getConditionReduction(damage);
 }
 
-float WeaponObjectImplementation::getWoundsRatio(bool withPup) {
+float WeaponObjectImplementation::getWoundsRatio(bool withPup)
+{
 
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return woundsRatio + (woundsRatio * powerupObject->getPowerupStat("woundsRatio"));
 
 	return woundsRatio;
 }
 
-float WeaponObjectImplementation::getDamageRadius(bool withPup) {
+float WeaponObjectImplementation::getDamageRadius(bool withPup)
+{
 
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return damageRadius + (damageRadius * powerupObject->getPowerupStat("damageRadius"));
 
 	return damageRadius;
 }
 
+int WeaponObjectImplementation::getHealthAttackCost(bool withPup)
+{
 
-int WeaponObjectImplementation::getHealthAttackCost(bool withPup) {
-
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return healthAttackCost - (abs(healthAttackCost) * powerupObject->getPowerupStat("healthAttackCost"));
 
 	return healthAttackCost;
 }
 
-int WeaponObjectImplementation::getActionAttackCost(bool withPup) {
+int WeaponObjectImplementation::getActionAttackCost(bool withPup)
+{
 
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return actionAttackCost - (abs(actionAttackCost) * powerupObject->getPowerupStat("actionAttackCost"));
 
 	return actionAttackCost;
 }
 
-int WeaponObjectImplementation::getMindAttackCost(bool withPup) {
+int WeaponObjectImplementation::getMindAttackCost(bool withPup)
+{
 
-	if(powerupObject != NULL && withPup)
+	if (powerupObject != NULL && withPup)
 		return mindAttackCost - (abs(mindAttackCost) * powerupObject->getPowerupStat("mindAttackCost"));
 
 	return mindAttackCost;
 }
 
-void WeaponObjectImplementation::updateCraftingValues(CraftingValues* values, bool firstUpdate) {
+void WeaponObjectImplementation::updateCraftingValues(CraftingValues *values, bool firstUpdate)
+{
 	/*
 	 * Incoming Values:					Ranges:
 	 * mindamage						Differs between weapons
@@ -614,7 +663,8 @@ void WeaponObjectImplementation::updateCraftingValues(CraftingValues* values, bo
 	setActionAttackCost((int)values->getCurrentValue("attackactioncost"));
 	setMindAttackCost((int)values->getCurrentValue("attackmindcost"));
 
-	if (isJediWeapon()) {
+	if (isJediWeapon())
+	{
 		setForceCost(Math::getPrecision(values->getCurrentValue("forcecost"), 1));
 		setBladeColor(31);
 	}
@@ -625,7 +675,7 @@ void WeaponObjectImplementation::updateCraftingValues(CraftingValues* values, bo
 
 	//value = craftingValues->getCurrentValue("roundsused");
 	//if(value != DraftSchematicValuesImplementation::VALUENOTFOUND)
-		//_this.getReferenceUnsafeStaticCast()->set_______(value);
+	//_this.getReferenceUnsafeStaticCast()->set_______(value);
 
 	value = values->getCurrentValue("zerorangemod");
 	if (value != ValuesMap::VALUENOTFOUND)
@@ -658,18 +708,21 @@ void WeaponObjectImplementation::updateCraftingValues(CraftingValues* values, bo
 	setConditionDamage(0);
 }
 
-bool WeaponObjectImplementation::isCertifiedFor(CreatureObject* object) {
-	ManagedReference<PlayerObject*> ghost = object->getPlayerObject();
+bool WeaponObjectImplementation::isCertifiedFor(CreatureObject *object)
+{
+	ManagedReference<PlayerObject *> ghost = object->getPlayerObject();
 
 	if (ghost == NULL)
 		return false;
 
-	Vector<String>* certificationsRequired = weaponTemplate->getCertificationsRequired();
+	Vector<String> *certificationsRequired = weaponTemplate->getCertificationsRequired();
 
-	for (int i = 0; i < certificationsRequired->size(); ++i) {
-		const String& cert = certificationsRequired->get(i);
+	for (int i = 0; i < certificationsRequired->size(); ++i)
+	{
+		const String &cert = certificationsRequired->get(i);
 
-		if (!ghost->hasAbility(cert) && !object->hasSkill(cert)) {
+		if (!ghost->hasAbility(cert) && !object->hasSkill(cert))
+		{
 			return false;
 		}
 	}
@@ -677,45 +730,57 @@ bool WeaponObjectImplementation::isCertifiedFor(CreatureObject* object) {
 	return true;
 }
 
-void WeaponObjectImplementation::decreasePowerupUses(CreatureObject* player) {
-	if (hasPowerup()) {
+void WeaponObjectImplementation::decreasePowerupUses(CreatureObject *player)
+{
+	if (hasPowerup())
+	{
 		powerupObject->decreaseUses();
-		if (powerupObject->getUses() < 1) {
+		if (powerupObject->getUses() < 1)
+		{
 			Locker locker(_this.getReferenceUnsafeStaticCast());
 			StringIdChatParameter message("powerup", "prose_pup_expire"); //The powerup on your %TT has expired.
 			message.setTT(getDisplayedName());
 
 			player->sendSystemMessage(message);
 
-			ManagedReference<PowerupObject*> pup = removePowerup();
-			if(pup != NULL) {
+			ManagedReference<PowerupObject *> pup = removePowerup();
+			if (pup != NULL)
+			{
 				Locker plocker(pup);
 
-				pup->destroyObjectFromWorld( true );
-				pup->destroyObjectFromDatabase( true );
+				pup->destroyObjectFromWorld(true);
+				pup->destroyObjectFromDatabase(true);
 			}
 		}
 		sendAttributeListTo(player);
 	}
 }
 
-String WeaponObjectImplementation::repairAttempt(int repairChance) {
+String WeaponObjectImplementation::repairAttempt(int repairChance)
+{
 
 	String message = "@error_message:";
 
-	if(repairChance < 25) {
+	if (repairChance < 25)
+	{
 		message += "sys_repair_failed";
 		setMaxCondition(1, true);
 		setConditionDamage(0, true);
-	} else if(repairChance < 50) {
+	}
+	else if (repairChance < 50)
+	{
 		message += "sys_repair_imperfect";
 		setMaxCondition(getMaxCondition() * .65f, true);
 		setConditionDamage(0, true);
-	} else if(repairChance < 75) {
+	}
+	else if (repairChance < 75)
+	{
 		setMaxCondition(getMaxCondition() * .80f, true);
 		setConditionDamage(0, true);
 		message += "sys_repair_slight";
-	} else {
+	}
+	else
+	{
 		setMaxCondition(getMaxCondition() * .95f, true);
 		setConditionDamage(0, true);
 		message += "sys_repair_perfect";
@@ -724,8 +789,10 @@ String WeaponObjectImplementation::repairAttempt(int repairChance) {
 	return message;
 }
 
-void WeaponObjectImplementation::decay(CreatureObject* user) {
-	if (_this.getReferenceUnsafeStaticCast() == user->getSlottedObject("default_weapon") || user->isAiAgent() || hasAntiDecayKit()) {
+void WeaponObjectImplementation::decay(CreatureObject *user)
+{
+	if (_this.getReferenceUnsafeStaticCast() == user->getSlottedObject("default_weapon") || user->isAiAgent() || hasAntiDecayKit())
+	{
 		return;
 	}
 
@@ -735,24 +802,30 @@ void WeaponObjectImplementation::decay(CreatureObject* user) {
 	if (hasPowerup())
 		chance += 10;
 
-	if (roll < chance) {
+	if (roll < chance)
+	{
 		Locker locker(_this.getReferenceUnsafeStaticCast());
 
-		if (isJediWeapon()) {
-			ManagedReference<SceneObject*> saberInv = getSlottedObject("saber_inv");
+		if (isJediWeapon())
+		{
+			ManagedReference<SceneObject *> saberInv = getSlottedObject("saber_inv");
 
 			if (saberInv == NULL)
 				return;
 
 			// TODO: is this supposed to be every crystal, or random crystal(s)?
-			for (int i = 0; i < saberInv->getContainerObjectsSize(); i++) {
-				ManagedReference<LightsaberCrystalComponent*> crystal = saberInv->getContainerObject(i).castTo<LightsaberCrystalComponent*>();
+			for (int i = 0; i < saberInv->getContainerObjectsSize(); i++)
+			{
+				ManagedReference<LightsaberCrystalComponent *> crystal = saberInv->getContainerObject(i).castTo<LightsaberCrystalComponent *>();
 
-				if (crystal != NULL) {
+				if (crystal != NULL)
+				{
 					crystal->inflictDamage(crystal, 0, 1, true, true);
 				}
 			}
-		} else {
+		}
+		else
+		{
 			inflictDamage(_this.getReferenceUnsafeStaticCast(), 0, 1, true, true);
 
 			if (((float)conditionDamage - 1 / (float)maxCondition < 0.75) && ((float)conditionDamage / (float)maxCondition > 0.75))
@@ -763,20 +836,24 @@ void WeaponObjectImplementation::decay(CreatureObject* user) {
 	}
 }
 
-bool WeaponObjectImplementation::isEquipped() {
-	ManagedReference<SceneObject*> parent = getParent().get();
+bool WeaponObjectImplementation::isEquipped()
+{
+	ManagedReference<SceneObject *> parent = getParent().get();
 	if (parent != NULL && parent->isPlayerCreature())
 		return true;
 
 	return false;
 }
 
-void WeaponObjectImplementation::applySkillModsTo(CreatureObject* creature) {
-	if (creature == NULL) {
+void WeaponObjectImplementation::applySkillModsTo(CreatureObject *creature)
+{
+	if (creature == NULL)
+	{
 		return;
 	}
 
-	for (int i = 0; i < wearableSkillMods.size(); ++i) {
+	for (int i = 0; i < wearableSkillMods.size(); ++i)
+	{
 		String name = wearableSkillMods.elementAt(i).getKey();
 		int value = wearableSkillMods.get(name);
 
@@ -787,12 +864,15 @@ void WeaponObjectImplementation::applySkillModsTo(CreatureObject* creature) {
 	SkillModManager::instance()->verifyWearableSkillMods(creature);
 }
 
-void WeaponObjectImplementation::removeSkillModsFrom(CreatureObject* creature) {
-	if (creature == NULL) {
+void WeaponObjectImplementation::removeSkillModsFrom(CreatureObject *creature)
+{
+	if (creature == NULL)
+	{
 		return;
 	}
 
-	for (int i = 0; i < wearableSkillMods.size(); ++i) {
+	for (int i = 0; i < wearableSkillMods.size(); ++i)
+	{
 		String name = wearableSkillMods.elementAt(i).getKey();
 		int value = wearableSkillMods.get(name);
 
@@ -803,15 +883,17 @@ void WeaponObjectImplementation::removeSkillModsFrom(CreatureObject* creature) {
 	SkillModManager::instance()->verifyWearableSkillMods(creature);
 }
 
-bool WeaponObjectImplementation::applyPowerup(CreatureObject* player, PowerupObject* pup) {
-	if(hasPowerup())
+bool WeaponObjectImplementation::applyPowerup(CreatureObject *player, PowerupObject *pup)
+{
+	if (hasPowerup())
 		return false;
 
 	addMagicBit(true);
 
 	powerupObject = pup;
 
-	if(pup->getParent() != NULL) {
+	if (pup->getParent() != NULL)
+	{
 		Locker clocker(pup, player);
 		pup->destroyObjectFromWorld(true);
 	}
@@ -821,11 +903,12 @@ bool WeaponObjectImplementation::applyPowerup(CreatureObject* player, PowerupObj
 	return true;
 }
 
-PowerupObject* WeaponObjectImplementation::removePowerup() {
-	if(!hasPowerup())
+PowerupObject *WeaponObjectImplementation::removePowerup()
+{
+	if (!hasPowerup())
 		return NULL;
 
-	PowerupObject* pup = powerupObject;
+	PowerupObject *pup = powerupObject;
 	powerupObject = NULL;
 
 	removeMagicBit(true);
