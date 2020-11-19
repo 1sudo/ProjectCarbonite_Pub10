@@ -57,7 +57,7 @@ function bounty_vendor_handler:getNextConversationScreen(conversationTemplate, c
          for i = 0, containerSize - 1, 1 do
         	 local pInvObj = inventory:getContainerObject(i)
 	         local InvObj = LuaSceneObject(pInvObj)
-	         	if (InvObj:getObjectName() == "holocron_dark")	then
+	         	if (InvObj:getObjectName() == "bh_skull")	then
 	         		itemCounter = itemCounter + 1
 	         	end
 	     end
@@ -105,7 +105,7 @@ function bounty_vendor_handler:getNextConversationScreen(conversationTemplate, c
 	            nextConversationScreen = conversation:getScreen("insufficient_item")
 	            creature:sendSystemMessage("You have insufficient items")
 	     elseif (optionLink == "3" and itemCounter >= 1) then
-	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_bicep_l_schematic.iff", -1)
+	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_belt_schematic.iff", -1)
 	            DeleteItems = 1
 		    nextConversationScreen = conversation:getScreen("end")
 		    creature:sendSystemMessage("You have received a Rebel Crusader Armor Belt Schematic. ")
@@ -115,7 +115,7 @@ function bounty_vendor_handler:getNextConversationScreen(conversationTemplate, c
 	            nextConversationScreen = conversation:getScreen("insufficient_item")
 	            creature:sendSystemMessage("You have insufficient items")
 	     elseif (optionLink == "4" and itemCounter >= 1) then
-	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_bicep_l_schematic.iff", -1)
+	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_boots_schematic.iff", -1)
 	            DeleteItems = 1
 		    nextConversationScreen = conversation:getScreen("end")
 		    creature:sendSystemMessage("You have received a Rebel Crusader Armor Boots Schematic. ")
@@ -125,7 +125,7 @@ function bounty_vendor_handler:getNextConversationScreen(conversationTemplate, c
 	            nextConversationScreen = conversation:getScreen("insufficient_item")
 	            creature:sendSystemMessage("You have insufficient items")
 	     elseif (optionLink == "5" and itemCounter >= 1) then
-	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_bicep_l_schematic.iff", -1)
+	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_bracer_l_schematic.iff", -1)
 	            DeleteItems = 1
 		    nextConversationScreen = conversation:getScreen("end")
 		    creature:sendSystemMessage("You have received a Rebel Crusader Armor Bracer l Schematic.")
@@ -135,7 +135,7 @@ function bounty_vendor_handler:getNextConversationScreen(conversationTemplate, c
 	            nextConversationScreen = conversation:getScreen("insufficient_item")
 	            creature:sendSystemMessage("You have insufficient items")
 	     elseif (optionLink == "6" and itemCounter >= 1) then
-	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_bicep_r_schematic.iff", -1)
+	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_bracer_r_schematic.iff", -1)
 	            DeleteItems = 1
 		    nextConversationScreen = conversation:getScreen("end")
 		    creature:sendSystemMessage("You have received a Rebel Crusader Armor Bracer r Schematic.")
@@ -165,7 +165,7 @@ function bounty_vendor_handler:getNextConversationScreen(conversationTemplate, c
 	            nextConversationScreen = conversation:getScreen("insufficient_item")
 	            creature:sendSystemMessage("You have insufficient items")
 	     elseif (optionLink == "9" and itemCounter >= 1) then
-	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_leggings_schematic.iff", -1)
+	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_gloves_schematic.iff", -1)
 	            DeleteItems = 1
 		    nextConversationScreen = conversation:getScreen("end")
                     creature:sendSystemMessage("You have received a Rebel Crusader Armor Gloves Schematic.")
@@ -268,7 +268,7 @@ function bounty_vendor_handler:getNextConversationScreen(conversationTemplate, c
 	            nextConversationScreen = conversation:getScreen("insufficient_item")
 	            creature:sendSystemMessage("You have insufficient items")
 	     elseif (optionLink == "19" and itemCounter >= 10) then
-	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_chest_plate.iff", -1)
+	            local pItem = giveItem(pInventory, "object/tangible/loot/loot_schematic/armor_mandalorian_rebel_chest_plate_schematic.iff", -1)
 	            DeleteItems = 10
 		    nextConversationScreen = conversation:getScreen("end")
 		    creature:sendSystemMessage("You have received a Rebel Crusader Armor Chest Plate Schematic.")
@@ -287,7 +287,7 @@ function bounty_vendor_handler:getNextConversationScreen(conversationTemplate, c
           for i = containerSize - 1 , 0 , -1 do
           	pInvObj = inventory:getContainerObject(i)
         	invObj = LuaSceneObject(pInvObj)
-		     	if (invObj:getObjectName() == "holocron_dark" and DeleteItems > 0 ) then
+		     	if (invObj:getObjectName() == "bh_skull" and DeleteItems > 0 ) then
 		     		DeleteItems = DeleteItems - 1
 		     		invObj:destroyObjectFromWorld()
 					invObj:destroyObjectFromDatabase()

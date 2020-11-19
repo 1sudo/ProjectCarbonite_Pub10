@@ -2,7 +2,7 @@ bh_skull = {
 	minimumLevel = 0,
 	maximumLevel = -1,
 	customObjectName = "",
-	directObjectTemplate = "object/tangible/loot/misc/loot_skull_human.iff",
+	directObjectTemplate = "object/tangible/loot/creature/loot/generic/bh_skull.iff",
 	craftingValues = {
 	},
 	customizationStringNames = {},

@@ -96,7 +96,7 @@ object_tangible_wearables_armor_composite_armor_composite_boots = object_tangibl
 	actionEncumbrance = 100,
 	mindEncumbrance = 80,
 
-	maxCondition = 30000,
+	maxCondition = 50000,
 
 	-- LIGHT, MEDIUM, HEAVY
 	rating = LIGHT,
