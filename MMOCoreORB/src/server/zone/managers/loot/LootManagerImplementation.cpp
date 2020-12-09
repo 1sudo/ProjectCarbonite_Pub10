@@ -555,6 +555,9 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 				attachmentName.setStringId("stat_n", key);
 				prototype->setObjectName(attachmentName,false);
 				attachmentCustomName = prototype->getDisplayedName() + " [+" + String::valueOf(value) + "] " + attachmentType;
+
+				// () are hidden characters in a player's inventory that will auto-sort to the beginning of a player's inventory
+				attachmentCustomName = "(" + attachmentCustomName + ")";
 			}
 		}
 		prototype->setCustomObjectName(attachmentCustomName,false);
@@ -627,8 +630,10 @@ TangibleObject* LootManagerImplementation::createLootAttachment(LootItemTemplate
 				last = value;
 				attachmentName.setStringId("stat_n", key);
 				prototype->setObjectName(attachmentName,false);
-				// attachmentCustomName = attachmentType + prototype->getDisplayedName() + " " + String::valueOf(value);
 				attachmentCustomName = prototype->getDisplayedName() + " [+" + String::valueOf(value) + "] " + attachmentType;
+
+				// () are hidden characters in a player's inventory that will auto-sort to the beginning of a player's inventory
+				attachmentCustomName = "(" + attachmentCustomName + ")";
 			}
 		}
 		prototype->setCustomObjectName(attachmentCustomName,false);
