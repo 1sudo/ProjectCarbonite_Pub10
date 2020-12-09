@@ -387,9 +387,10 @@ int CombatManager::doTargetCombatAction(CreatureObject *attacker, WeaponObject *
 int CombatManager::doTargetCombatAction(CreatureObject *attacker, WeaponObject *weapon, CreatureObject *defender, const CreatureAttackData &data, bool *shouldGcwTef, bool *shouldBhTef)
 {
 	//ensure sabers can't go below 5fc
-	if (attacker->isPlayerCreature() && weapon->isJediWeapon() && weapon->getForceCost() <= 5) {
-  		Locker locker(weapon);
- 		weapon->setForceCost(5);
+	if (attacker->isPlayerCreature() && weapon->isJediWeapon() && weapon->getForceCost() <= 5)
+	{
+		Locker locker(weapon);
+		weapon->setForceCost(5);
 	}
 
 	if (defender->isEntertaining())
@@ -589,6 +590,7 @@ int CombatManager::doTargetCombatAction(TangibleObject *attacker, WeaponObject *
 void CombatManager::applyDots(CreatureObject *attacker, CreatureObject *defender, const CreatureAttackData &data, int appliedDamage, int unmitDamage, int poolsToDamage)
 {
 	Vector<DotEffect> *dotEffects = data.getDotEffects();
+	const bool isDebugging = ConfigManager::instance()->getDebugMode();
 
 	if (defender->isPlayerCreature() && defender->getPvpStatusBitmask() == CreatureFlag::NONE)
 		return;
@@ -597,8 +599,11 @@ void CombatManager::applyDots(CreatureObject *attacker, CreatureObject *defender
 	{
 		const DotEffect &effect = dotEffects->get(i);
 
+		// If target has dotImmunity, OR has no duration on the dot left, OR they WIN a chance roll per chance definition
 		if (defender->hasDotImmunity(effect.getDotType()) || effect.getDotDuration() == 0 || System::random(100) > effect.getDotChance())
+		{
 			continue;
+		}
 
 		const Vector<String> &defenseMods = effect.getDefenderStateDefenseModifers();
 		int resist = 0;
@@ -618,6 +623,12 @@ void CombatManager::applyDots(CreatureObject *attacker, CreatureObject *defender
 
 		int potency = effect.getDotPotency();
 
+		// Checking to see what the potency is for our post-application.
+		if (isDebugging) {
+			defender->sendSystemMessage("///////////////////////////////////////");
+			defender->sendSystemMessage("DotPotency-Pre: " + String::valueOf(potency));
+		}
+
 		if (potency == 0)
 		{
 			potency = 150;
@@ -630,14 +641,63 @@ void CombatManager::applyDots(CreatureObject *attacker, CreatureObject *defender
 			pool = getPoolForDot(dotType, poolsToDamage);
 		}
 
-		//info("entering addDotState with CRC:" + String::valueOf(dotCRC), true);
+		// debug() << "entering addDotState with dotType:" << dotType;
 		float damMod = attacker->isAiAgent() ? cast<AiAgent *>(attacker)->getSpecialDamageMult() : 1.f;
-		defender->addDotState(attacker, dotType, data.getCommand()->getNameCRC(),
-							  effect.isDotDamageofHit() ? damageToApply * effect.getPrimaryPercent() / 100.0f
-														: effect.getDotStrength() * damMod,
-							  pool, effect.getDotDuration(), potency, resist,
-							  effect.isDotDamageofHit() ? damageToApply * effect.getSecondaryPercent() / 100.0f
-														: effect.getDotStrength() * damMod);
+
+		// Making DotStrength from command definitions actually work
+		int primaryDotStrength = 0;
+		int secondaryDotStrength = 0;
+
+		// If an attack is being used that contains 'creature' AND the attacker is an NPC then we
+		// respect the dotStrength value being given.
+		if (data.getCommand()->getQueueCommandName().contains("creature") && attacker->isAiAgent())
+		{
+			// Are we being attacked by an NPC?
+			if (isDebugging) {
+				defender->sendSystemMessage("Being attacked by an NPC using a creature attack!");
+			}
+
+			damageToApply = damageToApply * (effect.getDotStrength() / 100.0f);
+		}
+
+		if (effect.isDotDamageofHit())
+		{
+			primaryDotStrength = damageToApply * effect.getPrimaryPercent() / 100.0f;
+			secondaryDotStrength = damageToApply * effect.getSecondaryPercent() / 100.0f;
+		}
+		else
+		{
+			primaryDotStrength = effect.getDotStrength() * damMod;
+			secondaryDotStrength = effect.getDotStrength() * damMod;
+		}
+
+		defender->addDotState(
+			attacker,
+			dotType,
+			data.getCommand()->getNameCRC(),
+			primaryDotStrength,
+			pool,
+			effect.getDotDuration(),
+			potency,
+			resist,
+			secondaryDotStrength);
+
+		// A bunch of CreatureHandler debug messaging
+		if (isDebugging) {
+			defender->sendSystemMessage("You're being diseased from this method!");
+			defender->sendSystemMessage("Type: " + data.getCommand()->getQueueCommandName());
+			defender->sendSystemMessage("DmgOfHit: " + String::valueOf(effect.isDotDamageofHit()));
+			defender->sendSystemMessage("DmgToApply: " + String::valueOf(damageToApply));
+			defender->sendSystemMessage("Primary%: " + String::valueOf(effect.getPrimaryPercent()));
+			defender->sendSystemMessage("Secondary%: " + String::valueOf(effect.getSecondaryPercent()));
+			defender->sendSystemMessage("DamMod: " + String::valueOf(damMod));
+			defender->sendSystemMessage("DotPotency-Post: " + String::valueOf(potency));
+			defender->sendSystemMessage("DotStrength: " + String::valueOf(effect.getDotStrength()));
+			defender->sendSystemMessage("Chance: " + String::valueOf(effect.getDotChance()));
+			defender->sendSystemMessage("Duration: " + String::valueOf(effect.getDotDuration()));
+			defender->sendSystemMessage("DotDamageFromHit: " + String::valueOf(effect.isDotDamageofHit()));
+			defender->sendSystemMessage("///////////////////////////////////////");
+		}
 	}
 }
 
@@ -1295,7 +1355,8 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 	// defender->sendSystemMessage("Beginning Incoming Damage: " + String::valueOf(damage));
 
 	// Reduce all force attack damage from NPCs when attacking a player.
-	if (attacker->isAiAgent() && defender->isPlayerObject() && data.isForceAttack()){
+	if (attacker->isAiAgent() && defender->isPlayerObject() && data.isForceAttack())
+	{
 		damage = damage * 0.75; // From 100% -> 75% effectiveness
 	}
 
@@ -1399,19 +1460,22 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 	// PSG
 	ManagedReference<ArmorObject *> psg = getPSGArmor(defender);
 
-	if (psg != nullptr && !psg->isVulnerable(damageType)) {
-		float armorReduction =  getArmorObjectReduction(psg, damageType);
+	if (psg != nullptr && !psg->isVulnerable(damageType))
+	{
+		float armorReduction = getArmorObjectReduction(psg, damageType);
 
 		// Moved the armorPiercing code before setting dmbAbsorbed so it stops breaking on AP weapons
-		damage *= getArmorPiercing(psg, armorPiercing); 
+		damage *= getArmorPiercing(psg, armorPiercing);
 		float dmgAbsorbed = damage;
 
-        if (armorReduction > 0) {
+		if (armorReduction > 0)
+		{
 			damage *= 1.f - (armorReduction / 100.f);
 		}
 
 		dmgAbsorbed -= damage;
-		if (dmgAbsorbed > 0){
+		if (dmgAbsorbed > 0)
+		{
 			sendMitigationCombatSpam(defender, psg, (int)dmgAbsorbed, PSG);
 		}
 
@@ -1432,7 +1496,8 @@ int CombatManager::getArmorReduction(TangibleObject *attacker, WeaponObject *wea
 
 	armor = getArmorObject(defender, hitLocation);
 
-	if (armor != nullptr && !armor->isVulnerable(damageType)) {
+	if (armor != nullptr && !armor->isVulnerable(damageType))
+	{
 		float armorReduction = getArmorObjectReduction(armor, damageType);
 
 		// Moved the armorPiercing modifier to before we set dmgAbsorbed so negative values don't occur with AP/non-AP
@@ -2436,7 +2501,7 @@ int CombatManager::applyDamage(TangibleObject *attacker, WeaponObject *weapon, C
 			defender->inflictDamage(attacker, CreatureAttribute::MIND, (numSpillOverPools-- > 1 ? spillDamagePerPool : spillOverRemainder), true, xpType, true, true);
 	}
 
-	int totalDamage =  (int) (healthDamage + actionDamage + mindDamage);
+	int totalDamage = (int)(healthDamage + actionDamage + mindDamage);
 
 	defender->notifyObservers(ObserverEventType::DAMAGERECEIVED, attacker, totalDamage);
 
@@ -2509,7 +2574,6 @@ int CombatManager::applyDamage(CreatureObject *attacker, WeaponObject *weapon, T
 	}
 
 	defender->inflictDamage(attacker, 0, damage, true, xpType, true, true);
-
 
 	defender->notifyObservers(ObserverEventType::DAMAGERECEIVED, attacker, damage);
 

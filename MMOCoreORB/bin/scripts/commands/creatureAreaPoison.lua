@@ -52,9 +52,9 @@ CreatureAreaPoisonCommand = {
 		{ "resistance_poison", "poison_disease_resist" },
 		ATTACK_POOL,
 		true,
-		0,
-		50, -- Min
-		50, -- Max
+		0,	-- Potency? Doesn't really matter, DotChance takes the place of DotChance?
+		33, -- DotChance, creatures (player/npc) must roll a 1 -> 100 vs this value to beat it
+		25, -- DotStrength, this is only used when AI vs Player
 		120 -- Duration
 	  )
 	},

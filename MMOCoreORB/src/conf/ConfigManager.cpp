@@ -14,6 +14,7 @@ ConfigManager::ConfigManager() {
 	unloadContainers = true;
 	useMetrics = true;
 	pvpMode = false;
+	debugMode = true;
 
 	orbNamingDirectoryAddress = "";
 	orbNamingDirectoryPort = 44419;
@@ -97,6 +98,7 @@ bool ConfigManager::loadConfigData() {
 	unloadContainers = getGlobalByte("UnloadContainers");
 	useMetrics = getGlobalByte("UseMetrics");
 	pvpMode = getGlobalByte("PvpMode");
+	debugMode = getGlobalByte("DebugMode");
 
 	orbNamingDirectoryAddress = getGlobalString("ORB");
 	orbNamingDirectoryPort = getGlobalShort("ORBPort");

@@ -47,6 +47,7 @@ MakeZone = 1
 MakePing = 1
 MakeStatus = 1
 MakeWeb = 0
+DebugMode = 1 -- This should allow me to keep debugging messages in the future and not have to remove them!
 
 ORB = ""
 ORBPort = 44419

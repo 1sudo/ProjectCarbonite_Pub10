@@ -18,6 +18,7 @@ namespace conf {
 		bool unloadContainers;
 		bool useMetrics;
 		bool pvpMode;
+		bool debugMode;
 
 		String orbNamingDirectoryAddress;
 		uint16 orbNamingDirectoryPort;
@@ -151,6 +152,10 @@ namespace conf {
 
 		inline bool getPvpMode() const {
 			return pvpMode;
+		}
+
+		inline bool getDebugMode() const {
+			return debugMode;
 		}
 
 		inline void setPvpMode(bool val) {
