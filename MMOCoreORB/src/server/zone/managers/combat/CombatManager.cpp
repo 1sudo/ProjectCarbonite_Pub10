@@ -590,7 +590,6 @@ int CombatManager::doTargetCombatAction(TangibleObject *attacker, WeaponObject *
 void CombatManager::applyDots(CreatureObject *attacker, CreatureObject *defender, const CreatureAttackData &data, int appliedDamage, int unmitDamage, int poolsToDamage)
 {
 	Vector<DotEffect> *dotEffects = data.getDotEffects();
-	const bool isDebugging = ConfigManager::instance()->getDebugMode();
 
 	if (defender->isPlayerCreature() && defender->getPvpStatusBitmask() == CreatureFlag::NONE)
 		return;
@@ -623,12 +622,6 @@ void CombatManager::applyDots(CreatureObject *attacker, CreatureObject *defender
 
 		int potency = effect.getDotPotency();
 
-		// Checking to see what the potency is for our post-application.
-		if (isDebugging) {
-			defender->sendSystemMessage("///////////////////////////////////////");
-			defender->sendSystemMessage("DotPotency-Pre: " + String::valueOf(potency));
-		}
-
 		if (potency == 0)
 		{
 			potency = 150;
@@ -652,11 +645,6 @@ void CombatManager::applyDots(CreatureObject *attacker, CreatureObject *defender
 		// respect the dotStrength value being given.
 		if (data.getCommand()->getQueueCommandName().contains("creature") && attacker->isAiAgent())
 		{
-			// Are we being attacked by an NPC?
-			if (isDebugging) {
-				defender->sendSystemMessage("Being attacked by an NPC using a creature attack!");
-			}
-
 			damageToApply = damageToApply * (effect.getDotStrength() / 100.0f);
 		}
 
@@ -682,22 +670,6 @@ void CombatManager::applyDots(CreatureObject *attacker, CreatureObject *defender
 			resist,
 			secondaryDotStrength);
 
-		// A bunch of CreatureHandler debug messaging
-		if (isDebugging) {
-			defender->sendSystemMessage("You're being diseased from this method!");
-			defender->sendSystemMessage("Type: " + data.getCommand()->getQueueCommandName());
-			defender->sendSystemMessage("DmgOfHit: " + String::valueOf(effect.isDotDamageofHit()));
-			defender->sendSystemMessage("DmgToApply: " + String::valueOf(damageToApply));
-			defender->sendSystemMessage("Primary%: " + String::valueOf(effect.getPrimaryPercent()));
-			defender->sendSystemMessage("Secondary%: " + String::valueOf(effect.getSecondaryPercent()));
-			defender->sendSystemMessage("DamMod: " + String::valueOf(damMod));
-			defender->sendSystemMessage("DotPotency-Post: " + String::valueOf(potency));
-			defender->sendSystemMessage("DotStrength: " + String::valueOf(effect.getDotStrength()));
-			defender->sendSystemMessage("Chance: " + String::valueOf(effect.getDotChance()));
-			defender->sendSystemMessage("Duration: " + String::valueOf(effect.getDotDuration()));
-			defender->sendSystemMessage("DotDamageFromHit: " + String::valueOf(effect.isDotDamageofHit()));
-			defender->sendSystemMessage("///////////////////////////////////////");
-		}
 	}
 }
 
