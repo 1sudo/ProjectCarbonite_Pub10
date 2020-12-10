@@ -154,10 +154,6 @@ void WeaponObjectImplementation::createChildObjects()
 		obj->initializeChildObject(_this.getReferenceUnsafeStaticCast());
 	}
 
-		childObjects.put(obj);
-
-		obj->initializeChildObject(_this.getReferenceUnsafeStaticCast());
-	}
 }
 
 void WeaponObjectImplementation::sendBaselinesTo(SceneObject *player)
@@ -516,9 +512,6 @@ int WeaponObjectImplementation::getIdealAccuracy(bool withPup) const {
 	return idealAccuracy;
 }
 
-int WeaponObjectImplementation::getMaxRangeAccuracy(bool withPup)
-{
-
 int WeaponObjectImplementation::getMaxRangeAccuracy(bool withPup) const {
 	if(powerupObject != NULL && withPup)
 		return maxRangeAccuracy + (abs(maxRangeAccuracy) * powerupObject->getPowerupStat("maxRangeAccuracy"));
@@ -587,9 +580,6 @@ float WeaponObjectImplementation::getDamageRadius(bool withPup) const {
 
 	return damageRadius;
 }
-
-int WeaponObjectImplementation::getHealthAttackCost(bool withPup)
-{
 
 int WeaponObjectImplementation::getHealthAttackCost(bool withPup) const {
 	if(powerupObject != NULL && withPup)

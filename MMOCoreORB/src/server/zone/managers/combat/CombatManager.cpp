@@ -1090,45 +1090,21 @@ float CombatManager::applyDamageModifiers(CreatureObject* attacker, WeaponObject
 		for (int i = 0; i < weaponDamageMods->size(); ++i)
 		{
 			damage += attacker->getSkillMod(weaponDamageMods->get(i));
-
-			// Help with showing damage modifiers
-			if (showDebugHelpers)
-			{
-				attacker->sendSystemMessage("Displaying Damage Mod index of: " + String::valueOf(i) + " with value: " + String::valueOf(attacker->getSkillMod(weaponDamageMods->get(i))));
-			}
 		}
 
 		if (weapon->getAttackType() == SharedWeaponObjectTemplate::MELEEATTACK)
 		{
 			damage += attacker->getSkillMod("private_melee_damage_bonus");
-
-			// Help with showing damage modifiers
-			if (showDebugHelpers)
-			{
-				attacker->sendSystemMessage("Private Melee Damage Bonus: " + String::valueOf(attacker->getSkillMod("private_melee_damage_bonus")));
-			}
 		}
 		if (weapon->getAttackType() == SharedWeaponObjectTemplate::RANGEDATTACK)
 		{
 			damage += attacker->getSkillMod("private_ranged_damage_bonus");
-
-			// Help with showing damage modifiers
-			if (showDebugHelpers)
-			{
-				attacker->sendSystemMessage("Private Ranged Damage Bonus: " + String::valueOf(attacker->getSkillMod("private_ranged_damage_bonus")));
-			}
 		}
 	}
 
 	damage += attacker->getSkillMod("private_damage_bonus");
 
 	int damageMultiplier = attacker->getSkillMod("private_damage_multiplier");
-
-	// Help with showing damage modifiers
-	if (showDebugHelpers)
-	{
-		attacker->sendSystemMessage("Private Generic Damage Bonus: " + String::valueOf(attacker->getSkillMod("private_damage_multiplier")));
-	}
 
 	if (damageMultiplier != 0)
 		damage *= damageMultiplier;
@@ -1137,12 +1113,6 @@ float CombatManager::applyDamageModifiers(CreatureObject* attacker, WeaponObject
 
 	if (damageDivisor != 0)
 		damage /= damageDivisor;
-
-	// Help with showing damage modifiers
-	if (showDebugHelpers)
-	{
-		attacker->sendSystemMessage("Damage Post-Mods:" + String::valueOf(damage));
-	}
 
 	return damage;
 }
