@@ -5,18 +5,6 @@
 #include "ConfigManager.h"
 
 ConfigManager::ConfigManager() {
-<<<<<<< HEAD
-	makeLogin = true;
-	makeZone = true;
-	makePing = true;
-	makeStatus = true;
-	makeWeb = true;
-	dumpObjFiles = true;
-	unloadContainers = true;
-	useMetrics = true;
-	pvpMode = false;
-	debugMode = true;
-=======
 	setLoggingName("ConfigManager");
 #ifdef DEBUG_CONFIGMANAGER
 	setLogLevel(Logger::DEBUG);
@@ -24,7 +12,6 @@ ConfigManager::ConfigManager() {
 	setLogLevel(Logger::INFO);
 #endif // DEBUG_CONFIGMANAGER
 }
->>>>>>> 07d8ff2774... [update] config manager redesign
 
 bool ConfigManager::loadConfigData() {
 	configStartTime.start();
@@ -102,20 +89,7 @@ void ConfigManager::cacheHotItems() {
 void ConfigManager::dumpConfig(bool includeSecure) {
 	uint64 age = getConfigDataAgeMs();
 
-<<<<<<< HEAD
-	makeLogin = getGlobalByte("MakeLogin");
-	makeZone = getGlobalByte("MakeZone");
-	makePing = getGlobalByte("MakePing");
-	makeStatus = getGlobalByte("MakeStatus");
-	makeWeb = getGlobalByte("MakeWeb");
-	dumpObjFiles = getGlobalByte("DumpObjFiles");
-	unloadContainers = getGlobalByte("UnloadContainers");
-	useMetrics = getGlobalByte("UseMetrics");
-	pvpMode = getGlobalByte("PvpMode");
-	debugMode = getGlobalByte("DebugMode");
-=======
 	info("dumpConfig: START (Config Age: " + String::valueOf(age) + "ms)", true);
->>>>>>> 07d8ff2774... [update] config manager redesign
 
 	String hottestKey;
 	int maxPS = 0;

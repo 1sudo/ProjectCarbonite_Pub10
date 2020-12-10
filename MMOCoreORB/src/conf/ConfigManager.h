@@ -10,21 +10,7 @@
 #include "engine/engine.h"
 
 namespace conf {
-<<<<<<< HEAD
-	class ConfigManager : public Singleton<ConfigManager>, public Lua {
-		bool makeLogin;
-		bool makeZone;
-		bool makePing;
-		bool makeStatus;
-		bool makeWeb;
-		bool dumpObjFiles;
-		bool unloadContainers;
-		bool useMetrics;
-		bool pvpMode;
-		bool debugMode;
-=======
 	using namespace sys::thread;
->>>>>>> 07d8ff2774... [update] config manager redesign
 
 	class ConfigDataItem {
 		bool asBool;
@@ -206,14 +192,6 @@ namespace conf {
 			return cache_PvpMode;
 		}
 
-<<<<<<< HEAD
-		inline bool getDebugMode() const {
-			return debugMode;
-		}
-
-		inline void setPvpMode(bool val) {
-			pvpMode = val;
-=======
 		inline bool setPvpMode(bool val) {
 			if (!setBool("Core3.PvpMode", val))
 				return false;
@@ -222,7 +200,6 @@ namespace conf {
 			cache_PvpMode = getBool("Core3.PvpMode", val);
 
 			return true;
->>>>>>> 07d8ff2774... [update] config manager redesign
 		}
 
 		inline const String& getORBNamingDirectoryAddress() {
