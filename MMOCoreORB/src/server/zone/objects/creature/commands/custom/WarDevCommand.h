@@ -184,7 +184,7 @@ public:
 			int angle = object->getDirectionAngle();
 
 			AiAgent* mob = object.castTo<AiAgent*> ();
-			CreatureTemplate* creatureTemplate = mob->getCreatureTemplate();
+			const CreatureTemplate* creatureTemplate = mob->getCreatureTemplate();
 			String mobileName = creatureTemplate->getTemplateName();
 
 			text << "spawnMobile(\"" << planetName << "\", " <<  "\"" << mobileName << "\", 1, ";
